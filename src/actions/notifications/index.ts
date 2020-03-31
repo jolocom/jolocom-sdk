@@ -145,7 +145,7 @@ const setActiveNotification = (
   expiry,
 })
 
-let nextUpdateTimeout: number | null = null
+let nextUpdateTimeout: NodeJS.Timeout | null = null
 let updateInProgress = false
 
 const getActiveNotificationState = (getState: () => RootState) => {
