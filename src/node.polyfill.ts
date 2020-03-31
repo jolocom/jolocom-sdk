@@ -40,7 +40,8 @@ export function initStore() {
 import { writeFileSync, readFileSync } from 'fs'
 import path from 'path'
 
-export class KeyChain {
+// from src/lib/keychain.ts
+export class KeyChain implements KeyChainInterface {
   static PASSWORD_LOCATION = path.resolve(
     `${__dirname}/../local_identity.password.txt`,
   )
@@ -52,6 +53,7 @@ export class KeyChain {
       this.pass = readFileSync(KeyChain.PASSWORD_LOCATION).toString()
     } catch (err) {
       console.error('Error reading password file', err, '\n\n')
+      throw err
     }
 
     return this.pass
