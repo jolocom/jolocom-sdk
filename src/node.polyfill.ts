@@ -98,7 +98,7 @@ export default {
   t: (str: string) => str,
 
   // react-native-splash-screen
-  hide: logCall('SplashScreen.hide'),
+  hide: () => logCall('SplashScreen')('hide'),
 }
 
 import { randomBytes } from 'crypto'
@@ -124,4 +124,8 @@ export function reportErrorToSentry(err: ErrorReport, extraData: any) {
   console.error('reportErrorToSentry:\n', err.error, extraData)
 }
 
-export function findBestAvailableLanguage(locales: string[]) {}
+export function findBestAvailableLanguage(locales: string[]) {
+  return {
+    languageTag: 'en',
+  }
+}

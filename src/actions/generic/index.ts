@@ -1,7 +1,7 @@
 import { navigationActions } from 'src/actions/'
 import { routeList } from 'src/routeList'
 import SplashScreen from 'react-native-splash-screen'
-import I18n from 'src/locales/i18n'
+// import I18n from 'src/locales/i18n'
 import { ThunkAction } from 'src/store'
 import { AppError, ErrorCode } from 'src/lib/errors'
 
@@ -33,8 +33,8 @@ export const initApp: ThunkAction = async (
     await backendMiddleware.initStorage()
     const storedSettings = await backendMiddleware.storageLib.get.settingsObject()
     // locale setup
-    if (storedSettings.locale) I18n.locale = storedSettings.locale
-    else storedSettings.locale = I18n.locale
+    // if (storedSettings.locale) I18n.locale = storedSettings.locale
+    // else storedSettings.locale = I18n.locale
     SplashScreen.hide()
     return dispatch(loadSettings(storedSettings))
   } catch (e) {
