@@ -19,8 +19,20 @@
     "noImplicitReturns": true,
     "skipLibCheck": true,
     "noUnusedLocals": true,
-    "baseUrl": "."
+    "baseUrl": ".",
+
+    "paths": {
+      "src/lib/keychain": ["src/node.polyfill.ts"],
+      "rn-fetch-blob": ["src/node.polyfill.ts"],
+      "react-native": ["src/node.polyfill.ts"],
+      "src/lib/errors/sentry": ["src/node.polyfill.ts"],
+      "react-native-localize": ["src/node.polyfill.ts"],
+      "src/locales/i18n": ["src/node.polyfill.ts"],
+      "react-native-splash-screen": ["src/node.polyfill.ts"],
+      "src/lib/ipfs": ["src/node.polyfill.ts"],
+      "typeorm/browser": ["node_modules/typeorm"]
+    }
   },
   "exclude": ["node_modules", "babel.config.js", "jest.config.js"],
-  "include": ["./src/**/*", "./bin/**/*"]
+  "include": ["./src/**/*"]
 }
