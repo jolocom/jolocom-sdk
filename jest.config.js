@@ -8,8 +8,15 @@ module.exports = {
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   moduleNameMapper: {
-    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
-      '<rootDir>/tests/assetsTransformer.js',
+    'src/lib/keychain': 'src/node.polyfill.ts',
+    'rn-fetch-blob': 'src/node.polyfill.ts',
+    'react-native': 'src/node.polyfill.ts',
+    'src/lib/errors/sentry': 'src/node.polyfill.ts',
+    'react-native-localize': 'src/node.polyfill.ts',
+    'src/locales/i18n': 'src/node.polyfill.ts',
+    'react-native-splash-screen': 'src/node.polyfill.ts',
+    'src/lib/ipfs': 'src/node.polyfill.ts',
+    'typeorm/browser': 'node_modules/typeorm',
   },
   moduleDirectories: ['node_modules', '<rootDir>'],
   testMatch: ['**/tests/**/*.test.[tj]s?(x)'],
