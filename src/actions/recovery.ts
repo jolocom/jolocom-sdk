@@ -2,7 +2,6 @@ import { ThunkAction } from '../store'
 import { SoftwareKeyProvider } from 'jolocom-lib/js/vaultedKeyProvider/softwareProvider'
 import { navigationActions } from './index'
 import { routeList } from '../routeList'
-import settingKeys from '../ui/settings/settingKeys'
 import { removeNotification } from './notifications'
 
 export const showSeedPhrase = (): ThunkAction => async (
@@ -31,10 +30,7 @@ export const setSeedPhraseSaved = (): ThunkAction => async (
   getState,
   backendMiddleware,
 ) => {
-  await backendMiddleware.storageLib.store.setting(
-    settingKeys.seedPhraseSaved,
-    true,
-  )
+  await backendMiddleware.storageLib.store.setting('seedPhraseSaved', true)
 
   // TODO: find sticky by id from queue, not active
   const {

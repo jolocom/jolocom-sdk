@@ -1,13 +1,3 @@
-import {
-  NavigationActions,
-  StackActions,
-  NavigationNavigateActionPayload,
-  NavigationAction,
-  NavigationContainerComponent,
-  NavigationRouter,
-  NavigationResetActionPayload,
-  NavigationNavigateAction,
-} from 'react-navigation'
 import { routeList } from 'src/routeList'
 import { JolocomLib } from 'jolocom-lib'
 import { interactionHandlers } from 'src/lib/storage/interactionTokens'
