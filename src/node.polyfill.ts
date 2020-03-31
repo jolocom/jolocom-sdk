@@ -80,7 +80,7 @@ export {
 export default {
   // RNFetchBlob default export
   // @ts-ignore
-  fetch: function(method, endpoint, headers, formDataList) {
+  fetch: function(method, endpoint, headers?, formDataList?) {
     console.log(arguments)
     const body = new FormData()
     formDataList.forEach((item: { name: string; data: string }) => {
