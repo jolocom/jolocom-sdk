@@ -8,7 +8,7 @@ function logCall(pref: string) {
   return (msg: string) => console.log(`${pref}: ${msg}`)
 }
 
-const BackendMiddleware = require('src/BackendMiddleware').BackendMiddleware
+const BackendMiddleware = require('src/backendMiddleware').BackendMiddleware
 const ormconfig = require('../ormconfig.ts').default
 
 // change type to 'sqlite' instead of 'react-native'
