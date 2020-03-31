@@ -13,6 +13,7 @@ import { AppError, ErrorCode } from 'src/lib/errors'
 import { keyIdToDid } from 'jolocom-lib/js/utils/helper'
 import { generateIdentitySummary } from './utils'
 import { PaymentRequestSummary } from './types'
+import fetch from 'node-fetch'
 
 export const consumePaymentRequest = (
   paymentRequest: JSONWebToken<PaymentRequest>,

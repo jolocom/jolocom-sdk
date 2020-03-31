@@ -1,3 +1,5 @@
+import fetch from 'node-fetch'
+
 interface HttpAgent {
   getRequest<T>(endpoint: string): Promise<T>
   postRequest<T>(endpoint: string, headers: any, data: any): Promise<T>

@@ -19,6 +19,7 @@ import {
 } from './types'
 import { AppError, ErrorCode } from 'src/lib/errors'
 import { generateIdentitySummary } from './utils'
+import fetch from 'node-fetch'
 
 export const setReceivingCredential = (
   requester: IdentitySummary,
