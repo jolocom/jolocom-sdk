@@ -41,7 +41,9 @@ import { writeFileSync, readFileSync } from 'fs'
 import path from 'path'
 
 export class KeyChain {
-  static PASSWORD_LOCATION = path.resolve(`${__dirname}/../local_identity.password.txt`)
+  static PASSWORD_LOCATION = path.resolve(
+    `${__dirname}/../local_identity.password.txt`,
+  )
   private pass: string | null = null
 
   public async getPassword() {
@@ -49,7 +51,7 @@ export class KeyChain {
     try {
       this.pass = readFileSync(KeyChain.PASSWORD_LOCATION).toString()
     } catch (err) {
-      console.error("Error reading password file", err, "\n\n")
+      console.error('Error reading password file', err, '\n\n')
     }
 
     return this.pass
@@ -67,11 +69,12 @@ export interface KeyChainInterface {
   getPassword: () => Promise<string>
 }
 
-
 const fetch = require('node-fetch')
 const FormData = require('form-data')
 
-export { IpfsStorageAgent as IpfsCustomConnector } from 'node_modules/jolocom-lib/js/ipfs/ipfs'
+export {
+  IpfsStorageAgent as IpfsCustomConnector,
+} from 'node_modules/jolocom-lib/js/ipfs/ipfs'
 
 // default export merge of all default exports
 export default {
@@ -84,7 +87,7 @@ export default {
       body.append(item.name, item.data)
     })
     return fetch(endpoint, { method, body, headers }).then((res: any) => {
-      console.log("body", res.body.toString())
+      console.log('body', res.body.toString())
       return res
     })
   },
@@ -93,12 +96,12 @@ export default {
   t: (str: string) => str,
 
   // react-native-splash-screen
-  hide: logCall('SplashScreen.hide')
+  hide: logCall('SplashScreen.hide'),
 }
 
 export const generateSecureRandomBytes = require('crypto').randomBytes
 
-export class Linking  {
+export class Linking {
   static async canOpenURL(url: string) {
     console.log('canOpenURL called with ' + url)
     return true
@@ -115,7 +118,7 @@ export function initSentry() {
 
 import { ErrorReport } from 'src/lib/errors/types'
 export function reportErrorToSentry(err: ErrorReport) {
-  console.error("reportErrorToSentry:\n", err.error)
+  console.error('reportErrorToSentry:\n', err.error)
 }
 
-export function findBestAvailableLanguage(locales: string[]) { }
+export function findBestAvailableLanguage(locales: string[]) {}
