@@ -61,9 +61,9 @@ export const compareDates = (date1: Date, date2: Date): number =>
 
 export function generateSecureRandomBytes(length: number): Promise<Buffer> {
   return new Promise((resolve, reject) => {
-    RNRandomBytes.randomBytes(length, (err: string, bytesAsBase64: string) => {
+    RNRandomBytes.randomBytes(length, (err, bytes) => {
       if (err) reject(err)
-      else resolve(Buffer.from(bytesAsBase64, 'base64'))
+      else resolve(bytes)
     })
   })
 }

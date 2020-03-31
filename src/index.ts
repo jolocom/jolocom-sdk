@@ -8,7 +8,6 @@ const paths = compilerOptions.paths || {}
 const polyfills = [
   'src/lib/keychain',
   'rn-fetch-blob',
-  'src/lib/util',
   'react-native',
   'src/lib/errors/sentry',
   'react-native-localize',

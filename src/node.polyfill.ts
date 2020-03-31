@@ -99,7 +99,8 @@ export default {
   hide: logCall('SplashScreen.hide'),
 }
 
-export const generateSecureRandomBytes = require('crypto').randomBytes
+import { randomBytes } from 'crypto'
+export const NativeModules = { RNRandomBytes: { randomBytes } }
 
 export class Linking {
   static async canOpenURL(url: string) {
