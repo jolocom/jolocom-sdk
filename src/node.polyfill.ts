@@ -120,8 +120,8 @@ export function initSentry() {
 }
 
 import { ErrorReport } from 'src/lib/errors/types'
-export function reportErrorToSentry(err: ErrorReport) {
-  console.error('reportErrorToSentry:\n', err.error)
+export function reportErrorToSentry(err: ErrorReport, extraData: any) {
+  console.error('reportErrorToSentry:\n', err.error, extraData)
 }
 
 export function findBestAvailableLanguage(locales: string[]) {}
