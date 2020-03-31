@@ -1,18 +1,21 @@
 module.exports = {
-  presets: ['module:metro-react-native-babel-preset'],
+  presets: [['@babel/preset-env'], '@babel/preset-typescript'],
   plugins: [
-    ["babel-plugin-inline-import", {
-      "extensions": [
-        ".xml",
-        ".svg"
-      ]
-    }],
+    [
+      'babel-plugin-inline-import',
+      {
+        extensions: ['.xml', '.svg'],
+      },
+    ],
 
     // needed for reflect-metadata to work
-    "babel-plugin-transform-typescript-metadata",
+    'babel-plugin-transform-typescript-metadata',
 
-    ["@babel/plugin-proposal-decorators", {
-      legacy: true
-    }],
-  ]
-};
+    [
+      '@babel/plugin-proposal-decorators',
+      {
+        legacy: true,
+      },
+    ],
+  ],
+}
