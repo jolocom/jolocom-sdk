@@ -1,14 +1,15 @@
 {
-  "name": "jolocomwallet",
-  "version": "1.7.1",
-  "main": "js/index.ts",
+  "name": "jolocom-sdk",
+  "version": "0.1.0",
+  "main": "js/index.js",
   "files": ["js/"],
   "scripts": {
     "test": "jest",
+    "build": "tsc -p .",
     "clean:node": "rm -rf node_modules",
     "format": "eslint --fix --ext .ts --ext .tsx .",
     "terms": "ts-node -O '{\"module\": \"commonjs\"}' bin/generateTerms.ts",
-    "repl": "REPL=1 ts-node -O '{\"module\": \"commonjs\"}' -r ./bin/repl.ts",
+    "repl": "REPL=1 ts-node -P . -r ./bin/repl.ts",
     "typeorm": "ts-node -O '{\"module\": \"commonjs\"}' -r ./bin/repl.ts node_modules/.bin/typeorm"
   },
   "private": true,
