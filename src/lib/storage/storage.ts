@@ -13,6 +13,7 @@ import {
   SignatureEntity,
   CredentialEntity,
   CacheEntity,
+  InteractionTokenEntity,
 } from 'src/lib/storage/entities'
 import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
 import {
@@ -24,6 +25,11 @@ import { DidDocument } from 'jolocom-lib/js/identity/didDocument/didDocument'
 import { groupAttributesByCredentialId } from './utils'
 
 import migrationsList from './migration'
+import {
+  JWTEncodable,
+  JSONWebToken,
+} from 'jolocom-lib/js/interactionTokens/JSONWebToken'
+import { JolocomLib } from 'jolocom-lib'
 
 interface PersonaAttributes {
   did: string
@@ -57,6 +63,10 @@ export class Storage {
       this.createConnectionIfNeeded().then(() =>
         cacheDIDDoc(this.connection)(doc),
       ),
+    interactionToken: (token: JSONWebToken<JWTEncodable>) =>
+      this.createConnectionIfNeeded().then(() =>
+        storeInteractionToken(this.connection)(token),
+      ),
   }
 
   public get = {
@@ -78,6 +88,10 @@ export class Storage {
     didDoc: (did: string) =>
       this.createConnectionIfNeeded().then(() =>
         getCachedDIDDoc(this.connection)(did),
+      ),
+    interactionTokens: (nonce: string) =>
+      this.createConnectionIfNeeded().then(() =>
+        getTokensByNonce(this.connection)(nonce),
       ),
   }
 
@@ -300,6 +314,28 @@ const getCachedDIDDoc = (connection: Connection) => async (
     return undefined
   }
 }
+
+const storeInteractionToken = (connection: Connection) => async (
+  token: JSONWebToken<JWTEncodable>,
+) => {
+  const tokenEntry = InteractionTokenEntity.fromJWT(token)
+
+  return connection.manager.save(tokenEntry)
+}
+
+const getTokensByNonce = (connection: Connection) => async (
+  nonce: string,
+): Promise<JSONWebToken<JWTEncodable>[]> =>
+  // return await connection.manager.find(InteractionTokenEntity)
+  connection.manager
+    .find(InteractionTokenEntity, {
+      where: [{ nonce }],
+    })
+    .then(entities =>
+      entities.map(entity =>
+        JolocomLib.parse.interactionToken.fromJWT(entity.original),
+      ),
+    )
 
 const storeCredentialMetadata = (connection: Connection) => (
   credentialMetadata: CredentialMetadataSummary,
