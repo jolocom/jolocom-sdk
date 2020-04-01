@@ -31,6 +31,15 @@ export class JolocomSDK {
     this.idw = this.store.backendMiddleware.identityWallet
   }
 
+  /**
+   * Returns an agent with an Identity provided by a store
+   *
+   * @remarks
+   * This depends on an existing database connection
+   *
+   * @param store - The agent state with storage connection
+   * @returns An Agent with the identity existing in the storage in store
+   */
   static async fromStore(store: ReturnType<typeof initStore>) {
     await (store.dispatch as ThunkDispatch)(
       withErrorHandler(initErrorHandler)(
@@ -41,7 +50,13 @@ export class JolocomSDK {
     return new JolocomSDK(store)
   }
 
-  static async fromMnomic(mnemonic: string) {
+  /**
+   * Returns an agent with an Identity provided by a BIP 39 12 word seed phrase
+   *
+   * @param mnemonic - 12 word BIP 39 seed phrase, space-delimited
+   * @returns An Agent with the identity corrosponding to the sead phrase
+   */
+  static async fromMnemonic(mnemonic: string) {
     const store = initStore()
     await (store.dispatch as ThunkDispatch)(
       actions.registrationActions.recoverIdentity(mnemonic),
@@ -50,6 +65,12 @@ export class JolocomSDK {
     return new JolocomSDK(store)
   }
 
+  /**
+   * Returns an agent with an Identity provided by a BIP 39 12 word seed phrase
+   *
+   * @param mnemonic - 12 word BIP 39 seed phrase, space-delimited
+   * @returns An Agent with the identity corrosponding to the sead phrase
+   */
   static async newDIDFromSeed(seed: Buffer) {
     const store = initStore()
     await (store.dispatch as ThunkDispatch)(
@@ -59,6 +80,12 @@ export class JolocomSDK {
     return new JolocomSDK(store)
   }
 
+  /**
+   * Returns an agent with an Identity provided by a BIP 39 12 word seed phrase
+   *
+   * @param mnemonic - 12 word BIP 39 seed phrase, space-delimited
+   * @returns An Agent with the identity corrosponding to the sead phrase
+   */
   public async tokenRecieved(jwt: string) {
     const token = JolocomLib.parse.interactionToken.fromJWT(jwt)
 
@@ -66,6 +93,12 @@ export class JolocomSDK {
     await this.dispatch(interactionHandlers[token.interactionType](token))
   }
 
+  /**
+   * Returns an agent with an Identity provided by a BIP 39 12 word seed phrase
+   *
+   * @param mnemonic - 12 word BIP 39 seed phrase, space-delimited
+   * @returns An Agent with the identity corrosponding to the sead phrase
+   */
   public async credRequestToken(
     request: ICredentialRequestAttrs,
   ): Promise<string> {
@@ -77,6 +110,14 @@ export class JolocomSDK {
     return token.encode()
   }
 
+  /**
+   * Returns a base64 encoded signed credential offer token, given
+   * request attributes
+   *
+   * @param offer - credential offer attributes
+   * @returns A base64 encoded signed credential offer token offering
+   * credentials according to `offer`
+   */
   public async credOfferToken(
     offer: CredentialOfferRequestAttrs,
   ): Promise<string> {
@@ -88,6 +129,15 @@ export class JolocomSDK {
     return token.encode()
   }
 
+  /**
+   * Returns a base64 encoded signed credential issuance token, given
+   * issuance attributes and a recieved token selecting desired issuance
+   *
+   * @param issuance - credential issuance attributes
+   * @param selection - base64 encoded credential offer response token
+   * @returns A base64 encoded signed issuance token containing verifiable
+   * credentials
+   */
   public async credIssuanceToken(
     issuance: ICredentialsReceiveAttrs,
     selection: string,
