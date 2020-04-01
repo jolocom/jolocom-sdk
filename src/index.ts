@@ -54,9 +54,10 @@ export class JolocomSDK {
     return new JolocomSDK(store)
   }
 
-  public tokenRecieved(jwt: string) {
+  public async tokenRecieved(jwt: string) {
     const token = JolocomLib.parse.interactionToken.fromJWT(jwt)
 
-    this.dispatch(interactionHandlers[token.interactionType](token))
+    await this.store.backendMiddleware.storageLib.store.interactionToken(token)
+    await this.dispatch(interactionHandlers[token.interactionType](token))
   }
 }
