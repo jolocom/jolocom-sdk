@@ -7,6 +7,11 @@ import { withErrorHandler } from './actions/modifiers'
 import { AppError } from './lib/errors'
 import { ThunkAction, ThunkDispatch } from './store'
 import { IdentityWallet } from 'jolocom-lib/js/identityWallet/identityWallet'
+import {
+  ICredentialRequestAttrs,
+  CredentialOfferRequestAttrs,
+  ICredentialsReceiveAttrs,
+} from 'jolocom-lib/js/interactionTokens/interactionTokens.types'
 
 export { initStore, entities, actions }
 
@@ -59,5 +64,41 @@ export class JolocomSDK {
 
     await this.store.backendMiddleware.storageLib.store.interactionToken(token)
     await this.dispatch(interactionHandlers[token.interactionType](token))
+  }
+
+  public async credRequestToken(
+    request: ICredentialRequestAttrs,
+  ): Promise<string> {
+    const token = await this.idw.create.interactionTokens.request.share(
+      request,
+      await this.store.backendMiddleware.keyChainLib.getPassword(),
+    )
+    this.store.backendMiddleware.storageLib.store.interactionToken(token)
+    return token.encode()
+  }
+
+  public async credOfferToken(
+    offer: CredentialOfferRequestAttrs,
+  ): Promise<string> {
+    const token = await this.idw.create.interactionTokens.request.offer(
+      offer,
+      await this.store.backendMiddleware.keyChainLib.getPassword(),
+    )
+    this.store.backendMiddleware.storageLib.store.interactionToken(token)
+    return token.encode()
+  }
+
+  public async credIssuanceToken(
+    issuance: ICredentialsReceiveAttrs,
+    selection: string,
+  ): Promise<string> {
+    const token = await this.idw.create.interactionTokens.response.issue(
+      issuance,
+      await this.store.backendMiddleware.keyChainLib.getPassword(),
+      await JolocomLib.parse.interactionToken.fromJWT(selection),
+    )
+
+    this.store.backendMiddleware.storageLib.store.interactionToken(token)
+    return token.encode()
   }
 }
