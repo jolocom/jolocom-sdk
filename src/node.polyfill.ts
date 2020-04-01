@@ -8,7 +8,11 @@ function logCall(pref: string) {
   return (msg: string) => console.log(`${pref}: ${msg}`)
 }
 
-const BackendMiddleware = require('src/backendMiddleware').BackendMiddleware
+import { BackendMiddleware } from 'src/backendMiddleware'
+import { createStore, applyMiddleware } from 'redux'
+import thunk from 'redux-thunk'
+import { rootReducer, RootState } from 'src/reducers'
+
 const ormconfig = require('../ormconfig.ts').default
 
 // change type to 'sqlite' instead of 'react-native'
@@ -16,23 +20,20 @@ ormconfig.type = 'sqlite'
 ormconfig.database = 'db.sqlite3'
 
 export function initStore() {
-  const { createStore, applyMiddleware } = require('redux')
-  const thunk = require('redux-thunk').default
-  const { rootReducer } = require('src/reducers')
-
   const config = require('src/config.ts')
   config.typeOrmConfig = ormconfig
 
   // instantiate the storage backend
   const backendMiddleware = new BackendMiddleware(config)
 
-  const store = createStore(
-    rootReducer,
-    {},
-    applyMiddleware(thunk.withExtraArgument(backendMiddleware)),
-  )
-
-  store.backendMiddleware = backendMiddleware
+  const store = {
+    ...createStore(
+      rootReducer,
+      {} as RootState,
+      applyMiddleware(thunk.withExtraArgument(backendMiddleware)),
+    ),
+    backendMiddleware,
+  }
 
   return store
 }

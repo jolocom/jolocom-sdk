@@ -60,6 +60,7 @@ async function getPassword(): Promise<string> {
   // react-native-keychain and accessesed through src/lib/keychain.ts, but code
   // is reproduced here in case things change in the future
 
+  // @ts-ignore
   if (typeof navigator !== 'undefined' && navigator.product == 'ReactNative') {
     // We load react-native-keychain here conditionally because it is not
     // transpiled and cannot be loaded into ts-node (if running migrations locally
