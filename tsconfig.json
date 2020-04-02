@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "isolatedModules": false,
@@ -9,6 +8,7 @@
     "strict": true,
     "target": "es2017",
     "module": "es2015",
+    "declaration": true,
 
     "resolveJsonModule": true,
     "suppressImplicitAnyIndexErrors": true,
