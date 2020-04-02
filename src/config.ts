@@ -1,4 +1,4 @@
-import typeOrmConf from '../ormconfig'
+import typeOrmConf from 'src/ormconfig'
 import { ConnectionOptions } from 'typeorm/browser'
 
 export default {
