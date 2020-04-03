@@ -5,6 +5,8 @@ Interested in our vision? Take a look at our [whitepaper](https://jolocom.io/wp-
 
 ## Prerequisites
 
+[![Join the chat at https://gitter.im/jolocom/jolocom-sdk](https://badges.gitter.im/jolocom/jolocom-sdk.svg)](https://gitter.im/jolocom/jolocom-sdk?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 - Set-up requires [Node.js](https://nodejs.org/en/download/) to be installed on your computer.
   - `Node.js v10` is required to build the project.
 - We use [Yarn](https://yarnpkg.com) as our package manager.
