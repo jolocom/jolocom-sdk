@@ -20,6 +20,11 @@ const initErrorHandler = (error: AppError | Error): ThunkAction => dispatch => {
   return Promise.reject(error)
 }
 
+// @ts-ignore
+// const injectPassFn = (passFn: () => Promise<string>) => <A, T>(
+//   delayedFn: (arg1: A, pass: string, ...rest) => Promise<T>,
+// ) => async (a1: A, ...rest) => await delayedFn(a1, await passFn())
+
 export class JolocomSDK {
   private store: ReturnType<typeof initStore>
   private dispatch: ThunkDispatch
@@ -66,10 +71,11 @@ export class JolocomSDK {
   }
 
   /**
-   * Returns an agent with an Identity provided by a BIP 39 12 word seed phrase
+   * Returns an agent with an Identity provided by a buffer of entropy.
+   * WARNING: this registers an identity on the Jolocom DID Method
    *
-   * @param mnemonic - 12 word BIP 39 seed phrase, space-delimited
-   * @returns An Agent with the identity corrosponding to the sead phrase
+   * @param seed - Buffer of private entropy to generate keys with
+   * @returns An Agent with the identity corrosponding to the seed
    */
   static async newDIDFromSeed(seed: Buffer) {
     const store = initStore()
@@ -81,23 +87,24 @@ export class JolocomSDK {
   }
 
   /**
-   * Returns an agent with an Identity provided by a BIP 39 12 word seed phrase
+   * Handles a recieved interaction token
    *
-   * @param mnemonic - 12 word BIP 39 seed phrase, space-delimited
-   * @returns An Agent with the identity corrosponding to the sead phrase
+   * @param jwt - recieved jwt, Base64 encoded
+   * @returns TODO
    */
   public async tokenRecieved(jwt: string) {
     const token = JolocomLib.parse.interactionToken.fromJWT(jwt)
 
     await this.store.backendMiddleware.storageLib.store.interactionToken(token)
+
     await this.dispatch(interactionHandlers[token.interactionType](token))
   }
 
   /**
-   * Returns an agent with an Identity provided by a BIP 39 12 word seed phrase
+   * Creates a signed, base64 encoded Credential Request, given a set of requirements
    *
-   * @param mnemonic - 12 word BIP 39 seed phrase, space-delimited
-   * @returns An Agent with the identity corrosponding to the sead phrase
+   * @param request - Credential Request Attributes
+   * @returns Base64 encoded signed credential request
    */
   public async credRequestToken(
     request: ICredentialRequestAttrs,
