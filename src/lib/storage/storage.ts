@@ -89,9 +89,13 @@ export class Storage {
       this.createConnectionIfNeeded().then(() =>
         getCachedDIDDoc(this.connection)(did),
       ),
-    interactionTokens: (nonce: string) =>
+    interactionTokens: (attrs: {
+      nonce?: string
+      type?: string
+      issuer?: string
+    }) =>
       this.createConnectionIfNeeded().then(() =>
-        getTokensByNonce(this.connection)(nonce),
+        findTokens(this.connection)(attrs),
       ),
   }
 
@@ -323,13 +327,15 @@ const storeInteractionToken = (connection: Connection) => async (
   return connection.manager.save(tokenEntry)
 }
 
-const getTokensByNonce = (connection: Connection) => async (
-  nonce: string,
-): Promise<JSONWebToken<JWTEncodable>[]> =>
+const findTokens = (connection: Connection) => async (attrs: {
+  nonce?: string
+  type?: string
+  issuer?: string
+}): Promise<JSONWebToken<JWTEncodable>[]> =>
   // return await connection.manager.find(InteractionTokenEntity)
   connection.manager
     .find(InteractionTokenEntity, {
-      where: [{ nonce }],
+      where: [attrs],
     })
     .then(entities =>
       entities.map(entity =>
