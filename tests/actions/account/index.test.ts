@@ -3,8 +3,8 @@ import data from '../registration/data/mockRegistrationData'
 import { JolocomLib } from 'jolocom-lib'
 import { RootState } from 'src/reducers'
 import { createMockStore } from 'tests/utils'
-import { BackendError } from 'src/backendMiddleware'
-import { withErrorScreen } from 'src/actions/modifiers';
+import { withErrorScreen } from 'src/actions/modifiers'
+import { BackendError } from '../../../src/lib/errors/types'
 
 describe('Account action creators', () => {
   const initialState: Partial<RootState> = {
@@ -27,12 +27,6 @@ describe('Account action creators', () => {
             did: 'did:jolo:test',
           },
           subject: 'did:jolo:test',
-        },
-        pendingExternal: {
-          offer: [],
-          offeror: {
-            did: '',
-          },
         },
         decoratedCredentials: {},
         hasExternalCredentials: false,
@@ -71,12 +65,10 @@ describe('Account action creators', () => {
 
   it('should display exception screen in case of error', async () => {
     mockMiddleware.prepareIdentityWallet.mockRejectedValue(
-      new Error('everything is WRONG')
+      new Error('everything is WRONG'),
     )
     await mockStore.dispatch(
-      withErrorScreen(
-        accountActions.checkIdentityExists,
-      ),
+      withErrorScreen(accountActions.checkIdentityExists),
     )
     expect(mockStore.getActions()).toMatchSnapshot()
   })

@@ -2,8 +2,9 @@ import { routeList } from 'src/routeList'
 import { JolocomLib } from 'jolocom-lib'
 import { interactionHandlers } from 'src/lib/storage/interactionTokens'
 import { AppError, ErrorCode } from 'src/lib/errors'
-import { withLoading, withErrorScreen } from 'src/actions/modifiers'
+import { withErrorScreen, withLoading } from 'src/actions/modifiers'
 import { ThunkAction } from 'src/store'
+import { InteractionChannel } from '../../lib/interactionManager/types'
 
 /**
  * NOTE: navigate and navigatorReset both dispatch the navigation actions but
@@ -65,7 +66,11 @@ export const handleDeepLink = (url: string): ThunkAction => (
 
     if (handler) {
       return dispatch(
-        withLoading(withErrorScreen(handler(interactionToken, true))),
+        withLoading(
+          withErrorScreen(
+            handler(interactionToken, InteractionChannel.Deeplink),
+          ),
+        ),
       )
     }
   }

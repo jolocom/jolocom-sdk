@@ -1,5 +1,6 @@
 // NOTE: not importing from 'src/lib/errors' to avoid cycle
-import { ErrorCode } from 'src/lib/errors/codes'
+// NOTE: absolute path causes `generateTerms` to crash, since it is outside /src (I guess that's the cause)
+import { ErrorCode } from '../lib/errors/codes'
 
 const registration = {
   ENCRYPTING_AND_STORING_DATA_LOCALLY: 'Encrypting and storing data locally',
@@ -82,6 +83,19 @@ const notifications = {
   CONFIRMATION_IS_NOT_COMPLETE: 'Confirmation is not complete',
   YOUR_DATA_MAY_BE_LOST_BECAUSE_YOU_DID_NOT_CONFIRM_THE_SEED_PHRASE_WE_ADVISE_YOU_TO_COMPLETE_THE_REGISTRATION:
     'Your data may be lost because you did not confirm the seed phrase. We advise you to complete the registration.',
+  GREAT_SUCCESS: 'Great success!',
+  YOU_CAN_FIND_YOUR_NEW_CREDENTIAL_IN_THE_DOCUMENTS:
+    'You can find your new credential in the documents',
+  OPEN: 'Open',
+  DEJA_VU: 'Déjà vu',
+  YOU_ALREADY_SAVED_THAT_ONE: 'You already saved that one!',
+  AWKWARD: '#awkward',
+  THAT_DOC_DOESNT_BELONG_TO_YOU_TRY_SAVING_A_DIFFERENT_ONE:
+    'That doc doesn’t belong to you. Try saving a different one.',
+  WE_CANT_DO_THIS_SOME_OF_THE_DOCUMENTS_ARE_NOT_YOURS:
+    "We can't do this, some of the documents are not yours",
+  IT_SEEMS_LIKE_WE_CANT_DO_THIS: "It seems like we can't do this",
+  SOMETHING_WENT_WRONG_CHOOSE_AGAIN: 'Something went wrong. Choose again!',
 }
 
 const errorTitle = {
@@ -91,24 +105,24 @@ const errorTitle = {
 }
 
 const errorReporting = {
-  CHOOSE_THE_ISSUE: 'Choose the issue',
+  TELL_US_THE_PROBLEM: 'Tell us the problem',
   NO_INTERNET_CONNECTION: 'No internet connection',
-  CRASH: 'Crash',
+  THE_APP_KEEPS_CRASHING: 'The app keeps crashing',
   CANT_LOGIN: "Can't login",
   BACKUP_IS_EMPTY: 'Backup is empty',
-  CANT_REACH_SOME_ELEMENTS: "Can't reach some elements",
-  IM_JUST_ANNOYING: "I'm just annoying",
-  OTHER_REASON: 'Other reason',
-  CHOOSE_RELATED: 'Choose related',
+  PROBLEMS_WITH_THE_INTERFACE: 'Problems with the interface',
+  SOMETHING_DOESNT_SEEM_RIGHT: "Something doesn't seem right",
+  OTHER: 'Other',
+  SELECT_AN_OPTION: 'Select an option',
   CAN_YOU_BE_MORE_SPECIFIC: 'Can you be more specific?',
-  IF_THE_PROBLEM_IS_NOT_LISTED_THIS_IS_THE_BEST_PLACE_TO_DESCRIBE_IT:
-    'If the problem is not listed, this is the best place to describe it.',
-  YOUR_MESSAGE_HERE: 'Your message here...',
-  NEED_TO_TALK_TO_US: 'Need to talk to us?',
+  YOU_CAN_PROVIDE_FURTHER_DETAILS_ABOUT_THE_ISSUE_HERE:
+    'You can provide further details about the issue here',
+  TAP_TO_WRITE: 'Tap to write...',
+  WANT_TO_GET_IN_TOUCH: 'Want to get in touch?',
   LEAVE_US_YOUR_EMAIL_AND_NUMBER: 'Leave us your email or number...',
   WE_DO_NOT_STORE_ANY_DATA_AND_DO_NOT_SPAM_ANY_USER_INFORMATION_WILL_BE_DELETED_IMMEDIATELY_AFTER_SOLVING_THE_PROBLEM:
     'We do not store data and do not spam, any user information will be deleted immediately after solving the problem',
-  SOMETHING_ELSE: 'Something else?',
+  RATE_THE_ISSUE: 'Rate the issue',
   INCLUDE_YOUR_LOGS: 'Include your logs',
   THIS_INCLUDES_SOME_PRIVATE_METADATA_INFO_FILESIZES_BUT_NOT_NAMES_OR_CONTENTS_BUT_IT_WILL_HELP_DEVELOPERS_FIX_BUGS_MORE_QUICKLY:
     'This includes some private metadata info (file sizes, but not names or contents) but it will help developers fix bugs more quickly.',
@@ -152,6 +166,9 @@ export default {
   YOUR_JOLOCOM_WALLET: 'Your Jolocom Wallet',
   ALL_CLAIMS: 'All claims',
   RECEIVING_NEW_CREDENTIAL: 'Receiving new credential',
+  CHOOSE_ONE_OR_MORE_DOCUMENTS_PROVIDED_BY_THIS_SERVICE_AND_WE_WILL_GENERATE_THEM_FOR_YOU:
+    'Choose one or more documents provided by this service and we will generate them for you',
+  RECEIVE: 'Receive',
   SHARE_CLAIMS: 'Share claims',
   CONFIRM_PAYMENT: 'Confirm payment',
   AUTHORIZATION_REQUEST: 'Authorization request',
@@ -207,4 +224,5 @@ export default {
   PERSONAL: 'Personal',
   NO_DOCUMENTS_TO_SEE_HERE: 'No documents to see here',
   EXPIRED: 'expired',
+  UNKNOWN: 'Unknown',
 }
