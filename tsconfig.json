@@ -47,8 +47,6 @@
       "rn-fetch-blob": ["./src/polyfills/rnFetchBlob"],
       "src/lib/errors/sentry": ["./src/polyfills/sentry"],
       "src/locales/i18n": ["./src/polyfills/i18n"],
-      "react-native-splash-screen": ["./src/polyfills/rnSplashScreen"],
-      "react-native": ["./src/polyfills/reactNative"],
       "src/lib/ipfs": ["./src/polyfills/ipfs"],
       "src/*": ["./src/*"],
       "typeorm/browser": ["./../node_modules/typeorm"]

@@ -21,7 +21,7 @@ import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credent
 import { AuthenticationFlow } from './authenticationFlow'
 import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRequest'
 import { CredentialsReceive } from 'jolocom-lib/js/interactionTokens/credentialsReceive'
-import { Linking } from 'react-native'
+import { Linking } from 'src/polyfills/reactNative'
 import { AppError, ErrorCode } from '../errors'
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { Identity } from 'jolocom-lib/js/identity/identity'
