@@ -13,7 +13,7 @@
     // "sourceMap": true,                     /* Generates corresponding '.map' file. */
     // "outFile": "./",                       /* Concatenate and emit output to single file. */
     "outDir": "./js" /* Redirect output structure to the directory. */,
-    // "rootDir": "./",                       /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
+    "rootDir": "./" /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */,
     // "composite": true,                     /* Enable project compilation */
     // "tsBuildInfoFile": "./",               /* Specify file to store incremental compilation information */
     // "removeComments": true,                /* Do not emit comments to output. */
@@ -43,17 +43,15 @@
     "baseUrl": "./" /* Base directory to resolve non-absolute module names. */,
     "paths": {
       /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
-      "src/lib/keychain": ["src/node.polyfill.ts"],
-      "rn-fetch-blob": ["src/node.polyfill"],
-      "react-native": ["src/node.polyfill"],
-      "src/lib/errors/sentry": ["src/node.polyfill"],
-      "react-native-localize": ["src/node.polyfill"],
-      "src/locales/i18n": ["src/node.polyfill"],
-      "react-native-splash-screen": ["src/node.polyfill"],
-      "src/lib/ipfs": ["src/node.polyfill"],
-      "typeorm/browser": ["node_modules/typeorm"]
+      "src/lib/keychain": ["./src/polyfills/keychain"],
+      "rn-fetch-blob": ["./src/polyfills/rnFetchBlob"],
+      "src/lib/errors/sentry": ["./src/polyfills/sentry"],
+      "src/locales/i18n": ["./src/polyfills/i18n"],
+      "src/lib/ipfs": ["./src/polyfills/ipfs"],
+      "src/*": ["./src/*"],
+      "typeorm/browser": ["./../node_modules/typeorm"]
     },
-    // "rootDirs": [],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
+    // "rootdirs": [] /* list of root folders whose combined content represents the structure of the project at runtime. */,
     // "typeRoots": [],                       /* List of folders to include type definitions from. */
     // "types": [],                           /* Type declaration files to be included in compilation. */
     "allowSyntheticDefaultImports": true /* Allow default imports from modules with no default export. This does not affect code emit, just typechecking. */,
@@ -81,6 +79,6 @@
     "noEmitHelpers": true,
     "skipLibCheck": true
   },
-  "exclude": ["node_modules", "babel.config.js", "jest.config.js"],
-  "include": ["./src/**/*"]
+  "exclude": ["node_modules", "babel.config.js", "jest.config.js", "js/**/*"],
+  "include": ["./src/**/*", "./index.ts"]
 }

@@ -3,9 +3,9 @@ import * as entities from 'src/lib/storage/entities'
 import * as actions from 'src/actions'
 import { JolocomLib } from 'jolocom-lib'
 import { interactionHandlers } from 'src/lib/storage/interactionTokens'
-import { withErrorHandler } from './actions/modifiers'
-import { AppError } from './lib/errors'
-import { ThunkAction, ThunkDispatch } from './store'
+import { withErrorHandler } from 'src/actions/modifiers'
+import { AppError } from 'src/lib/errors'
+import { ThunkAction, ThunkDispatch } from 'src/store'
 import { IdentityWallet } from 'jolocom-lib/js/identityWallet/identityWallet'
 import {
   ICredentialRequestAttrs,

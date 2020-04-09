@@ -4,20 +4,19 @@
  * backendMiddleware and redux store under node
  */
 
-function logCall(pref: string) {
-  return (msg: string) => console.log(`${pref}: ${msg}`)
-}
-
 import { BackendMiddleware } from 'src/backendMiddleware'
 import { createStore, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk'
 import { rootReducer, RootState } from 'src/reducers'
 
-const ormconfig = require('../ormconfig.ts').default
+import * as originalORMConfig from 'src/ormconfig'
 
-// change type to 'sqlite' instead of 'react-native'
-ormconfig.type = 'sqlite'
-ormconfig.database = 'db.sqlite3'
+const ormconfig = {
+  ...originalORMConfig,
+  // change type to 'sqlite' instead of 'react-native'
+  type: 'sqlite',
+  database: 'db.sqlite3',
+}
 
 export function initStore() {
   const config = require('src/config.ts')
@@ -36,97 +35,4 @@ export function initStore() {
   }
 
   return store
-}
-
-import { writeFileSync, readFileSync } from 'fs'
-import path from 'path'
-
-// from src/lib/keychain.ts
-export class KeyChain implements KeyChainInterface {
-  static PASSWORD_LOCATION = path.resolve(
-    `${__dirname}/../local_identity.password.txt`,
-  )
-  private pass: string | null = null
-
-  public async getPassword() {
-    if (this.pass != null) return this.pass
-    try {
-      this.pass = readFileSync(KeyChain.PASSWORD_LOCATION).toString()
-    } catch (err) {
-      console.error('Error reading password file', err, '\n\n')
-      throw err
-    }
-
-    return this.pass
-  }
-
-  public async savePassword(pass: string) {
-    console.log('KEYCHAIN SAVED PASSWORD: ', pass)
-    this.pass = pass
-    writeFileSync(KeyChain.PASSWORD_LOCATION, pass)
-  }
-}
-
-export interface KeyChainInterface {
-  savePassword: (password: string) => Promise<void>
-  getPassword: () => Promise<string>
-}
-
-const fetch = require('node-fetch')
-const FormData = require('form-data')
-
-export {
-  IpfsStorageAgent as IpfsCustomConnector,
-} from 'node_modules/jolocom-lib/js/ipfs/ipfs'
-
-// default export merge of all default exports
-export default {
-  // RNFetchBlob default export
-  // @ts-ignore
-  fetch: function(method, endpoint, headers?, formDataList?) {
-    console.log(arguments)
-    const body = new FormData()
-    formDataList.forEach((item: { name: string; data: string }) => {
-      body.append(item.name, item.data)
-    })
-    return fetch(endpoint, { method, body, headers }).then((res: any) => {
-      console.log('body', res.body.toString())
-      return res
-    })
-  },
-
-  // src/locales/i18n.ts default export
-  t: (str: string) => str,
-
-  // react-native-splash-screen
-  hide: () => logCall('SplashScreen')('hide'),
-}
-
-import { randomBytes } from 'crypto'
-export const NativeModules = { RNRandomBytes: { randomBytes } }
-
-export class Linking {
-  static async canOpenURL(url: string) {
-    console.log('canOpenURL called with ' + url)
-    return true
-  }
-
-  static async openURL(url: string) {
-    console.log('openURL called with ' + url)
-  }
-}
-
-export function initSentry() {
-  console.log('initSentry')
-}
-
-import { ErrorReport } from 'src/lib/errors/types'
-export function reportErrorToSentry(err: ErrorReport, extraData: any) {
-  console.error('reportErrorToSentry:\n', err.error, extraData)
-}
-
-export function findBestAvailableLanguage(locales: string[]) {
-  return {
-    languageTag: 'en',
-  }
 }
