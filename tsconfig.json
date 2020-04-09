@@ -45,7 +45,7 @@
       /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
       "src/lib/keychain": ["./src/polyfills/keychain"],
       "rn-fetch-blob": ["./src/polyfills/rnFetchBlob"],
-      "src/lib/errors/sentry": ["./src/node.polyfill"],
+      "src/lib/errors/sentry": ["./src/polyfills/sentry"],
       "react-native-localize": ["./src/node.polyfill"],
       "src/locales/i18n": ["./src/node.polyfill"],
       "react-native-splash-screen": ["./src/node.polyfill"],
