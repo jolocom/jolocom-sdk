@@ -49,8 +49,8 @@ export class Interaction {
   public channel: InteractionChannel
 
   public participants!: {
-    us: Identity
-    them: Identity
+    requester: Identity
+    responder: Identity
   }
 
   public constructor(
@@ -139,8 +139,8 @@ export class Interaction {
   public async processInteractionToken(token: JSONWebToken<JWTEncodable>) {
     if (!this.participants) {
       this.participants = {
-        us: this.ctx.identityWallet.identity,
-        them: await this.ctx.registry.resolve(token.signer.did),
+        requester: await this.ctx.registry.resolve(token.signer.did),
+        responder: this.ctx.identityWallet.identity,
       }
     }
 
@@ -168,7 +168,7 @@ export class Interaction {
 
   public getSummary(): InteractionSummary {
     return {
-      issuer: generateIdentitySummary(this.participants.them),
+      initiator: generateIdentitySummary(this.participants.requester),
       state: this.flow.getState(),
     }
   }
@@ -250,6 +250,6 @@ export class Interaction {
 
   public storeIssuerProfile = () =>
     this.ctx.storageLib.store.issuerProfile(
-      generateIdentitySummary(this.participants.them),
+      generateIdentitySummary(this.participants.requester),
     )
 }
