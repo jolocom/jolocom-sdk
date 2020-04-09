@@ -46,7 +46,6 @@
       "src/lib/keychain": ["./src/polyfills/keychain"],
       "rn-fetch-blob": ["./src/polyfills/rnFetchBlob"],
       "src/lib/errors/sentry": ["./src/polyfills/sentry"],
-      "react-native-localize": ["./src/node.polyfill"],
       "src/locales/i18n": ["./src/node.polyfill"],
       "react-native-splash-screen": ["./src/node.polyfill"],
       "react-native": ["./src/node.polyfill"],

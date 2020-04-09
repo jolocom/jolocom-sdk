@@ -64,9 +64,3 @@ export class Linking {
     console.log('openURL called with ' + url)
   }
 }
-
-export function findBestAvailableLanguage(locales: string[]) {
-  return {
-    languageTag: 'en',
-  }
-}
