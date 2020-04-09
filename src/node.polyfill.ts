@@ -38,29 +38,12 @@ export function initStore() {
   return store
 }
 
-const fetch = require('node-fetch')
-const FormData = require('form-data')
-
 export {
   IpfsStorageAgent as IpfsCustomConnector,
 } from 'node_modules/jolocom-lib/js/ipfs/ipfs'
 
 // default export merge of all default exports
 export default {
-  // RNFetchBlob default export
-  // @ts-ignore
-  fetch: function(method, endpoint, headers?, formDataList?) {
-    console.log(arguments)
-    const body = new FormData()
-    formDataList.forEach((item: { name: string; data: string }) => {
-      body.append(item.name, item.data)
-    })
-    return fetch(endpoint, { method, body, headers }).then((res: any) => {
-      console.log('body', res.body.toString())
-      return res
-    })
-  },
-
   // src/locales/i18n.ts default export
   t: (str: string) => str,
 
