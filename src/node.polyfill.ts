@@ -9,11 +9,14 @@ import { createStore, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk'
 import { rootReducer, RootState } from 'src/reducers'
 
-const ormconfig = require('../ormconfig.ts').default
+import * as originalORMConfig from 'src/ormconfig'
 
-// change type to 'sqlite' instead of 'react-native'
-ormconfig.type = 'sqlite'
-ormconfig.database = 'db.sqlite3'
+const ormconfig = {
+  ...originalORMConfig,
+  // change type to 'sqlite' instead of 'react-native'
+  type: 'sqlite',
+  database: 'db.sqlite3',
+}
 
 export function initStore() {
   const config = require('src/config.ts')
