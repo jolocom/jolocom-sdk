@@ -50,7 +50,7 @@ export class Interaction {
 
   public participants!: {
     requester: Identity
-    responder: Identity
+    responder?: Identity
   }
 
   public constructor(
@@ -138,10 +138,18 @@ export class Interaction {
 
   public async processInteractionToken(token: JSONWebToken<JWTEncodable>) {
     if (!this.participants) {
+      // TODO what happens if the signer isnt resolvable
+      const requester = await this.ctx.registry.resolve(token.signer.did)
       this.participants = {
-        requester: await this.ctx.registry.resolve(token.signer.did),
-        responder: this.ctx.identityWallet.identity,
+        requester,
       }
+      if (requester.did !== this.ctx.identityWallet.did) {
+        this.participants.responder = this.ctx.identityWallet.identity
+      }
+    } else if (!this.participants.responder) {
+      this.participants.responder = await this.ctx.registry.resolve(
+        token.signer.did,
+      )
     }
 
     if (token.signer.did !== this.ctx.identityWallet.did) {
