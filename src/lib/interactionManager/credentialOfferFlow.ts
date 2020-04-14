@@ -74,7 +74,7 @@ export class CredentialOfferFlow extends Flow {
           invalidIssuer:
             signedCredential.issuer !== this.ctx.participants.requester.did,
           invalidSubject:
-            signedCredential.subject !== this.ctx.participants.responder.did,
+            signedCredential.subject !== this.ctx.participants.responder!.did,
         },
       }
     })
