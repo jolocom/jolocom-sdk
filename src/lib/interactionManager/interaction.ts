@@ -171,6 +171,7 @@ export class Interaction {
       .handleInteractionToken(token.interactionToken, token.interactionType)
       .then(() => {
         this.interactionMessages.push(token)
+        this.ctx.storageLib.store.interactionToken(token)
       })
   }
 
