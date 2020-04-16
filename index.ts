@@ -2,7 +2,6 @@ import { initStore } from 'src/node.polyfill'
 import * as entities from 'src/lib/storage/entities'
 import * as actions from 'src/actions'
 import { JolocomLib } from 'jolocom-lib'
-import { interactionHandlers } from 'src/lib/storage/interactionTokens'
 import { withErrorHandler } from 'src/actions/modifiers'
 import { AppError } from 'src/lib/errors'
 import { ThunkAction, ThunkDispatch } from 'src/store'
@@ -28,12 +27,10 @@ const initErrorHandler = (error: AppError | Error): ThunkAction => dispatch => {
 
 export class JolocomSDK {
   private store: ReturnType<typeof initStore>
-  private dispatch: ThunkDispatch
   public idw: IdentityWallet
 
   constructor(store: ReturnType<typeof initStore>) {
     this.store = store
-    this.dispatch = this.store.dispatch
     this.idw = this.store.backendMiddleware.identityWallet
   }
 
@@ -91,14 +88,24 @@ export class JolocomSDK {
    * Handles a recieved interaction token
    *
    * @param jwt - recieved jwt, Base64 encoded
-   * @returns TODO
+   * @returns Promise<bool>, true: valid, false: invalid, reject: incorrect
    */
   public async tokenRecieved(jwt: string) {
     const token = JolocomLib.parse.interactionToken.fromJWT(jwt)
 
-    await this.store.backendMiddleware.storageLib.store.interactionToken(token)
+    const interaction = this.store.backendMiddleware.interactionManager.getInteraction(
+      token.nonce,
+    )
 
-    await this.dispatch(interactionHandlers[token.interactionType](token))
+    if (interaction) {
+      return interaction.processInteractionToken(token)
+    } else {
+      this.store.backendMiddleware.interactionManager.start(
+        InteractionChannel.HTTP,
+        token,
+      )
+      return true
+    }
   }
 
   /**
