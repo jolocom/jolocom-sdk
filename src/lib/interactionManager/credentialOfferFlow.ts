@@ -6,7 +6,7 @@ import { InteractionType } from 'jolocom-lib/js/interactionTokens/types'
 import { last } from 'ramda'
 import { Flow } from './flow'
 import { Interaction } from './interaction'
-import { CredentialOfferFlowState } from './types'
+import { CredentialOfferFlowState, IssuanceResult } from './types'
 import {
   isCredentialOfferRequest,
   isCredentialOfferResponse,
@@ -16,6 +16,8 @@ import {
 export class CredentialOfferFlow extends Flow {
   public state: CredentialOfferFlowState = {
     offerSummary: [],
+    selection: [],
+    issued: [],
   }
 
   public constructor(ctx: Interaction) {
@@ -25,7 +27,7 @@ export class CredentialOfferFlow extends Flow {
   public async handleInteractionToken(
     token: JWTEncodable,
     messageType: InteractionType,
-  ): Promise<any> {
+  ): Promise<boolean> {
     switch (messageType) {
       case InteractionType.CredentialOfferRequest:
         if (isCredentialOfferRequest(token))
@@ -41,24 +43,45 @@ export class CredentialOfferFlow extends Flow {
     }
   }
 
-  private handleOfferRequest({ offeredCredentials }: CredentialOfferRequest) {
-    this.state.offerSummary = offeredCredentials.map(offer => ({
-      ...offer,
-      validationErrors: {},
-    }))
+  private handleOfferRequest(offer: CredentialOfferRequest) {
+    this.state.offerSummary = offer.offeredCredentials
+    return true
   }
 
-  // Not relevant for client (?)
   private async handleOfferResponse(token: CredentialOfferResponse) {
-    return
+    this.state.selection = token.selectedCredentials
+    return true
   }
 
   // Sets the validity map, currently if the issuer and if the subjects are correct.
   // also populates the SignedCredentialWithMetadata with credentials
   private handleCredentialReceive({ signedCredentials }: CredentialsReceive) {
-    this.state.offerSummary = signedCredentials.map(signedCredential => {
+    this.state.issued = signedCredentials
+    this.state.issued.map(cred => {
       const offer = this.state.offerSummary.find(
-        ({ type }) => type === last(signedCredential.type),
+        ({ type }) => type === last(cred.type),
+      )
+
+      if (!offer) {
+        throw new Error('Received wrong credentials')
+      }
+    })
+
+    return true
+  }
+
+  // return a list of types which are both offered and requested
+  public getSelectionResult(): string[] {
+    const offeredTypes = this.state.offerSummary.map(o => o.type)
+    const selectedTypes = this.state.selection.map(s => s.type)
+
+    return offeredTypes.filter(ot => selectedTypes.includes(ot))
+  }
+
+  public getIssuanceResult(): IssuanceResult {
+    return this.state.issued.map(cred => {
+      const offer = this.state.offerSummary.find(
+        ({ type }) => type === last(cred.type),
       )
 
       if (!offer) {
@@ -67,14 +90,10 @@ export class CredentialOfferFlow extends Flow {
 
       return {
         ...offer,
-        signedCredential,
+        signedCredential: cred,
         validationErrors: {
-          // This signals funny things in the flow without throwing errors. We don't simply throw because often times
-          // negotiation is still possible on the UI / UX layer, and the interaction can continue.
-          invalidIssuer:
-            signedCredential.issuer !== this.ctx.participants.requester.did,
-          invalidSubject:
-            signedCredential.subject !== this.ctx.participants.responder!.did,
+          invalidIssuer: cred.issuer !== this.ctx.participants.requester.did,
+          invalidSubject: cred.subject !== this.ctx.participants.responder!.did,
         },
       }
     })
