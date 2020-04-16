@@ -1,11 +1,16 @@
-import { CredentialOffer } from 'jolocom-lib/js/interactionTokens/interactionTokens.types'
+import {
+  CredentialOffer,
+  CredentialOfferResponseSelection,
+} from 'jolocom-lib/js/interactionTokens/interactionTokens.types'
 import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
 import { IdentitySummary } from '../../actions/sso/types'
 import { FlowState } from './flow'
+import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRequest'
+import { CredentialResponse } from 'jolocom-lib/js/interactionTokens/credentialResponse'
 
 // TODO define and refactor how the UI components/containers handle the InteractionSummary.
 export interface InteractionSummary {
-  issuer: IdentitySummary
+  initiator: IdentitySummary
   state: FlowState
 }
 
@@ -22,13 +27,14 @@ export interface AuthenticationFlowState extends FlowState {
 }
 
 export interface CredentialRequestFlowState extends FlowState {
-  availableCredentials: CredentialTypeSummary[]
+  constraints: CredentialRequest[]
+  providedCredentials: CredentialResponse[]
 }
 
 export interface CredentialOfferFlowState extends FlowState {
-  offerSummary: Array<
-    SignedCredentialWithMetadata & { validationErrors: ValidationErrorMap }
-  >
+  offerSummary: CredentialOffer[]
+  selection: CredentialOfferResponseSelection[]
+  issued: SignedCredential[]
 }
 
 export interface CredentialTypeSummary {
@@ -52,6 +58,10 @@ export interface AttributeSummary {
     values: string[]
   }>
 }
+
+export type IssuanceResult = Array<
+  SignedCredentialWithMetadata & { validationErrors: ValidationErrorMap }
+>
 
 type ValidationErrorMap = {
   invalidIssuer?: boolean

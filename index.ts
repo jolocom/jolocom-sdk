@@ -12,6 +12,7 @@ import {
   CredentialOfferRequestAttrs,
   ICredentialsReceiveAttrs,
 } from 'jolocom-lib/js/interactionTokens/interactionTokens.types'
+import { InteractionChannel } from 'src/lib/interactionManager/types'
 
 export { initStore, entities, actions }
 
@@ -113,7 +114,10 @@ export class JolocomSDK {
       request,
       await this.store.backendMiddleware.keyChainLib.getPassword(),
     )
-    this.store.backendMiddleware.storageLib.store.interactionToken(token)
+    await this.store.backendMiddleware.interactionManager.start(
+      InteractionChannel.HTTP,
+      token,
+    )
     return token.encode()
   }
 
@@ -132,7 +136,10 @@ export class JolocomSDK {
       offer,
       await this.store.backendMiddleware.keyChainLib.getPassword(),
     )
-    this.store.backendMiddleware.storageLib.store.interactionToken(token)
+    await this.store.backendMiddleware.interactionManager.start(
+      InteractionChannel.HTTP,
+      token,
+    )
     return token.encode()
   }
 
@@ -152,10 +159,9 @@ export class JolocomSDK {
     const token = await this.idw.create.interactionTokens.response.issue(
       issuance,
       await this.store.backendMiddleware.keyChainLib.getPassword(),
-      await JolocomLib.parse.interactionToken.fromJWT(selection),
+      JolocomLib.parse.interactionToken.fromJWT(selection),
     )
 
-    this.store.backendMiddleware.storageLib.store.interactionToken(token)
     return token.encode()
   }
 }
