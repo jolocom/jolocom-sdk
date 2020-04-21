@@ -7,6 +7,7 @@ import { AppError } from 'src/lib/errors'
 import { ThunkAction, ThunkDispatch } from 'src/store'
 import { IdentityWallet } from 'jolocom-lib/js/identityWallet/identityWallet'
 import {
+  ICredentialRequest,
   ICredentialRequestAttrs,
   CredentialOfferRequestAttrs,
   ICredentialsReceiveAttrs,
@@ -14,6 +15,12 @@ import {
 import { InteractionChannel } from 'src/lib/interactionManager/types'
 
 export { initStore, entities, actions }
+export {
+  ICredentialRequest as CredentialRequirements,
+  ICredentialRequestAttrs as CredentialRequest,
+  CredentialOfferRequestAttrs as CredentialOffer,
+  ICredentialsReceiveAttrs as CredentialPayload,
+}
 
 const initErrorHandler = (error: AppError | Error): ThunkAction => dispatch => {
   console.error(error.message)
