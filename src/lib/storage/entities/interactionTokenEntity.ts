@@ -1,6 +1,6 @@
 import { plainToClass } from 'class-transformer'
 
-import { PrimaryGeneratedColumn, Entity, Column } from 'typeorm/browser'
+import { PrimaryGeneratedColumn, Entity, Column } from 'typeorm'
 import {
   JWTEncodable,
   JSONWebToken,

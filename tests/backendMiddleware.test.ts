@@ -1,7 +1,7 @@
 import * as util from 'src/lib/util'
 import { BackendMiddleware } from 'src/backendMiddleware'
 import { reveal, stub } from './utils'
-import { ConnectionOptions } from 'typeorm/browser'
+import { ConnectionOptions } from 'typeorm'
 import data from 'tests/actions/registration/data/mockRegistrationData'
 import { JolocomLib } from 'jolocom-lib'
 import { IRegistry } from 'jolocom-lib/js/registries/types'

@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm/browser'
+import { MigrationInterface, QueryRunner } from 'typeorm'
 
 // Template migration for typeorm, don't include this directly into the typeorm config.
 // Create a copy and add that to the config.

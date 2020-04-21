@@ -4,7 +4,7 @@
  * crypto-js dependency
  */
 
-import { MigrationInterface, QueryRunner } from 'typeorm/browser'
+import { MigrationInterface, QueryRunner } from 'typeorm'
 import CryptoJS from './../../compat/cryptojs'
 import { KeyChain } from 'src/lib/keychain'
 import { MasterKeyEntity } from '../entities'

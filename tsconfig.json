@@ -48,8 +48,7 @@
       "src/lib/errors/sentry": ["./src/polyfills/sentry"],
       "src/locales/i18n": ["./src/polyfills/i18n"],
       "src/lib/ipfs": ["./src/polyfills/ipfs"],
-      "src/*": ["./src/*"],
-      "typeorm/browser": ["./../node_modules/typeorm"]
+      "src/*": ["./src/*"]
     },
     // "rootdirs": [] /* list of root folders whose combined content represents the structure of the project at runtime. */,
     // "typeRoots": [],                       /* List of folders to include type definitions from. */

@@ -1,7 +1,7 @@
 import { IdentityWallet } from 'jolocom-lib/js/identityWallet/identityWallet'
 import { Storage } from 'src/lib/storage/storage'
 import { KeyChain, KeyChainInterface } from 'src/lib/keychain'
-import { ConnectionOptions } from 'typeorm/browser'
+import { ConnectionOptions } from 'typeorm'
 import {
   createJolocomRegistry,
   JolocomRegistry,

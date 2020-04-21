@@ -4,7 +4,7 @@ import {
   Column,
   OneToMany,
   ManyToOne,
-} from 'typeorm/browser'
+} from 'typeorm'
 
 import { Exclude, Expose, plainToClass, classToPlain } from 'class-transformer'
 import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'

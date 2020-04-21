@@ -10,6 +10,7 @@ import thunk from 'redux-thunk'
 import { rootReducer, RootState } from 'src/reducers'
 
 import * as originalORMConfig from 'src/ormconfig'
+import config from 'src/config'
 
 const ormconfig = {
   ...originalORMConfig,
@@ -19,11 +20,12 @@ const ormconfig = {
 }
 
 export function initStore() {
-  const config = require('src/config.ts')
-  config.typeOrmConfig = ormconfig
+  const bemwConfig = config
+  // @ts-ignore
+  bemwConfig.typeOrmConfig = ormconfig
 
   // instantiate the storage backend
-  const backendMiddleware = new BackendMiddleware(config)
+  const backendMiddleware = new BackendMiddleware(bemwConfig)
 
   const store = {
     ...createStore(

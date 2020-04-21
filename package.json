@@ -54,7 +54,6 @@
     "ts-loader": "3.5.0",
     "tsconfig-paths": "^3.8.0",
     "tslib": "^1.7.1",
-    "typeorm": "^0.2.5",
     "tspath": "^1.3.7",
     "typescript": "^3.7.5",
     "yarn": "^1.16.0"
@@ -82,6 +81,7 @@
     "sqlite3": "^4.0.0",
     "squel": "^5.12.1",
     "stream-browserify": "^2.0.2",
+    "typeorm": "^0.2.5",
     "unorm": "^1.6.0",
     "vm-browserify": "^1.1.0",
     "wif": "^2.0.6"

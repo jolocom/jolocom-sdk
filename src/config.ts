@@ -1,5 +1,5 @@
 import typeOrmConf from 'src/ormconfig'
-import { ConnectionOptions } from 'typeorm/browser'
+import { ConnectionOptions } from 'typeorm'
 
 export default {
   fuelingEndpoint: 'https://faucet.jolocom.com/request',

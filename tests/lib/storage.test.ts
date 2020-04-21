@@ -7,7 +7,7 @@ import {
 describe('lib/storage', () => {
   jest.unmock('src/lib/storage/storage')
   jest.mock('src/lib/storage/entities', () => ({}))
-  jest.mock('typeorm/browser', () => ({
+  jest.mock('typeorm', () => ({
     createConnection: jest.fn().mockResolvedValue({}),
   }))
 
@@ -16,7 +16,7 @@ describe('lib/storage', () => {
     const config = {}
 
     describe('initConnection', () => {
-      const createConnection: jest.Mock = require('typeorm/browser')
+      const createConnection: jest.Mock = require('typeorm')
         .createConnection
 
       it('should create only one connection if called multiple times synchronously', async () => {
