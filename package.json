@@ -1,6 +1,6 @@
 {
   "name": "jolocom-sdk",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "main": "js/index.js",
   "files": ["js/"],
   "scripts": {
