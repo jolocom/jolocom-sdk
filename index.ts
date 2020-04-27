@@ -1,7 +1,7 @@
 import { initStore } from 'src/node.polyfill'
 import * as entities from 'src/lib/storage/entities'
 import * as actions from 'src/actions'
-import { JolocomLib } from 'jolocom-lib'
+import { JolocomLib, BaseMetadata } from 'jolocom-lib'
 import { withErrorHandler } from 'src/actions/modifiers'
 import { AppError } from 'src/lib/errors'
 import { ThunkAction, ThunkDispatch } from 'src/store'
@@ -9,17 +9,22 @@ import { IdentityWallet } from 'jolocom-lib/js/identityWallet/identityWallet'
 import {
   ICredentialRequest,
   ICredentialRequestAttrs,
+  CredentialOffer,
   CredentialOfferRequestAttrs,
   ICredentialsReceiveAttrs,
 } from 'jolocom-lib/js/interactionTokens/interactionTokens.types'
+import { ISignedCredCreationArgs } from 'jolocom-lib/js/credential/signedCredential/types'
 import { InteractionChannel } from 'src/lib/interactionManager/types'
 
 export { initStore, entities, actions }
 export {
   ICredentialRequest as CredentialRequirements,
   ICredentialRequestAttrs as CredentialRequest,
-  CredentialOfferRequestAttrs as CredentialOffer,
+  CredentialOffer,
+  CredentialOfferRequestAttrs,
   ICredentialsReceiveAttrs as CredentialPayload,
+  BaseMetadata as CredentialDefinition,
+  ISignedCredCreationArgs as CredentialData,
 }
 
 const initErrorHandler = (error: AppError | Error): ThunkAction => dispatch => {
@@ -177,5 +182,20 @@ export class JolocomSDK {
     )
 
     return token.encode()
+  }
+
+  /**
+   * Returns a Signed Credential
+   *
+   * @param credParams - credential attributes
+   * @returns SignedCredential instance
+   */
+  public async signedCredential<T extends BaseMetadata>(
+    credParams: ISignedCredCreationArgs<T>,
+  ) {
+    return await this.idw.create.signedCredential(
+      credParams,
+      await this.store.backendMiddleware.keyChainLib.getPassword(),
+    )
   }
 }
