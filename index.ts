@@ -1,7 +1,8 @@
 import { initStore } from 'src/node.polyfill'
 import * as entities from 'src/lib/storage/entities'
 import * as actions from 'src/actions'
-import { JolocomLib, BaseMetadata } from 'jolocom-lib'
+import { JolocomLib } from 'jolocom-lib'
+import { BaseMetadata } from 'cred-types-jolocom-core'
 import { withErrorHandler } from 'src/actions/modifiers'
 import { AppError } from 'src/lib/errors'
 import { ThunkAction, ThunkDispatch } from 'src/store'
@@ -13,7 +14,7 @@ import {
   CredentialOfferRequestAttrs,
   ICredentialsReceiveAttrs,
 } from 'jolocom-lib/js/interactionTokens/interactionTokens.types'
-import { ISignedCredCreationArgs } from 'jolocom-lib/js/credential/signedCredential/types'
+import { ISignedCredCreationArgs } from 'jolocom-lib/js/credentials/signedCredential/types'
 import { InteractionChannel } from 'src/lib/interactionManager/types'
 
 export { initStore, entities, actions }
