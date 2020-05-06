@@ -9,7 +9,7 @@ import { createStore, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk'
 import { rootReducer, RootState } from 'src/reducers'
 
-import * as originalORMConfig from 'src/ormconfig'
+import originalORMConfig from 'src/ormconfig'
 import config from 'src/config'
 
 const ormconfig = {

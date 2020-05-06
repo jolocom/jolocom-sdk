@@ -20,7 +20,7 @@ import { IdentitySummary } from '../../actions/sso/types'
 import { DidDocument } from 'jolocom-lib/js/identity/didDocument/didDocument'
 import { groupAttributesByCredentialId } from './utils'
 
-import migrationsList from './migration'
+import { migrationList } from './migration'
 import {
   JWTEncodable,
   JSONWebToken,
@@ -113,7 +113,7 @@ export class Storage {
     this.config = {
       ...config,
       entities: entityList,
-      migrations: migrationsList,
+      migrations: migrationList,
     }
   }
 
