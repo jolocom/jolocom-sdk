@@ -57,6 +57,8 @@ export class JolocomSDK {
    * @returns An Agent with the identity existing in the storage in store
    */
   static async fromStore(store: ReturnType<typeof initStore>) {
+    await store.backendMiddleware.initStorage()
+
     await (store.dispatch as ThunkDispatch)(
       withErrorHandler(initErrorHandler)(
         actions.accountActions.checkIdentityExists,
@@ -74,11 +76,27 @@ export class JolocomSDK {
    */
   static async fromMnemonic(mnemonic: string) {
     const store = initStore()
+
+    await store.backendMiddleware.initStorage()
+
     await (store.dispatch as ThunkDispatch)(
       actions.registrationActions.recoverIdentity(mnemonic),
     )
 
     return new JolocomSDK(store)
+  }
+
+  /**
+   * Returns an agent with an Identity provided by a buffer of entropy.
+   *
+   * @param seed - Buffer of private entropy to generate keys with
+   * @returns An Agent with the identity corrosponding to the seed
+   */
+  static async fromSeed(seed: Buffer) {
+    // this is ugly but it works, is no less unsafe, and was quick
+    const vkp = JolocomLib.KeyProvider.fromSeed(seed, 'a')
+
+    return JolocomSDK.fromMnemonic(vkp.getMnemonic('a'))
   }
 
   /**
@@ -90,6 +108,9 @@ export class JolocomSDK {
    */
   static async newDIDFromSeed(seed: Buffer) {
     const store = initStore()
+
+    await store.backendMiddleware.initStorage()
+
     await (store.dispatch as ThunkDispatch)(
       actions.registrationActions.createIdentity(seed.toString('hex')),
     )
