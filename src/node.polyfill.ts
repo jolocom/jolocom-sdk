@@ -4,13 +4,13 @@
  * backendMiddleware and redux store under node
  */
 
-import { BackendMiddleware } from 'src/backendMiddleware'
+import { BackendMiddleware } from './backendMiddleware'
 import { createStore, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk'
-import { rootReducer, RootState } from 'src/reducers'
+import { rootReducer, RootState } from './reducers'
 
-import originalORMConfig from 'src/ormconfig'
-import config from 'src/config'
+import originalORMConfig from './ormconfig'
+import config from './config'
 
 const ormconfig = {
   ...originalORMConfig,

@@ -1,6 +1,6 @@
 import { IIpfsConnector } from 'jolocom-lib/js/ipfs/types'
 import { IDidDocumentAttrs } from 'jolocom-lib/js/identity/didDocument/types'
-import RNFetchBlob from 'rn-fetch-blob'
+import RNFetchBlob from '../polyfills/rnFetchBlob'
 import FormData from 'form-data'
 
 export class IpfsCustomConnector implements IIpfsConnector {

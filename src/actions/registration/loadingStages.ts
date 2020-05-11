@@ -1,4 +1,4 @@
-import I18n from 'src/locales/i18n'
+import I18n from '../../locales/i18n'
 import strings from '../../locales/strings'
 
 export const loadingStages = [

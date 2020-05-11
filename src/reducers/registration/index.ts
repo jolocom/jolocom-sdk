@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-import { loading } from 'src/reducers/registration/loading'
+import { loading } from './loading'
 
 export interface LoadingState {
   readonly loadingMsg: string

@@ -1,4 +1,4 @@
-import { navigationActions } from 'src/actions'
+import { navigationActions } from '../../actions'
 import { ThunkAction } from '../../store'
 
 export {

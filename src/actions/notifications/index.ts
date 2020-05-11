@@ -1,12 +1,12 @@
-import { ThunkAction } from 'src/store'
-import { Notification, NotificationFilter } from 'src/lib/notifications'
+import { ThunkAction } from '../../store'
+import { Notification, NotificationFilter } from '../../lib/notifications'
 import {
   SET_ACTIVE_NOTIFICATION,
   SCHEDULE_NOTIFICATION,
   REMOVE_NOTIFICATION,
   CLEAR_NOTIFICATIONS,
   SET_ACTIVE_FILTER,
-} from 'src/reducers/notifications'
+} from '../../reducers/notifications'
 import { RootState } from '../../reducers'
 
 /**

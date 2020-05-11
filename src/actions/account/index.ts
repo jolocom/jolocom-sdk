@@ -1,13 +1,13 @@
-import { navigationActions } from 'src/actions/'
-import { routeList } from 'src/routeList'
-import { CategorizedClaims, DecoratedClaims } from 'src/reducers/account'
+import { navigationActions } from '../index'
+import { routeList } from '../../routeList'
+import { CategorizedClaims, DecoratedClaims } from '../../reducers/account'
 import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
 import {
   getClaimMetadataByCredentialType,
   getCredentialUiCategory,
   getUiCredentialTypeByType,
-} from 'src/lib/util'
-import { ThunkAction } from 'src/store'
+} from '../../lib/util'
+import { ThunkAction } from '../../store'
 import { groupBy, map, mergeRight, omit, uniq, zipWith } from 'ramda'
 import { compose } from 'redux'
 import { CredentialMetadataSummary } from '../../lib/storage/storage'

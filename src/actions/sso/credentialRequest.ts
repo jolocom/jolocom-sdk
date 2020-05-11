@@ -1,13 +1,13 @@
-import { navigationActions } from 'src/actions'
-import { routeList } from 'src/routeList'
+import { navigationActions } from '../../actions'
+import { routeList } from '../../routeList'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRequest'
 import { ThunkAction } from '../../store'
-import { CredentialVerificationSummary } from 'src/lib/interactionManager/types'
-import { InteractionChannel } from 'src/lib/interactionManager/types'
-import { Interaction } from 'src/lib/interactionManager/interaction'
+import { CredentialVerificationSummary } from '../../lib/interactionManager/types'
+import { InteractionChannel } from '../../lib/interactionManager/types'
+import { Interaction } from '../../lib/interactionManager/interaction'
 import { cancelSSO } from './'
-import { CredentialRequestFlow } from 'src/lib/interactionManager/credentialRequestFlow'
+import { CredentialRequestFlow } from '../../lib/interactionManager/credentialRequestFlow'
 
 export const consumeCredentialRequest = (
   credentialRequest: JSONWebToken<CredentialRequest>,

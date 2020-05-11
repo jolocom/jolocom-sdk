@@ -1,5 +1,5 @@
 import { MigrationInterface, QueryRunner } from 'typeorm'
-import { KeyChain } from 'src/lib/keychain'
+import { KeyChain } from '../../../polyfills/keychain'
 import { MasterKeyEntity } from '../entities'
 import {
   encryptWithLib4,

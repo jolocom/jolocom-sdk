@@ -6,7 +6,7 @@ import {
 } from './categories'
 import { BaseMetadata } from 'cred-types-jolocom-core'
 
-import { NativeModules } from 'src/polyfills/reactNative'
+import { NativeModules } from '../polyfills/reactNative'
 import { DecoratedClaims } from '../reducers/account'
 import { equals } from 'ramda'
 // this comes from 'react-native-randombytes'

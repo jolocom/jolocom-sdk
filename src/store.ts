@@ -4,8 +4,8 @@ import thunk, {
   ThunkDispatch as OriginalThunkDispatch,
   ThunkAction as OriginalThunkAction,
 } from 'redux-thunk'
-import { RootState, rootReducer } from 'src/reducers'
-import config from 'src/config'
+import { RootState, rootReducer } from './reducers'
+import config from './config'
 
 import { BackendMiddleware } from './backendMiddleware'
 

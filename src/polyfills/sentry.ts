@@ -1,4 +1,4 @@
-import { ErrorReport } from 'src/lib/errors/types'
+import { ErrorReport } from '../lib/errors/types'
 
 export function initSentry() {
   console.log('initSentry')

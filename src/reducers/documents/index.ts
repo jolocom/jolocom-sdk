@@ -1,5 +1,5 @@
 import { AnyAction } from 'redux'
-import { SET_DOC_DETAIL, CLEAR_DOC_DETAIL } from 'src/actions/documents'
+import { SET_DOC_DETAIL, CLEAR_DOC_DETAIL } from '../../actions/documents'
 import { DecoratedClaims } from '../account'
 
 export interface DocumentsState {

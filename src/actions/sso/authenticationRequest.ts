@@ -1,9 +1,9 @@
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
-import { navigationActions } from 'src/actions'
+import { navigationActions } from '../../actions'
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
-import { routeList } from 'src/routeList'
+import { routeList } from '../../routeList'
 import { ThunkAction } from '../../store'
-import { InteractionChannel } from 'src/lib/interactionManager/types'
+import { InteractionChannel } from '../../lib/interactionManager/types'
 import { cancelSSO } from '.'
 
 export const consumeAuthenticationRequest = (

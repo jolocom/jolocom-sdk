@@ -1,4 +1,4 @@
-import { routeList } from 'src/routeList'
+import { routeList } from '../../routeList'
 import { ErrorCode } from './codes'
 
 export { ErrorCode }

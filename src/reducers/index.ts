@@ -1,10 +1,7 @@
 import { combineReducers } from 'redux'
-import { settingsReducer, SettingsState } from 'src/reducers/settings/'
-import { accountReducer, AccountState } from 'src/reducers/account/'
-import {
-  registrationReducer,
-  RegistrationState,
-} from 'src/reducers/registration/'
+import { settingsReducer, SettingsState } from './settings/'
+import { accountReducer, AccountState } from './account/'
+import { registrationReducer, RegistrationState } from './registration/'
 import { documentsReducer, DocumentsState } from './documents'
 import { notificationsReducer, NotificationsState } from './notifications'
 
