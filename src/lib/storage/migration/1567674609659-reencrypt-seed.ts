@@ -6,7 +6,7 @@
 
 import { MigrationInterface, QueryRunner } from 'typeorm'
 import CryptoJS from './../../compat/cryptojs'
-import { KeyChain } from 'src/lib/keychain'
+import { KeyChain } from '../../../polyfills/keychain'
 import { MasterKeyEntity } from '../entities'
 import { encryptWithLib3 } from './../../compat/jolocomLib'
 

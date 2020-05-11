@@ -10,7 +10,7 @@ import {
   CredentialEntity,
   CacheEntity,
   InteractionTokenEntity,
-} from 'src/lib/storage/entities'
+} from './entities'
 import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
 import {
   CredentialOfferMetadata,

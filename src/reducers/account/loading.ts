@@ -1,5 +1,5 @@
 import { AnyAction } from 'redux'
-import { LoadingState } from 'src/reducers/account/'
+import { LoadingState } from './index'
 
 const initialState: LoadingState = false
 

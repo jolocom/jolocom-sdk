@@ -7,7 +7,7 @@ import { setClaimsForDid } from '../account'
 import { checkRecoverySetup } from '../notifications/checkRecoverySetup'
 import { createInfoNotification, Notification } from '../../lib/notifications'
 import { scheduleNotification } from '../notifications'
-import I18n from 'src/locales/i18n'
+import I18n from '../../locales/i18n'
 import strings from '../../locales/strings'
 import {
   InteractionChannel,
@@ -16,9 +16,9 @@ import {
 } from '../../lib/interactionManager/types'
 import { isEmpty, uniqBy } from 'ramda'
 import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
-import { CredentialMetadataSummary } from 'src/lib/storage/storage'
-import { CacheEntity } from 'src/lib/storage/entities'
-import { CredentialOfferFlow } from 'src/lib/interactionManager/credentialOfferFlow'
+import { CredentialMetadataSummary } from '../../lib/storage/storage'
+import { CacheEntity } from '../../lib/storage/entities'
+import { CredentialOfferFlow } from '../../lib/interactionManager/credentialOfferFlow'
 
 export const consumeCredentialOfferRequest = (
   credentialOfferRequest: JSONWebToken<CredentialOfferRequest>,

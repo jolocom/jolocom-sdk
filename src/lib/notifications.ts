@@ -1,4 +1,4 @@
-import { AppError } from 'src/lib/errors'
+import { AppError } from './errors'
 import { randomBytes } from 'crypto'
 
 interface NotificationMessage {

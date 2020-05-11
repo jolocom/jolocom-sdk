@@ -2,7 +2,7 @@ import { ThunkAction } from '../../store'
 import { accountActions } from '../index'
 import { createStickyNotification } from '../../lib/notifications'
 import { scheduleNotification } from './index'
-import I18n from 'src/locales/i18n'
+import I18n from '../../locales/i18n'
 import strings from '../../locales/strings'
 import { showSeedPhrase } from '../recovery'
 

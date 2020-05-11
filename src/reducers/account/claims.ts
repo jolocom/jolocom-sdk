@@ -3,7 +3,7 @@ import {
   ClaimsState,
   CategorizedClaims,
   DecoratedClaims,
-} from 'src/reducers/account'
+} from './index'
 import { HAS_EXTERNAL_CREDENTIALS } from '../../actions/account/actionTypes'
 
 const categorizedClaims: CategorizedClaims = {

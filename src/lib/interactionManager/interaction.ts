@@ -21,11 +21,11 @@ import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credent
 import { AuthenticationFlow } from './authenticationFlow'
 import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRequest'
 import { CredentialsReceive } from 'jolocom-lib/js/interactionTokens/credentialsReceive'
-import { Linking } from 'src/polyfills/reactNative'
+import { Linking } from '../../polyfills/reactNative'
 import { AppError, ErrorCode } from '../errors'
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { Identity } from 'jolocom-lib/js/identity/identity'
-import { generateIdentitySummary } from 'src/actions/sso/utils'
+import { generateIdentitySummary } from '../../actions/sso/utils'
 
 /***
  * - initiated by InteractionManager when an interaction starts
@@ -171,7 +171,7 @@ export class Interaction {
       .handleInteractionToken(token.interactionToken, token.interactionType)
       .then(res => {
         this.interactionMessages.push(token)
-        this.ctx.storageLib.store.interactionToken(token)
+        // this.ctx.storageLib.store.interactionToken(token)
         return res
       })
   }

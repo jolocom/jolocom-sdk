@@ -1,7 +1,7 @@
 import { combineReducers } from 'redux'
-import { did } from 'src/reducers/account/did'
-import { claims } from 'src/reducers/account/claims'
-import { loading } from 'src/reducers/account/loading'
+import { did } from './did'
+import { claims } from './claims'
+import { loading } from './loading'
 import {
   CredentialOfferMetadata,
   CredentialOfferRenderInfo,

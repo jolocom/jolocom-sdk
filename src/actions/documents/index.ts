@@ -1,7 +1,7 @@
-import * as navigationActions from 'src/actions/navigation'
-import { routeList } from 'src/routeList'
-import { DecoratedClaims } from 'src/reducers/account'
-import { ThunkAction } from 'src/store'
+import * as navigationActions from '../../actions/navigation'
+import { routeList } from '../../routeList'
+import { DecoratedClaims } from '../../reducers/account'
+import { ThunkAction } from '../../store'
 
 export const SET_DOC_DETAIL = 'SET_SELECTED_DOCUMENT_DETAIL'
 export const CLEAR_DOC_DETAIL = 'CLEAR_SELECTED_DOCUMENT_DETAIL'

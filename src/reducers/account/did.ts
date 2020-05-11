@@ -1,5 +1,5 @@
 import { AnyAction } from 'redux'
-import { DidState } from 'src/reducers/account/'
+import { DidState } from './index'
 
 const initialState: DidState = {
   did: '',

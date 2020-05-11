@@ -1,12 +1,12 @@
 import { IdentityWallet } from 'jolocom-lib/js/identityWallet/identityWallet'
-import { Storage } from 'src/lib/storage/storage'
-import { KeyChain, KeyChainInterface } from 'src/lib/keychain'
+import { Storage } from './lib/storage/storage'
+import { KeyChain, KeyChainInterface } from './polyfills/keychain'
 import { ConnectionOptions } from 'typeorm'
 import {
   createJolocomRegistry,
   JolocomRegistry,
 } from 'jolocom-lib/js/registries/jolocomRegistry'
-import { IpfsCustomConnector } from 'src/lib/ipfs'
+import { IpfsCustomConnector } from './lib/ipfs'
 import { jolocomContractsAdapter } from 'jolocom-lib/js/contracts/contractsAdapter'
 import { jolocomEthereumResolver } from 'jolocom-lib/js/ethereum/ethereum'
 import { jolocomContractsGateway } from 'jolocom-lib/js/contracts/contractsGateway'
@@ -14,7 +14,7 @@ import { JolocomLib } from 'jolocom-lib'
 import { publicKeyToDID } from 'jolocom-lib/js/utils/crypto'
 import { Identity } from 'jolocom-lib/js/identity/identity'
 import { SoftwareKeyProvider } from 'jolocom-lib/js/vaultedKeyProvider/softwareProvider'
-import { generateSecureRandomBytes } from 'src/lib/util'
+import { generateSecureRandomBytes } from './lib/util'
 import { InteractionManager } from './lib/interactionManager/interactionManager'
 import { BackendError, BackendMiddlewareErrorCodes } from './lib/errors/types'
 

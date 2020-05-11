@@ -1,9 +1,9 @@
-import { routeList } from 'src/routeList'
+import { routeList } from '../../routeList'
 import { JolocomLib } from 'jolocom-lib'
-import { interactionHandlers } from 'src/lib/storage/interactionTokens'
-import { AppError, ErrorCode } from 'src/lib/errors'
-import { withErrorScreen, withLoading } from 'src/actions/modifiers'
-import { ThunkAction } from 'src/store'
+import { interactionHandlers } from '../../lib/storage/interactionTokens'
+import { AppError, ErrorCode } from '../../lib/errors'
+import { withErrorScreen, withLoading } from '../../actions/modifiers'
+import { ThunkAction } from '../../store'
 import { InteractionChannel } from '../../lib/interactionManager/types'
 
 /**

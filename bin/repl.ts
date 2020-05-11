@@ -1,4 +1,4 @@
-import { initStore, entities, actions } from '../src'
+import { initStore, entities, actions } from '../index'
 
 const welcomeBanner = `
 /****** This code was executed ******/

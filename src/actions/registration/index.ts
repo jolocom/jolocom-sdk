@@ -1,8 +1,8 @@
-import { navigationActions } from 'src/actions/'
-import { routeList } from 'src/routeList'
-import * as loading from 'src/actions/registration/loadingStages'
-import { setDid } from 'src/actions/account'
-import { ThunkAction } from 'src/store'
+import { navigationActions } from '../../actions/'
+import { routeList } from '../../routeList'
+import * as loading from '../../actions/registration/loadingStages'
+import { setDid } from '../../actions/account'
+import { ThunkAction } from '../../store'
 import { navigatorResetHome } from '../navigation'
 import { setSeedPhraseSaved } from '../recovery'
 

@@ -1,9 +1,9 @@
-import { routeList } from 'src/routeList'
-import strings from 'src/locales/strings'
+import { routeList } from '../../routeList'
+import strings from '../../locales/strings'
 import { ErrorReport, ErrorCode, IAppError } from './types'
 export { ErrorCode }
 
-import { reportErrorToSentry, initSentry } from 'src/lib/errors/sentry'
+import { reportErrorToSentry, initSentry } from '../../polyfills/sentry'
 
 export class AppError extends Error implements IAppError {
   // private code: ErrorCode

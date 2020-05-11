@@ -1,10 +1,10 @@
-import * as accountActions from 'src/actions/account/'
-import * as registrationActions from 'src/actions/registration/'
-import * as navigationActions from 'src/actions/navigation/'
-import * as genericActions from 'src/actions/generic/'
-import * as ssoActions from 'src/actions/sso/'
-import * as recoveryActions from 'src/actions/recovery'
-import * as notificationsActions from 'src/actions/notifications'
+import * as accountActions from './account/'
+import * as registrationActions from './registration/'
+import * as navigationActions from './navigation/'
+import * as genericActions from './generic/'
+import * as ssoActions from './sso/'
+import * as recoveryActions from './recovery'
+import * as notificationsActions from './notifications'
 
 export {
   accountActions,

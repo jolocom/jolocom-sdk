@@ -1,9 +1,9 @@
-import { navigationActions } from 'src/actions/'
-import { routeList } from 'src/routeList'
-import SplashScreen from 'src/polyfills/rnSplashScreen'
-// import I18n from 'src/locales/i18n'
-import { ThunkAction } from 'src/store'
-import { AppError, ErrorCode } from 'src/lib/errors'
+import { navigationActions } from '../../actions/'
+import { routeList } from '../../routeList'
+import SplashScreen from '../../polyfills/rnSplashScreen'
+// import I18n from '../../locales/i18n'
+import { ThunkAction } from '../../store'
+import { AppError, ErrorCode } from '../../lib/errors'
 
 export const showErrorScreen = (
   error: AppError | Error,
