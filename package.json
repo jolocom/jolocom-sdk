@@ -2,7 +2,9 @@
   "name": "jolocom-sdk",
   "version": "0.6.0",
   "main": "js/index.js",
-  "files": ["js/"],
+  "files": [
+    "js/"
+  ],
   "scripts": {
     "test": "jest",
     "build": "ttsc -p .",
@@ -83,7 +85,6 @@
     "sqlite3": "^4.0.0",
     "squel": "^5.12.1",
     "stream-browserify": "^2.0.2",
-    "typeorm": "^0.2.5",
     "unorm": "^1.6.0",
     "vm-browserify": "^1.1.0",
     "wif": "^2.0.6"
