@@ -1,10 +1,3 @@
-import {
-  Entity,
-  Column,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  Unique,
-} from 'typeorm'
 import { VerifiableCredentialEntity } from './verifiableCredentialEntity'
 import { plainToClass } from 'class-transformer'
 import {
@@ -12,28 +5,13 @@ import {
   ILinkedDataSignatureAttrs,
 } from 'jolocom-lib/js/linkedDataSignature/types'
 
-@Entity('signatures')
-@Unique(['verifiableCredential', 'signatureValue'])
 export class SignatureEntity {
-  @PrimaryGeneratedColumn()
   id!: number
-
-  @ManyToOne(type => VerifiableCredentialEntity, vCred => vCred.proof)
   verifiableCredential!: VerifiableCredentialEntity
-
-  @Column()
   type!: string
-
-  @Column()
   created!: Date
-
-  @Column()
   creator!: string
-
-  @Column({ nullable: true })
   nonce!: string
-
-  @Column()
   signatureValue!: string
 
   static fromJSON(json: ILinkedDataSignatureAttrs): SignatureEntity {
