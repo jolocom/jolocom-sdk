@@ -1,5 +1,3 @@
-import { plainToClass } from 'class-transformer'
-
 import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
 import { DidDocument } from 'jolocom-lib/js/identity/didDocument/didDocument'
 import {
