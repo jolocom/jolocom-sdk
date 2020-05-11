@@ -1,7 +1,6 @@
 import { IdentityWallet } from 'jolocom-lib/js/identityWallet/identityWallet'
-import { Storage } from './lib/storage/storage'
+import { IStorage } from './lib/storage'
 import { KeyChain, KeyChainInterface } from './polyfills/keychain'
-import { ConnectionOptions } from 'typeorm'
 import {
   createJolocomRegistry,
   JolocomRegistry,
@@ -22,16 +21,16 @@ export class BackendMiddleware {
   private _identityWallet!: IdentityWallet
   private _keyProvider!: SoftwareKeyProvider
 
-  public storageLib: Storage
+  public storageLib: IStorage
   public keyChainLib: KeyChainInterface
   public registry: JolocomRegistry
   public interactionManager: InteractionManager
 
   public constructor(config: {
     fuelingEndpoint: string
-    typeOrmConfig: ConnectionOptions
+    storageLib: IStorage
   }) {
-    this.storageLib = new Storage(config.typeOrmConfig)
+    this.storageLib = storageLib
     this.keyChainLib = new KeyChain()
     this.registry = createJolocomRegistry({
       ipfsConnector: new IpfsCustomConnector({
@@ -46,10 +45,6 @@ export class BackendMiddleware {
       },
     })
     this.interactionManager = new InteractionManager(this)
-  }
-
-  public async initStorage(): Promise<void> {
-    await this.storageLib.initConnection()
   }
 
   public get identityWallet(): IdentityWallet {

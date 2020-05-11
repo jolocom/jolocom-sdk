@@ -14,7 +14,7 @@ import {
 } from './types'
 import { CredentialRequestFlow } from './credentialRequestFlow'
 import { JolocomLib } from 'jolocom-lib'
-import { CredentialMetadataSummary } from '../storage/storage'
+import { CredentialMetadataSummary } from '../storage'
 import { Flow } from './flow'
 import { last } from 'ramda'
 import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credentialOfferRequest'
