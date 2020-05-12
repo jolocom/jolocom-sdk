@@ -22,20 +22,23 @@ export class IpfsCustomConnector implements IIpfsConnector {
       throw new Error(`JSON expected, received ${typeof data}`)
     }
 
-    // TODO: clarify if we need formData
-    // const formData = new FormData()
-    // formData.append('file', Buffer.from(JSON.stringify(data)))
+    // NOTE: we use FormData because it automatically creates the necessary
+    // headers, which are not trivially
+    // see https://github.com/github/fetch/issues/505#issuecomment-293064470
+    const formData = new FormData()
+    formData.append('file', Buffer.from(JSON.stringify(data)))
 
     const endpoint = `${this.ipfsHost}/api/v0/add?pin=${pin}`
-    const headers = { 'Content-Type': 'multipart/form-data' }
 
-    const res = await this.nativeLib.fetch('POST', endpoint, headers, [
+    const res = await this.nativeLib.fetch('POST', endpoint, null, [
       {
         name: 'ddo',
-        data: JSON.stringify(data),
+        data: formData
       },
     ])
-    return res.json().Hash
+    const resJson = await res.json()
+
+    return resJson.Hash
   }
 
   async catJSON(hash: string): Promise<IDidDocumentAttrs> {
@@ -49,8 +52,10 @@ export class IpfsCustomConnector implements IIpfsConnector {
     const endpoint = `${resolutionGateway}/${hash}`
     const res = await this.nativeLib.fetch('GET', endpoint)
 
+    // @ts-ignore
     if (res.respInfo.status !== 200) {
       throw new Error(
+        // @ts-ignore
         `Removing pinned hash ${hash} failed, status code: ${res.respInfo.status}`,
       )
     }
@@ -71,16 +76,15 @@ export class IpfsCustomConnector implements IIpfsConnector {
     formData.append('file', Buffer.from(JSON.stringify(data)))
 
     const endpoint = `${this.ipfsHost}/api/v0/dag/put?pin=${pin}`
-    const headers = { 'Content-Type': 'multipart/form-data' }
 
-    const res = this.nativeLib.fetch('POST', endpoint, headers, [
+    const res = this.nativeLib.fetch('POST', endpoint, null, [
       {
         name: 'dag',
         data: formData,
       },
     ])
 
-    return (await res).json().Cid['/']
+    return (await res).json().then(obj => obj.Cid['/'])
   }
 
   async resolveIpldPath(pathToResolve: string): Promise<object> {
