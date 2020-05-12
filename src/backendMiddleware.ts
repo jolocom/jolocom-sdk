@@ -26,11 +26,14 @@ export class BackendMiddleware {
   public registry: JolocomRegistry
   public interactionManager: InteractionManager
 
+  private newIdentityPromise!: Promise<Identity>
+
   public constructor(config: {
     fuelingEndpoint: string
-    storageLib: IStorage
+    storage: IStorage
   }) {
-    this.storageLib = storageLib
+    // FIXME actually use fuelingEndpoint
+    this.storageLib = config.storage
     this.keyChainLib = new KeyChain()
     this.registry = createJolocomRegistry({
       ipfsConnector: new IpfsCustomConnector({
@@ -72,9 +75,9 @@ export class BackendMiddleware {
     }
 
     if (encryptedEntropy && !encryptionPass) {
-      // if we can't decrypt the encryptedEntropy, then reset the database
-      console.warn('DROPPING OLD DB')
-      await this.storageLib.resetDatabase()
+      // if we can't decrypt the encryptedEntropy, then 
+      // FIXME throw a proper error
+      throw new Error('error decrypting database!')
     }
 
     if (!encryptedEntropy || !encryptionPass) {
@@ -129,7 +132,14 @@ export class BackendMiddleware {
       return (this._identityWallet = identityWallet)
     }
   }
-  public async recoverIdentity(mnemonic: string): Promise<Identity> {
+
+  /**
+   * Loads an Identity based on a BIP 39 12 word seed phrase
+   *
+   * @param mnemonic - 12 word BIP 39 seed phrase, space-delimited
+   * @returns An identity corrosponding to the sead phrase mnemonic
+   */
+  public async initWithMnemonic(mnemonic: string): Promise<Identity> {
     const password = (await generateSecureRandomBytes(32)).toString('base64')
     this._keyProvider = JolocomLib.KeyProvider.recoverKeyPair(
       mnemonic,
@@ -145,6 +155,18 @@ export class BackendMiddleware {
     await this.keyChainLib.savePassword(password)
     await this.storeIdentityData()
     return identityWallet.identity
+  }
+
+  /**
+   * Loads an Identity based on a buffer of entropy.
+   *
+   * @param entropy - Buffer of private entropy to generate keys with
+   * @returns An identity corrosponding to the entropy
+   */
+  public async initWithEntropy(entropy: Buffer): Promise<Identity> {
+    // this is ugly but it works, is no less unsafe, and was quick
+    const vkp = JolocomLib.KeyProvider.fromSeed(entropy, 'a')
+    return this.initWithMnemonic(vkp.getMnemonic('a'))
   }
 
   public async createKeyProvider(encodedEntropy: string): Promise<void> {
@@ -188,5 +210,25 @@ export class BackendMiddleware {
     }
     await this.storageLib.store.encryptedSeed(encryptedSeedData)
     await this.storageLib.store.didDoc(this._identityWallet.didDocument)
+  }
+
+  /**
+   * Returns an agent with an Identity provided by a buffer of entropy.
+   * WARNING: this registers an identity on the Jolocom DID Method
+   *
+   * @param seed - Buffer of private entropy to generate keys with
+   * @returns An Agent with the identity corrosponding to the seed
+   */
+  public async createNewIdentity(seed: Buffer): Promise<Identity> {
+    if (this.newIdentityPromise) return this.newIdentityPromise
+    return (this.newIdentityPromise = this._createNewIdentity(seed))
+  }
+
+  private async _createNewIdentity(seed: Buffer): Promise<Identity> {
+    const encodedEntropy = seed.toString('hex')
+    await this.createKeyProvider(encodedEntropy)
+    await this.fuelKeyWithEther()
+    const identity = await this.createIdentity()
+    return identity
   }
 }
