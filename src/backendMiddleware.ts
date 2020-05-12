@@ -1,6 +1,5 @@
 import { IdentityWallet } from 'jolocom-lib/js/identityWallet/identityWallet'
-import { IStorage } from './lib/storage'
-import { KeyChain, KeyChainInterface } from './polyfills/keychain'
+import { IStorage, IPasswordStore, EmptyPasswordStore } from './lib/storage'
 import {
   createJolocomRegistry,
   JolocomRegistry,
@@ -22,7 +21,7 @@ export class BackendMiddleware {
   private _keyProvider!: SoftwareKeyProvider
 
   public storageLib: IStorage
-  public keyChainLib: KeyChainInterface
+  public keyChainLib: IPasswordStore
   public registry: JolocomRegistry
   public interactionManager: InteractionManager
 
@@ -30,11 +29,12 @@ export class BackendMiddleware {
 
   public constructor(config: {
     fuelingEndpoint: string
-    storage: IStorage
+    storage: IStorage,
+    passwordStore?: IPasswordStore
   }) {
     // FIXME actually use fuelingEndpoint
     this.storageLib = config.storage
-    this.keyChainLib = new KeyChain()
+    this.keyChainLib = config.passwordStore || new EmptyPasswordStore()
     this.registry = createJolocomRegistry({
       ipfsConnector: new IpfsCustomConnector({
         host: 'ipfs.jolocom.com',

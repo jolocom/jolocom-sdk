@@ -24,10 +24,12 @@ export {
 }
 import { BackendMiddleware } from './src/backendMiddleware'
 import defaultConfig from './src/config'
-import { IStorage } from './src/lib/storage'
+import { IStorage, IPasswordStore } from './src/lib/storage'
+export { FilePasswordStore } from './src/lib/storage'
 
 export interface IJolocomSDKConfig {
   storage: IStorage
+  passwordStore: IPasswordStore
 }
 
 export interface IJolocomSDKInitOptions {
@@ -43,7 +45,7 @@ export class JolocomSDK {
   public bemw: BackendMiddleware
 
   constructor(conf: IJolocomSDKConfig) {
-    this.bemw = new BackendMiddleware({ ...defaultConfig, storage: conf.storage })
+    this.bemw = new BackendMiddleware({ ...defaultConfig, storage: conf.storage, passwordStore: conf.passwordStore })
   }
 
   public get idw(): IdentityWallet {
