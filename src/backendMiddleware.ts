@@ -26,7 +26,7 @@ export class BackendMiddleware {
   public registry: JolocomRegistry
   public interactionManager: InteractionManager
 
-  private newIdentityPromise!: Promise<Identity>
+  private newIdentityPromise!: Promise<IdentityWallet>
 
   public constructor(config: {
     fuelingEndpoint: string
@@ -75,7 +75,7 @@ export class BackendMiddleware {
     }
 
     if (encryptedEntropy && !encryptionPass) {
-      // if we can't decrypt the encryptedEntropy, then 
+      // if we can't decrypt the encryptedEntropy, then
       // FIXME throw a proper error
       throw new Error('error decrypting database!')
     }
@@ -188,14 +188,21 @@ export class BackendMiddleware {
     )
   }
 
-  public async createIdentity(): Promise<Identity> {
+  public async createIdentity(): Promise<IdentityWallet> {
     const password = await this.keyChainLib.getPassword()
+    // FIXME
+    // registry.create fails while storing json in ipfs
+    // it seems the request is badly formatted
+    // something to do with FormData or node-fetch
+    // needs to remove the polyfill stuff
+    // console.log('does registry.create fail?')
     this._identityWallet = await this.registry.create(
       this.keyProvider,
       password,
     )
+    // console.log('registry.create doesn't fail!')
     await this.storeIdentityData()
-    return this._identityWallet.identity
+    return this._identityWallet
   }
 
   private async storeIdentityData(): Promise<void> {
@@ -219,16 +226,16 @@ export class BackendMiddleware {
    * @param seed - Buffer of private entropy to generate keys with
    * @returns An Agent with the identity corrosponding to the seed
    */
-  public async createNewIdentity(seed: Buffer): Promise<Identity> {
+  public async createNewIdentity(seed: Buffer): Promise<IdentityWallet> {
     if (this.newIdentityPromise) return this.newIdentityPromise
     return (this.newIdentityPromise = this._createNewIdentity(seed))
   }
 
-  private async _createNewIdentity(seed: Buffer): Promise<Identity> {
+  private async _createNewIdentity(seed: Buffer): Promise<IdentityWallet> {
     const encodedEntropy = seed.toString('hex')
     await this.createKeyProvider(encodedEntropy)
     await this.fuelKeyWithEther()
-    const identity = await this.createIdentity()
-    return identity
+    await this.createIdentity()
+    return this.identityWallet
   }
 }
