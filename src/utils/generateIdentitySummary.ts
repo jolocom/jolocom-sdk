@@ -1,4 +1,4 @@
-import { IdentitySummary, IssuerPublicProfileSummary } from './types'
+import { IdentitySummary, IssuerPublicProfileSummary } from '../lib/types'
 import { Identity } from 'jolocom-lib/js/identity/identity'
 import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credentialOfferRequest'
 import { all, compose, either, isEmpty, isNil, map } from 'ramda'

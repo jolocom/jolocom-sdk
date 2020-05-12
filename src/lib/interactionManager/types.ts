@@ -3,7 +3,7 @@ import {
   CredentialOfferResponseSelection,
 } from 'jolocom-lib/js/interactionTokens/interactionTokens.types'
 import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
-import { IdentitySummary } from '../../actions/sso/types'
+import { IdentitySummary } from '../types'
 import { FlowState } from './flow'
 import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRequest'
 import { CredentialResponse } from 'jolocom-lib/js/interactionTokens/credentialResponse'

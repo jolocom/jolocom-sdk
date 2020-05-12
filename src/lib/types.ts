@@ -1,3 +1,8 @@
+import {
+  CredentialOfferMetadata,
+  CredentialOfferRenderInfo,
+} from 'jolocom-lib/js/interactionTokens/interactionTokens.types'
+
 import { PublicProfileClaimMetadata } from 'cred-types-jolocom-core/types'
 
 /**
@@ -25,4 +30,28 @@ export interface PaymentRequestSummary {
   requestJWT: string
   amount: number
   description: string
+}
+
+export interface DecoratedClaims {
+  credentialType: string
+  claimData: {
+    [key: string]: any /** @TODO Type correctly */
+  }
+  id: string
+  issuer: IdentitySummary
+  subject: string
+  expires?: Date
+  renderInfo?: CredentialOfferRenderInfo
+  metadata?: CredentialOfferMetadata
+  keyboardType?:
+    | 'default'
+    | 'number-pad'
+    | 'decimal-pad'
+    | 'numeric'
+    | 'email-address'
+    | 'phone-pad'
+}
+
+export interface CategorizedClaims {
+  readonly [key: string]: DecoratedClaims[]
 }

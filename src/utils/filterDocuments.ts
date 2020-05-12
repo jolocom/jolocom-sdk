@@ -1,4 +1,4 @@
-import { DecoratedClaims } from '../reducers/account'
+import { DecoratedClaims } from '../lib/types'
 import { compose, includes, or, equals, complement } from 'ramda'
 
 const DOC_TYPES = [

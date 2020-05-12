@@ -1,5 +1,5 @@
 import { buildTransform, Filter } from './filter'
-import { DecoratedClaims } from '../reducers/account'
+import { DecoratedClaims } from './types'
 import { complement } from 'ramda'
 
 const expiredFilter: Filter<DecoratedClaims> = cred =>

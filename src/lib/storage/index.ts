@@ -9,7 +9,7 @@ import {
   JSONWebToken,
 } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 
-import { IdentitySummary } from '../../actions/sso/types'
+import { IdentitySummary } from '../types'
 
 import { PersonaEntity } from './entities'
 
@@ -45,7 +45,7 @@ export interface IStorageStore {
   setting(key: string, value: any): Promise<void>
   persona(args: PersonaAttributes): Promise<void>
   verifiableCredential(vCred: SignedCredential): Promise<void>
-  encryptedSeedstoreEncryptedSeed(args: EncryptedSeedAttributes): Promise<void>
+  encryptedSeed(args: EncryptedSeedAttributes): Promise<void>
   credentialMetadata(credentialMetadata: CredentialMetadataSummary): Promise<void>
   issuerProfile(issuer: IdentitySummary): Promise<void>
   didDoc(doc: DidDocument): Promise<void>
