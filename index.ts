@@ -10,6 +10,8 @@ import {
 } from 'jolocom-lib/js/interactionTokens/interactionTokens.types'
 import { ISignedCredCreationArgs } from 'jolocom-lib/js/credentials/signedCredential/types'
 import { InteractionChannel } from './src/lib/interactionManager/types'
+import { generateSecureRandomBytes } from './src/lib/util'
+import { BackendError } from './src/lib/errors/types'
 
 export {
   ICredentialRequest as CredentialRequirements,
@@ -21,8 +23,16 @@ export {
   ISignedCredCreationArgs as CredentialData,
 }
 import { BackendMiddleware } from './src/backendMiddleware'
-import config from './src/config'
+import defaultConfig from './src/config'
 import { IStorage } from './src/lib/storage'
+
+export interface IJolocomSDKConfig {
+  storage: IStorage
+}
+
+export interface IJolocomSDKInitOptions {
+  dontAutoRegister?: boolean
+}
 
 // @ts-ignore
 // const injectPassFn = (passFn: () => Promise<string>) => <A, T>(
@@ -30,12 +40,29 @@ import { IStorage } from './src/lib/storage'
 // ) => async (a1: A, ...rest) => await delayedFn(a1, await passFn())
 
 export class JolocomSDK {
-  public idw: IdentityWallet
   public bemw: BackendMiddleware
 
-  constructor(storage: IStorage) {
-    this.bemw = new BackendMiddleware({ ...config, storage })
-    this.idw = this.bemw.identityWallet
+  constructor(conf: IJolocomSDKConfig) {
+    this.bemw = new BackendMiddleware({ ...defaultConfig, storage: conf.storage })
+  }
+
+  public get idw(): IdentityWallet {
+    return this.bemw.identityWallet
+  }
+
+  async init(opts: IJolocomSDKInitOptions = {}) {
+    try {
+      return await this.bemw.prepareIdentityWallet()
+    } catch (err) {
+      if (!(err instanceof BackendError)) throw err
+
+      if (!opts.dontAutoRegister && err.message === BackendError.codes.NoEntropy) {
+        const seed = await generateSecureRandomBytes(16)
+        return this.bemw.createNewIdentity(seed)
+      }
+
+      throw err
+    }
   }
 
   /**
