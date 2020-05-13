@@ -59,7 +59,7 @@
     "tslib": "^1.7.1",
     "ttypescript": "^1.5.10",
     "typescript": "^3.7.5",
-    "yarn": "^1.16.0"
+    "yarn": "^1.22.0"
   },
   "husky": {
     "hooks": {
