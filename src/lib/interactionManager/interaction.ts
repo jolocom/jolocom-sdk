@@ -14,7 +14,7 @@ import {
 } from './types'
 import { CredentialRequestFlow } from './credentialRequestFlow'
 import { JolocomLib } from 'jolocom-lib'
-import { CredentialMetadataSummary } from '../storage/storage'
+import { CredentialMetadataSummary } from '../storage'
 import { Flow } from './flow'
 import { last } from 'ramda'
 import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credentialOfferRequest'
@@ -25,7 +25,7 @@ import { Linking } from '../../polyfills/reactNative'
 import { AppError, ErrorCode } from '../errors'
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { Identity } from 'jolocom-lib/js/identity/identity'
-import { generateIdentitySummary } from '../../actions/sso/utils'
+import { generateIdentitySummary } from '../../utils/generateIdentitySummary'
 
 /***
  * - initiated by InteractionManager when an interaction starts

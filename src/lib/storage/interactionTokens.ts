@@ -1,3 +1,4 @@
+/** FIXME
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { InteractionType } from 'jolocom-lib/js/interactionTokens/types'
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
@@ -5,12 +6,15 @@ import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credent
 import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRequest'
 import { PaymentRequest } from 'jolocom-lib/js/interactionTokens/paymentRequest'
 import { InteractionChannel } from '../interactionManager/types'
-import { ssoActions } from '../../actions'
+*/
+
 /**
  * @param Metadata should not need to be passed to credential receive because it comes from cred Offer
  * Furthermore, this only needs to be defined for requests
  */
 
+/** FIXME
+import { ssoActions } from '../../actions'
 export const interactionHandlers = {
   [InteractionType.Authentication]: <T extends JSONWebToken<Authentication>>(
     interactionToken: T,
@@ -35,3 +39,4 @@ export const interactionHandlers = {
   ) =>
     ssoActions.consumePaymentRequest(interactionToken, isDeepLinkInteraction),
 }
+*/

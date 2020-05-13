@@ -1,9 +1,5 @@
-import typeOrmConf from './ormconfig'
-import { ConnectionOptions } from 'typeorm'
-
 export default {
   fuelingEndpoint: 'https://faucet.jolocom.com/request',
-  typeOrmConfig: typeOrmConf as ConnectionOptions,
 }
 
 export const sentryDSN =

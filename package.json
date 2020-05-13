@@ -2,7 +2,9 @@
   "name": "jolocom-sdk",
   "version": "0.6.0",
   "main": "js/index.js",
-  "files": ["js/"],
+  "files": [
+    "js/"
+  ],
   "scripts": {
     "test": "jest",
     "build": "ttsc -p .",
@@ -77,13 +79,10 @@
     "i18n-js": "^3.1.0",
     "jolocom-lib": "^4.1.0",
     "ramda": "^0.26.1",
-    "redux": "^3.7.2",
-    "redux-thunk": "^2.3.0",
     "sjcl": "^1.0.7",
     "sqlite3": "^4.0.0",
     "squel": "^5.12.1",
     "stream-browserify": "^2.0.2",
-    "typeorm": "^0.2.5",
     "unorm": "^1.6.0",
     "vm-browserify": "^1.1.0",
     "wif": "^2.0.6"

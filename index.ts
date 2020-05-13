@@ -1,11 +1,5 @@
-import { initStore } from './src/node.polyfill'
-import * as entities from './src/lib/storage/entities'
-import * as actions from './src/actions'
 import { JolocomLib } from 'jolocom-lib'
 import { BaseMetadata } from 'cred-types-jolocom-core'
-import { withErrorHandler } from './src/actions/modifiers'
-import { AppError } from './src/lib/errors'
-import { ThunkAction, ThunkDispatch } from './src/store'
 import { IdentityWallet } from 'jolocom-lib/js/identityWallet/identityWallet'
 import {
   ICredentialRequest,
@@ -16,8 +10,9 @@ import {
 } from 'jolocom-lib/js/interactionTokens/interactionTokens.types'
 import { ISignedCredCreationArgs } from 'jolocom-lib/js/credentials/signedCredential/types'
 import { InteractionChannel } from './src/lib/interactionManager/types'
+import { generateSecureRandomBytes } from './src/lib/util'
+import { BackendError } from './src/lib/errors/types'
 
-export { initStore, entities, actions }
 export {
   ICredentialRequest as CredentialRequirements,
   ICredentialRequestAttrs as CredentialRequest,
@@ -27,10 +22,18 @@ export {
   BaseMetadata as CredentialDefinition,
   ISignedCredCreationArgs as CredentialData,
 }
+import { BackendMiddleware } from './src/backendMiddleware'
+import defaultConfig from './src/config'
+import { IStorage, IPasswordStore } from './src/lib/storage'
+export { FilePasswordStore } from './src/lib/storage'
 
-const initErrorHandler = (error: AppError | Error): ThunkAction => dispatch => {
-  console.error(error.message)
-  return Promise.reject(error)
+export interface IJolocomSDKConfig {
+  storage: IStorage
+  passwordStore: IPasswordStore
+}
+
+export interface IJolocomSDKInitOptions {
+  dontAutoRegister?: boolean
 }
 
 // @ts-ignore
@@ -39,83 +42,29 @@ const initErrorHandler = (error: AppError | Error): ThunkAction => dispatch => {
 // ) => async (a1: A, ...rest) => await delayedFn(a1, await passFn())
 
 export class JolocomSDK {
-  private store: ReturnType<typeof initStore>
-  public idw: IdentityWallet
+  public bemw: BackendMiddleware
 
-  constructor(store: ReturnType<typeof initStore>) {
-    this.store = store
-    this.idw = this.store.backendMiddleware.identityWallet
+  constructor(conf: IJolocomSDKConfig) {
+    this.bemw = new BackendMiddleware({ ...defaultConfig, storage: conf.storage, passwordStore: conf.passwordStore })
   }
 
-  /**
-   * Returns an agent with an Identity provided by a store
-   *
-   * @remarks
-   * This depends on an existing database connection
-   *
-   * @param store - The agent state with storage connection
-   * @returns An Agent with the identity existing in the storage in store
-   */
-  static async fromStore(store: ReturnType<typeof initStore>) {
-    await store.backendMiddleware.initStorage()
-
-    await (store.dispatch as ThunkDispatch)(
-      withErrorHandler(initErrorHandler)(
-        actions.accountActions.checkIdentityExists,
-      ),
-    )
-
-    return new JolocomSDK(store)
+  public get idw(): IdentityWallet {
+    return this.bemw.identityWallet
   }
 
-  /**
-   * Returns an agent with an Identity provided by a BIP 39 12 word seed phrase
-   *
-   * @param mnemonic - 12 word BIP 39 seed phrase, space-delimited
-   * @returns An Agent with the identity corrosponding to the sead phrase
-   */
-  static async fromMnemonic(mnemonic: string) {
-    const store = initStore()
+  async init(opts: IJolocomSDKInitOptions = {}) {
+    try {
+      return await this.bemw.prepareIdentityWallet()
+    } catch (err) {
+      if (!(err instanceof BackendError)) throw err
 
-    await store.backendMiddleware.initStorage()
+      if (!opts.dontAutoRegister && err.message === BackendError.codes.NoEntropy) {
+        const seed = await generateSecureRandomBytes(16)
+        return this.bemw.createNewIdentity(seed)
+      }
 
-    await (store.dispatch as ThunkDispatch)(
-      actions.registrationActions.recoverIdentity(mnemonic),
-    )
-
-    return new JolocomSDK(store)
-  }
-
-  /**
-   * Returns an agent with an Identity provided by a buffer of entropy.
-   *
-   * @param seed - Buffer of private entropy to generate keys with
-   * @returns An Agent with the identity corrosponding to the seed
-   */
-  static async fromSeed(seed: Buffer) {
-    // this is ugly but it works, is no less unsafe, and was quick
-    const vkp = JolocomLib.KeyProvider.fromSeed(seed, 'a')
-
-    return JolocomSDK.fromMnemonic(vkp.getMnemonic('a'))
-  }
-
-  /**
-   * Returns an agent with an Identity provided by a buffer of entropy.
-   * WARNING: this registers an identity on the Jolocom DID Method
-   *
-   * @param seed - Buffer of private entropy to generate keys with
-   * @returns An Agent with the identity corrosponding to the seed
-   */
-  static async newDIDFromSeed(seed: Buffer) {
-    const store = initStore()
-
-    await store.backendMiddleware.initStorage()
-
-    await (store.dispatch as ThunkDispatch)(
-      actions.registrationActions.createIdentity(seed.toString('hex')),
-    )
-
-    return new JolocomSDK(store)
+      throw err
+    }
   }
 
   /**
@@ -127,14 +76,14 @@ export class JolocomSDK {
   public async tokenRecieved(jwt: string) {
     const token = JolocomLib.parse.interactionToken.fromJWT(jwt)
 
-    const interaction = this.store.backendMiddleware.interactionManager.getInteraction(
+    const interaction = this.bemw.interactionManager.getInteraction(
       token.nonce,
     )
 
     if (interaction) {
       return interaction.processInteractionToken(token)
     } else {
-      this.store.backendMiddleware.interactionManager.start(
+      this.bemw.interactionManager.start(
         InteractionChannel.HTTP,
         token,
       )
@@ -153,9 +102,9 @@ export class JolocomSDK {
   ): Promise<string> {
     const token = await this.idw.create.interactionTokens.request.share(
       request,
-      await this.store.backendMiddleware.keyChainLib.getPassword(),
+      await this.bemw.keyChainLib.getPassword(),
     )
-    await this.store.backendMiddleware.interactionManager.start(
+    await this.bemw.interactionManager.start(
       InteractionChannel.HTTP,
       token,
     )
@@ -175,9 +124,9 @@ export class JolocomSDK {
   ): Promise<string> {
     const token = await this.idw.create.interactionTokens.request.offer(
       offer,
-      await this.store.backendMiddleware.keyChainLib.getPassword(),
+      await this.bemw.keyChainLib.getPassword(),
     )
-    await this.store.backendMiddleware.interactionManager.start(
+    await this.bemw.interactionManager.start(
       InteractionChannel.HTTP,
       token,
     )
@@ -199,7 +148,7 @@ export class JolocomSDK {
   ): Promise<string> {
     const token = await this.idw.create.interactionTokens.response.issue(
       issuance,
-      await this.store.backendMiddleware.keyChainLib.getPassword(),
+      await this.bemw.keyChainLib.getPassword(),
       JolocomLib.parse.interactionToken.fromJWT(selection),
     )
 
@@ -217,7 +166,7 @@ export class JolocomSDK {
   ) {
     return await this.idw.create.signedCredential(
       credParams,
-      await this.store.backendMiddleware.keyChainLib.getPassword(),
+      await this.bemw.keyChainLib.getPassword(),
     )
   }
 }

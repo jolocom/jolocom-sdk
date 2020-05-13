@@ -1,11 +1,3 @@
-import {
-  PrimaryColumn,
-  Entity,
-  Column,
-  OneToMany,
-  ManyToOne,
-} from 'typeorm'
-
 import { Exclude, Expose, plainToClass, classToPlain } from 'class-transformer'
 import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
 import { ISignedCredentialAttrs } from 'jolocom-lib/js/credentials/signedCredential/types'
@@ -15,52 +7,35 @@ import { SignatureEntity } from './signatureEntity'
 import { CredentialEntity } from './credentialEntity'
 
 @Exclude()
-@Entity('verifiable_credentials')
 export class VerifiableCredentialEntity {
   // note: avoiding "@context" class property name because it chokes up
   // @babel/plugin-proposal-decorators
   @Expose({ name: '@context' })
-  @Column({ name: '@context', type: 'simple-json' })
   _context!: any
 
   @Expose()
-  @PrimaryColumn({ length: 50 })
   id!: string
 
   @Expose()
-  @Column({ type: 'simple-array' })
   type!: string
 
   @Expose()
-  @Column({ length: 20, nullable: true })
   name!: string
 
   @Expose()
-  @Column({ length: 75 })
   issuer!: string
 
   @Expose()
-  @Column()
   issued!: Date
 
   @Expose()
-  @Column({ nullable: true })
   expires!: Date
 
   @Expose()
-  @ManyToOne(type => PersonaEntity, persona => persona.did)
   subject!: PersonaEntity
 
-  @OneToMany(type => SignatureEntity, sig => sig.verifiableCredential, {
-    cascade: true,
-    onDelete: 'CASCADE',
-  })
   proof!: SignatureEntity[]
 
-  @OneToMany(type => CredentialEntity, cred => cred.verifiableCredential, {
-    cascade: true,
-    onDelete: 'CASCADE',
-  })
   claim!: CredentialEntity[]
 
   static fromJSON(json: ISignedCredentialAttrs): VerifiableCredentialEntity {

@@ -7,7 +7,7 @@ import {
 import { BaseMetadata } from 'cred-types-jolocom-core'
 
 import { NativeModules } from '../polyfills/reactNative'
-import { DecoratedClaims } from '../reducers/account'
+import { DecoratedClaims } from './types'
 import { equals } from 'ramda'
 // this comes from 'react-native-randombytes'
 const { RNRandomBytes } = NativeModules
