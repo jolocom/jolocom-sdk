@@ -1,7 +1,11 @@
-Jolocom Software Development Kit - Facilitating applications to manage and
+[![npm package jolocom-sdk](https://img.shields.io/npm/v/jolocom-sdk?style=flat-square)](https://www.npmjs.com/package/jolocom-sdk)
+[![chat on gitter](https://img.shields.io/gitter/room/jolocom/jolocom-sdk?style=flat-square)](https://gitter.im/jolocom/jolocom-sdk)
+
+
+[Jolocom](https://jolocom.io) Software Development Kit - Facilitating applications to manage and
 interact with digital identities.
 
-Interested in our vision? Take a look at our [whitepaper](https://jolocom.io/wp-content/uploads/2018/07/Jolocom-Technical-WP-_-Self-Sovereign-and-Decentralised-Identity-By-Design-2018-03-09.pdf)
+Interested in our vision? Take a look at our [whitepaper](https://jolocom.io/wp-content/uploads/2019/12/Jolocom-Whitepaper-v2.1-A-Decentralized-Open-Source-Solution-for-Digital-Identity-and-Access-Management.pdf)
 
 ## Prerequisites
 
