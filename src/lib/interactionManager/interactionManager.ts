@@ -5,6 +5,7 @@ import {
 import { Interaction } from './interaction'
 import { BackendMiddleware } from '../../backendMiddleware'
 import { InteractionChannel } from './types'
+import { isRPCRequest } from './guards'
 
 /***
  * - initiated inside BackendMiddleware
@@ -18,7 +19,7 @@ import { InteractionChannel } from './types'
 export class InteractionManager {
   public interactions: {
     [NONCE: string]: Interaction
-  }  = {}
+  } = {}
 
   public readonly backendMiddleware: BackendMiddleware
 
@@ -30,11 +31,12 @@ export class InteractionManager {
     channel: InteractionChannel,
     token: JSONWebToken<JWTEncodable>,
   ) {
+    const isRpc = isRPCRequest(token.payload)
     const interaction = new Interaction(
       this.backendMiddleware, // TODO Lift
       channel,
       token.nonce,
-      token.interactionType
+      token.interactionType,
     )
 
     this.interactions[token.nonce] = interaction
