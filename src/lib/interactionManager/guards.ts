@@ -1,5 +1,6 @@
 import { JWTEncodable } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRequest'
+import { Generic } from 'jolocom-lib/js/interactionTokens/genericToken'
 import { CredentialResponse } from 'jolocom-lib/js/interactionTokens/credentialResponse'
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credentialOfferRequest'
@@ -48,3 +49,6 @@ export const isRPCResponse = (token: JWTEncodable): token is RPCResponse => {
   const t: RPCResponse = token as RPCResponse
   return t.response && !!t.response.response
 }
+
+export const isGenericRequest = (token: JWTEncodable): token is Generic =>
+  !!(token as Generic).body

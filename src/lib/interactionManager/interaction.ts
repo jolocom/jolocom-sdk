@@ -25,10 +25,12 @@ import { Linking } from '../../polyfills/reactNative'
 import { AppError, ErrorCode } from '../errors'
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { Identity } from 'jolocom-lib/js/identity/identity'
-import { generateIdentitySummary } from '../../utils/generateIdentitySummary'
-
 import { EncryptionFlow } from './encryptionFlow'
 import { RPCRequest } from './rpc'
+import { generateIdentitySummary } from '../../utils/generateIdentitySummary'
+import { GenericFlow } from './genericFlow'
+import { Generic } from 'jolocom-lib/js/interactionTokens/genericToken'
+import { IGenericAttrs } from 'jolocom-lib/js/interactionTokens/interactionTokens.types'
 
 /***
  * - initiated by InteractionManager when an interaction starts
@@ -40,6 +42,7 @@ const interactionFlowForMessage = {
   [InteractionType.CredentialOfferRequest]: CredentialOfferFlow,
   [InteractionType.CredentialRequest]: CredentialRequestFlow,
   [InteractionType.Authentication]: AuthenticationFlow,
+  [InteractionType.Generic]: GenericFlow,
 }
 
 export class Interaction {
@@ -167,6 +170,23 @@ export class Interaction {
       },
       await this.ctx.keyChainLib.getPassword(),
       encRequest,
+    )
+  }
+
+  public async createGenericResponse<T, R>(body: IGenericAttrs<T>) {
+    const genericRequest = this.findMessageByType(
+      InteractionType.Generic,
+    ) as JSONWebToken<Generic<R>>
+
+    const genericResponse = {
+      callbackURL: genericRequest.interactionToken.callbackURL,
+      body,
+    }
+
+    return this.ctx.identityWallet.create.interactionTokens.response.generic(
+      genericResponse,
+      await this.ctx.keyChainLib.getPassword(),
+      genericRequest,
     )
   }
 

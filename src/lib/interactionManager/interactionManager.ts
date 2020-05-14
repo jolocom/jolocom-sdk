@@ -40,6 +40,7 @@ export class InteractionManager {
       isRpc,
     )
 
+    console.log(JSON.stringify(token))
     this.interactions[token.nonce] = interaction
     await interaction.processInteractionToken(token)
 
