@@ -161,13 +161,13 @@ export class JolocomSDK {
     toEncrypt: string
     callbackURL: string
   }): Promise<string> {
-    const token = await this.idw.create.interactionTokens.request.auth(
+    const token = await this.idw.create.interactionTokens.request.generic(
       {
         callbackURL: req.callbackURL,
-        description: JSON.stringify({
+        body: {
           rpc: CallType.AsymEncrypt,
           request: req.toEncrypt,
-        }),
+        },
       },
       await this.bemw.keyChainLib.getPassword(),
     )

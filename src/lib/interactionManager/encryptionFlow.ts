@@ -3,8 +3,8 @@ import { InteractionType } from 'jolocom-lib/js/interactionTokens/types'
 import { Interaction } from './interaction'
 import { Flow } from './flow'
 import { EncryptionFlowState } from './types'
-import { isRPCRequest, isRPCResponse } from './guards'
-import { RPCRequest, RPCResponse, CallType } from './rpc'
+import { isEncryptionRequest, isEncryptionResponse } from './guards'
+import { CallType, EncryptionRequest, EncryptionResponse } from './rpc'
 
 export class EncryptionFlow extends Flow {
   public state: EncryptionFlowState = {
@@ -20,22 +20,23 @@ export class EncryptionFlow extends Flow {
     interactionType: InteractionType,
   ) {
     switch (interactionType) {
-      case InteractionType.Authentication:
-        if (isRPCRequest(token)) return this.consumeEncryptionRequest(token)
-        else if (isRPCResponse(token))
+      case InteractionType.Generic:
+        if (isEncryptionRequest(token))
+          return this.consumeEncryptionRequest(token)
+        else if (isEncryptionResponse(token))
           return this.consumeEncryptionResponse(token)
       default:
         throw new Error('Interaction type not found')
     }
   }
 
-  public async consumeEncryptionRequest(token: RPCRequest) {
-    if (!this.state.req.request) this.state.req = token.request
+  public async consumeEncryptionRequest(token: EncryptionRequest) {
+    if (!this.state.req.request) this.state.req.request = token.body.request
 
     return true
   }
 
-  public async consumeEncryptionResponse(token: RPCResponse) {
+  public async consumeEncryptionResponse(token: EncryptionResponse) {
     return true
   }
 }

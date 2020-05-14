@@ -1,17 +1,26 @@
-import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
+import { Generic } from 'jolocom-lib/js/interactionTokens/genericToken'
 
 export enum CallType {
   AsymEncrypt = 'asymEncrypt',
+  AsymDecrypt = 'asymDecrypt',
 }
 
-type Call<T> = {
+export type Call<T> = {
   rpc: CallType
   request: T
 }
 
-type Result<T> = {
+export type Result<T> = {
   rpc: CallType
-  response: T
+  result: T
+}
+
+export type AsymDecryptCall = Call<string> & {
+  rpc: CallType.AsymDecrypt
+}
+
+export type AsymDecryptResult = Result<string> & {
+  rpc: CallType.AsymDecrypt
 }
 
 export type AsymEncryptCall = Call<string> & {
@@ -22,31 +31,7 @@ export type AsymEncryptResult = Result<string> & {
   rpc: CallType.AsymEncrypt
 }
 
-// says "RPC" but really right now it's just encryption req/res
-export class RPCRequest extends Authentication {
-  // _request: AsymEncryptCall
-
-  set description(description: string) {}
-
-  set request(request: AsymEncryptCall) {
-    this.description = JSON.stringify(request)
-  }
-
-  get request(): AsymEncryptCall {
-    return JSON.parse(super.description) as AsymEncryptCall
-  }
-}
-
-export class RPCResponse extends Authentication {
-  // _response: AsymEncryptResult
-
-  set description(description: string) {}
-
-  set response(response: AsymEncryptResult) {
-    this.description = JSON.stringify(response)
-  }
-
-  get response(): AsymEncryptResult {
-    return JSON.parse(super.description) as AsymEncryptResult
-  }
-}
+export type DecryptionRequest = Generic<AsymDecryptCall>
+export type DecryptionResponse = Generic<AsymDecryptResult>
+export type EncryptionRequest = Generic<AsymEncryptCall>
+export type EncryptionResponse = Generic<AsymEncryptResult>
