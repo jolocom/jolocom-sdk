@@ -92,6 +92,26 @@ export class JolocomSDK {
   }
 
   /**
+   * Creates a signed, base64 encoded Authentication Request, given a
+   * callbackURL
+   *
+   * @param callbackURL - the callbackURL to which the Authentication Response
+   *                      should be sent
+   * @returns Base64 encoded signed Authentication Request
+   */
+  public async authRequestToken(callbackURL: string): Promise<string> {
+    const token = await this.idw.create.interactionTokens.request.auth(
+      { callbackURL },
+      await this.bemw.keyChainLib.getPassword(),
+    )
+    await this.bemw.interactionManager.start(
+      InteractionChannel.HTTP,
+      token,
+    )
+    return token.encode()
+  }
+
+  /**
    * Creates a signed, base64 encoded Credential Request, given a set of requirements
    *
    * @param request - Credential Request Attributes
