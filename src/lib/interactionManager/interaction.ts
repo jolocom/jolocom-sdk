@@ -27,6 +27,10 @@ import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { Identity } from 'jolocom-lib/js/identity/identity'
 import { generateIdentitySummary } from '../../utils/generateIdentitySummary'
 
+import { SoftwareKeyProvider } from 'jolocom-lib/js/vaultedKeyProvider/softwareProvider'
+import { JolocomLib } from 'jolocom-lib'
+import { EncryptionFlow } from './encryptionFlow'
+
 /***
  * - initiated by InteractionManager when an interaction starts
  * - handles the communication channel of the interaction
@@ -58,11 +62,17 @@ export class Interaction {
     channel: InteractionChannel,
     id: string,
     interactionType: InteractionType,
+    // temp HACK TODO remove and fix
+    rpc?: bool,
   ) {
     this.ctx = ctx
     this.channel = channel
     this.id = id
-    this.flow = new interactionFlowForMessage[interactionType](this)
+
+    // HACK
+    this.flow = rpc
+      ? new EncryptionFlow(this)
+      : new interactionFlowForMessage[interactionType](this)
   }
 
   public getMessages() {
@@ -133,6 +143,30 @@ export class Interaction {
       credentialOfferResponseAttr,
       await this.ctx.keyChainLib.getPassword(),
       credentialOfferRequest,
+    )
+  }
+
+  public async createEncResponseToken() {
+    const encRequest = this.findMessageByType(
+      InteractionType.Authentication,
+    ) as JSONWebToken<RPCRequest>
+
+    return this.ctx.identityWallet.create.interactionTokens.response.authentication(
+      {
+        callbackURL: encRequest.payload.callbackURL,
+        // this is a dirty hack (not really but we need to expose some more stuff)
+        description: JSON.stringify(
+          await this.ctx.identityWallet._vaultedKeyProvider.encryptHybrid(
+            encRequest.request.request,
+            {
+              derivationPath: JolocomLib.KeyTypes.jolocomIdentityKey,
+              encryptionPass: await this.ctx.keyChainLib.getPassword(),
+            },
+          ),
+        ),
+      },
+      await this.ctx.keyChainLib.getPassword(),
+      encRequest,
     )
   }
 
