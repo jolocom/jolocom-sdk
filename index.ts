@@ -172,6 +172,8 @@ export class JolocomSDK {
       await this.bemw.keyChainLib.getPassword(),
     )
 
+    await this.bemw.interactionManager.start(InteractionChannel.HTTP, token)
+
     return token.encode()
   }
 
