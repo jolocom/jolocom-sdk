@@ -32,8 +32,8 @@ export class RPCRequest extends Authentication {
     this.description = JSON.stringify(request)
   }
 
-  get request(): AsymEncryptRequest {
-    return JSON.parse(super.description) as AsymEncryptRequest
+  get request(): AsymEncryptCall {
+    return JSON.parse(super.description) as AsymEncryptCall
   }
 }
 

@@ -31,12 +31,13 @@ export class InteractionManager {
     channel: InteractionChannel,
     token: JSONWebToken<JWTEncodable>,
   ) {
-    const isRpc = isRPCRequest(token.payload)
+    const isRpc = isRPCRequest(token.payload.interactionToken!)
     const interaction = new Interaction(
       this.backendMiddleware, // TODO Lift
       channel,
       token.nonce,
       token.interactionType,
+      isRpc,
     )
 
     this.interactions[token.nonce] = interaction

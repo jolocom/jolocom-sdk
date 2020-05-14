@@ -5,7 +5,7 @@ import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credentialOfferRequest'
 import { CredentialOfferResponse } from 'jolocom-lib/js/interactionTokens/credentialOfferResponse'
 import { CredentialsReceive } from 'jolocom-lib/js/interactionTokens/credentialsReceive'
-import { RPCRequest, RPCResult } from './rpc'
+import { RPCRequest, RPCResponse } from './rpc'
 
 export const isCredentialRequest = (
   token: JWTEncodable,
@@ -41,10 +41,10 @@ export const isCredentialReceive = (
 
 export const isRPCRequest = (token: JWTEncodable): token is RPCRequest => {
   const t: RPCRequest = token as RPCRequest
-  return t.request && t.request.request
+  return t.request && !!t.request.request
 }
 
 export const isRPCResponse = (token: JWTEncodable): token is RPCResponse => {
   const t: RPCResponse = token as RPCResponse
-  return t.response && t.response.response
+  return t.response && !!t.response.response
 }

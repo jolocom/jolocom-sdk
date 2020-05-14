@@ -3,7 +3,7 @@ import { InteractionType } from 'jolocom-lib/js/interactionTokens/types'
 import { Interaction } from './interaction'
 import { Flow } from './flow'
 import { EncryptionFlowState } from './types'
-import { isRPCRequest, isRPCResult } from './guards'
+import { isRPCRequest, isRPCResponse } from './guards'
 import { RPCRequest, RPCResponse, CallType } from './rpc'
 
 export class EncryptionFlow extends Flow {
@@ -30,12 +30,12 @@ export class EncryptionFlow extends Flow {
   }
 
   public async consumeEncryptionRequest(token: RPCRequest) {
-    if (!this.state.req.request) this.state.req = token
+    if (!this.state.req.request) this.state.req = token.request
 
     return true
   }
 
-  public async consumeEncryptionResult(token: RPCResult) {
+  public async consumeEncryptionResponse(token: RPCResponse) {
     return true
   }
 }

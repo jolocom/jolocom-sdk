@@ -7,7 +7,7 @@ import { IdentitySummary } from '../types'
 import { FlowState } from './flow'
 import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRequest'
 import { CredentialResponse } from 'jolocom-lib/js/interactionTokens/credentialResponse'
-import { RPCRequest } from './rpc'
+import { AsymEncryptCall } from './rpc'
 
 // TODO define and refactor how the UI components/containers handle the InteractionSummary.
 export interface InteractionSummary {
@@ -39,7 +39,7 @@ export interface CredentialOfferFlowState extends FlowState {
 }
 
 export interface EncryptionFlowState extends FlowState {
-  req: RPCRequest
+  req: AsymEncryptCall
 }
 
 export interface CredentialTypeSummary {
