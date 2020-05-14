@@ -27,6 +27,8 @@ import defaultConfig from './src/config'
 import { IStorage, IPasswordStore } from './src/lib/storage'
 export { FilePasswordStore } from './src/lib/storage'
 
+import { CallType } from './src/lib/interactionManager/rpc'
+
 export interface IJolocomSDKConfig {
   storage: IStorage
   passwordStore: IPasswordStore
@@ -150,6 +152,24 @@ export class JolocomSDK {
       issuance,
       await this.bemw.keyChainLib.getPassword(),
       JolocomLib.parse.interactionToken.fromJWT(selection),
+    )
+
+    return token.encode()
+  }
+
+  public async rpcEncRequest(req: {
+    toEncrypt: string
+    callbackURL: string
+  }): Promise<string> {
+    const token = await this.idw.create.interactionTokens.request.auth(
+      {
+        callbackURL: req.callbackURL,
+        description: JSON.stringify({
+          rpc: CallType.AsymEncrypt,
+          request: req.toEncrypt,
+        }),
+      },
+      await this.bemw.keyChainLib.getPassword(),
     )
 
     return token.encode()
