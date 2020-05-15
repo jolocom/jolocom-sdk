@@ -153,6 +153,26 @@ export class JolocomSDK {
     return token.encode()
   }
 
+  public async rpcDecRequest(req: {
+    toDecrypt: string
+    callbackURL: string
+  }): Promise<string> {
+    const token = await this.idw.create.interactionTokens.request.generic(
+      {
+        callbackURL: req.callbackURL,
+        body: {
+          rpc: CallType.AsymDecrypt,
+          request: req.toDecrypt,
+        },
+      },
+      await this.bemw.keyChainLib.getPassword(),
+    )
+
+    await this.bemw.interactionManager.start(InteractionChannel.HTTP, token)
+
+    return token.encode()
+  }
+
   public async rpcEncRequest(req: {
     toEncrypt: string
     callbackURL: string
