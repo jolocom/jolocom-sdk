@@ -72,17 +72,37 @@ export class Interaction {
     channel: InteractionChannel,
     id: string,
     interactionType: InteractionType,
-    // temp HACK TODO remove and fix
-    rpc?: boolean,
   ) {
     this.ctx = ctx
     this.channel = channel
     this.id = id
 
-    // HACK
-    this.flow = rpc
-      ? new EncryptionFlow(this)
-      : new interactionFlowForMessage[interactionType](this)
+    this.flow = new interactionFlowForMessage[interactionType](this)
+  }
+
+  public static async start(
+    ctx: BackendMiddleware,
+    channel: InteractionChannel,
+    token: JSONWebToken<JWTEncodable>,
+  ): Promise<Interaction> {
+    const interaction = new Interaction(
+      ctx,
+      channel,
+      token.nonce,
+      token.interactionType,
+    )
+
+    if (token.interactionType === InteractionType.Generic) {
+      if (isEncryptionRequest(token.payload.interactionToken!)) {
+        interaction.flow = new EncryptionFlow(interaction)
+      } else if (isDecryptionRequest(token.payload.interactionToken!)) {
+        interaction.flow = new DecryptionFlow(interaction)
+      }
+    }
+
+    await interaction.processInteractionToken(token)
+
+    return interaction
   }
 
   public getMessages() {
