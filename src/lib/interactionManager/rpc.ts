@@ -23,7 +23,7 @@ export type AsymDecryptResult = Result<string> & {
   rpc: CallType.AsymDecrypt
 }
 
-export type AsymEncryptCall = Call<string> & {
+export type AsymEncryptCall = Call<{ target: string; data: string }> & {
   rpc: CallType.AsymEncrypt
 }
 

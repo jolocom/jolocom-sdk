@@ -77,7 +77,7 @@
     "events": "^3.0.0",
     "form-data": "^3.0.0",
     "i18n-js": "^3.1.0",
-    "jolocom-lib": "^4.1.0",
+    "jolocom-lib": "^4.2.8",
     "ramda": "^0.26.1",
     "sjcl": "^1.0.7",
     "sqlite3": "^4.0.0",
