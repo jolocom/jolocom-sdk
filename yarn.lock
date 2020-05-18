@@ -5281,10 +5281,10 @@ jest@^24.8.0:
     import-local "^2.0.0"
     jest-cli "^24.8.0"
 
-jolocom-lib@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-4.1.0.tgz#dcbf79e62201e6fdcec2fa2fa9f1da4da687238f"
-  integrity sha512-Ab5aYuOpaAetNV8F7shadvFWYtULrclCzxb1sVljF3VI34higSbOy3qYn1V+XhRR5MT1dGKhrr4wQedscPs++w==
+jolocom-lib@^4.2.9:
+  version "4.2.9"
+  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-4.2.9.tgz#9a008d7c72184ce192982d5c826722b16fcba1e3"
+  integrity sha512-XEyd6KLM/vFSWwRhcd9oKe1Q97EWnewCxOu18qC9et5SNv3VuwCior4PvllI4gtf57Tan0XTgtjrnBIJnieygw==
   dependencies:
     base64url "^3.0.1"
     bip32 "^1.0.2"

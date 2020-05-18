@@ -188,15 +188,13 @@ export class Interaction {
         callbackURL: encRequest.payload.interactionToken!.callbackURL,
         // @ts-ignore
         body: {
-          result: await this.ctx.identityWallet
-            .asymEncryptToDidKey(
-              Buffer.from(
-                encRequest.payload.interactionToken!.body.request.data,
-                'base64',
-              ),
-              encRequest.payload.interactionToken!.body.request.target,
-            )
-            .then(buf => buf.toString('base64')),
+          result: await this.ctx.identityWallet.asymEncryptToDidKey(
+            Buffer.from(
+              encRequest.payload.interactionToken!.body.request.data,
+              'base64',
+            ),
+            encRequest.payload.interactionToken!.body.request.target,
+          ),
           rpc: CallType.AsymEncrypt,
         },
       },
@@ -218,16 +216,10 @@ export class Interaction {
         body: {
           // @ts-ignore
           result: await this.ctx.identityWallet
-            .asymDecrypt(
-              Buffer.from(
-                decRequest.payload.interactionToken!.body.request,
-                'base64',
-              ),
-              {
-                derivationPath: JolocomLib.KeyTypes.jolocomIdentityKey,
-                encryptionPass: await this.ctx.keyChainLib.getPassword(),
-              },
-            )
+            .asymDecrypt(decRequest.payload.interactionToken!.body.request, {
+              derivationPath: JolocomLib.KeyTypes.jolocomIdentityKey,
+              encryptionPass: await this.ctx.keyChainLib.getPassword(),
+            })
             .then(buf => buf.toString('base64')),
           rpc: CallType.AsymDecrypt,
         },
