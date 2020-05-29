@@ -19,10 +19,7 @@ export class EncryptionFlow extends Flow {
     super(ctx)
   }
 
-  public handleInteractionToken(
-    token: JWTEncodable,
-    interactionType: InteractionType,
-  ) {
+  public handleInteractionToken(token: JWTEncodable, interactionType: string) {
     switch (interactionType) {
       case InteractionType.Generic:
         if (isEncryptionRequest(token))

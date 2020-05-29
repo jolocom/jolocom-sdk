@@ -28,9 +28,6 @@ import { Identity } from 'jolocom-lib/js/identity/identity'
 import { EncryptionFlow } from './encryptionFlow'
 import { DecryptionFlow } from './decryptionFlow'
 import { generateIdentitySummary } from '../../utils/generateIdentitySummary'
-import { GenericFlow } from './genericFlow'
-import { Generic } from 'jolocom-lib/js/interactionTokens/genericToken'
-import { IGenericAttrs } from 'jolocom-lib/js/interactionTokens/interactionTokens.types'
 import {
   CallType,
   EncryptionRequest,
@@ -38,7 +35,6 @@ import {
   DecryptionRequest,
   DecryptionResponse,
 } from './rpc'
-import { isEncryptionRequest, isDecryptionRequest } from './guards'
 
 /***
  * - initiated by InteractionManager when an interaction starts
@@ -50,11 +46,12 @@ const interactionFlowForMessage = {
   [InteractionType.CredentialOfferRequest]: CredentialOfferFlow,
   [InteractionType.CredentialRequest]: CredentialRequestFlow,
   [InteractionType.Authentication]: AuthenticationFlow,
-  [InteractionType.Generic]: GenericFlow,
+  [CallType.AsymEncrypt]: EncryptionFlow,
+  [CallType.AsymDecrypt]: DecryptionFlow,
 }
 
 export class Interaction {
-  private interactionMessages: JSONWebToken<JWTEncodable>[] = []
+  private interactionMessages: JSONWebToken[] = []
   public id: string
   public ctx: BackendMiddleware
   public flow: Flow
@@ -71,7 +68,7 @@ export class Interaction {
     ctx: BackendMiddleware,
     channel: InteractionChannel,
     id: string,
-    interactionType: InteractionType,
+    interactionType: string,
   ) {
     this.ctx = ctx
     this.channel = channel
@@ -92,14 +89,6 @@ export class Interaction {
       token.interactionType,
     )
 
-    if (token.interactionType === InteractionType.Generic) {
-      if (isEncryptionRequest(token.payload.interactionToken!)) {
-        interaction.flow = new EncryptionFlow(interaction)
-      } else if (isDecryptionRequest(token.payload.interactionToken!)) {
-        interaction.flow = new DecryptionFlow(interaction)
-      }
-    }
-
     await interaction.processInteractionToken(token)
 
     return interaction
@@ -109,7 +98,7 @@ export class Interaction {
     return this.interactionMessages
   }
 
-  private findMessageByType(type: InteractionType) {
+  private findMessageByType(type: string) {
     return this.getMessages().find(
       ({ interactionType }) => interactionType === type,
     )
@@ -180,23 +169,24 @@ export class Interaction {
     JSONWebToken<EncryptionResponse>
   > {
     const encRequest = this.findMessageByType(
-      InteractionType.Generic,
+      CallType.AsymEncrypt,
     ) as JSONWebToken<EncryptionRequest>
 
-    return this.ctx.identityWallet.create.interactionTokens.response.generic(
+    return this.ctx.identityWallet.create.message(
       {
-        callbackURL: encRequest.payload.interactionToken!.callbackURL,
-        // @ts-ignore
-        body: {
+        message: {
+          callbackURL: encRequest.payload.interactionToken!.callbackURL,
+          // @ts-ignore
           result: await this.ctx.identityWallet.asymEncryptToDidKey(
             Buffer.from(
-              encRequest.payload.interactionToken!.body.request.data,
+              encRequest.payload.interactionToken!.request.data,
               'base64',
             ),
-            encRequest.payload.interactionToken!.body.request.target,
+            encRequest.payload.interactionToken!.request.target,
           ),
           rpc: CallType.AsymEncrypt,
         },
+        typ: CallType.AsymEncrypt,
       },
       await this.ctx.keyChainLib.getPassword(),
       encRequest,
@@ -207,42 +197,25 @@ export class Interaction {
     JSONWebToken<DecryptionResponse>
   > {
     const decRequest = this.findMessageByType(
-      InteractionType.Generic,
+      CallType.AsymDecrypt,
     ) as JSONWebToken<DecryptionRequest>
 
-    return this.ctx.identityWallet.create.interactionTokens.response.generic(
+    return this.ctx.identityWallet.create.message(
       {
-        callbackURL: decRequest.payload.interactionToken!.callbackURL,
-        body: {
-          // @ts-ignore
+        message: {
+          callbackURL: decRequest.payload.interactionToken!.callbackURL,
           result: await this.ctx.identityWallet
-            .asymDecrypt(decRequest.payload.interactionToken!.body.request, {
+            .asymDecrypt(decRequest.payload.interactionToken!.request, {
               derivationPath: JolocomLib.KeyTypes.jolocomIdentityKey,
               encryptionPass: await this.ctx.keyChainLib.getPassword(),
             })
             .then(buf => buf.toString('base64')),
           rpc: CallType.AsymDecrypt,
         },
+        typ: CallType.AsymDecrypt,
       },
       await this.ctx.keyChainLib.getPassword(),
       decRequest,
-    )
-  }
-
-  public async createGenericResponse<T, R>(body: IGenericAttrs<T>) {
-    const genericRequest = this.findMessageByType(
-      InteractionType.Generic,
-    ) as JSONWebToken<Generic<R>>
-
-    const genericResponse = {
-      callbackURL: genericRequest.interactionToken.callbackURL,
-      body,
-    }
-
-    return this.ctx.identityWallet.create.interactionTokens.response.generic(
-      genericResponse,
-      await this.ctx.keyChainLib.getPassword(),
-      genericRequest,
     )
   }
 
