@@ -8,7 +8,7 @@ import { CallType, DecryptionRequest, DecryptionResponse } from './rpc'
 
 export class DecryptionFlow extends Flow {
   public state: DecryptionFlowState = {
-    req: { rpc: CallType.AsymDecrypt, request: '' },
+    req: { callbackURL: '', rpc: CallType.AsymDecrypt, request: '' },
   }
 
   public constructor(ctx: Interaction) {

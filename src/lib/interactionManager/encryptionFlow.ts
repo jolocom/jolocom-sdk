@@ -8,7 +8,11 @@ import { CallType, EncryptionRequest, EncryptionResponse } from './rpc'
 
 export class EncryptionFlow extends Flow {
   public state: EncryptionFlowState = {
-    req: { rpc: CallType.AsymEncrypt, request: { target: '', data: '' } },
+    req: {
+      callbackURL: '',
+      rpc: CallType.AsymEncrypt,
+      request: { target: '', data: '' },
+    },
   }
 
   public constructor(ctx: Interaction) {

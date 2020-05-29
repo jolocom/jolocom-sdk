@@ -1,6 +1,5 @@
 import { JWTEncodable } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRequest'
-import { Generic } from 'jolocom-lib/js/interactionTokens/genericToken'
 import { CredentialResponse } from 'jolocom-lib/js/interactionTokens/credentialResponse'
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credentialOfferRequest'
@@ -14,6 +13,7 @@ import {
   CallType,
   Call,
   Result,
+  RPC,
 } from './rpc'
 
 export const isCredentialRequest = (
@@ -48,42 +48,34 @@ export const isCredentialReceive = (
 ): token is CredentialsReceive =>
   !!(token as CredentialsReceive).signedCredentials
 
-export const isEncryptionRequest = (
-  token: JWTEncodable,
-): token is EncryptionRequest => {
-  return (
-    isGeneric<Call<string>>(token) &&
-    token.body.rpc === CallType.AsymEncrypt &&
-    typeof token.body.request === 'string'
-  )
-}
-export const isEncryptionResponse = (
-  token: JWTEncodable,
-): token is EncryptionResponse => {
-  return (
-    isGeneric<Result<string>>(token) &&
-    token.body.rpc === CallType.AsymEncrypt &&
-    typeof token.body.result === 'string'
-  )
-}
-export const isDecryptionRequest = (
-  token: JWTEncodable,
-): token is DecryptionRequest => {
-  return (
-    isGeneric<Call<string>>(token) &&
-    token.body.rpc === CallType.AsymDecrypt &&
-    typeof token.body.request === 'string'
-  )
-}
-export const isDecryptionResponse = (
-  token: JWTEncodable,
-): token is DecryptionResponse => {
-  return (
-    isGeneric<Result<string>>(token) &&
-    token.body.rpc === CallType.AsymDecrypt &&
-    typeof token.body.result === 'string'
-  )
-}
+const isRPC = <T extends RPC>(token: any): token is T =>
+  typeof token.rpc === 'string'
 
-export const isGeneric = <T>(token: JWTEncodable): token is Generic<T> =>
-  !!(token as Generic<T>).body
+const isRPCCall = <T>(token: any): token is Call<T> =>
+  isRPC<Call<T>>(token) &&
+  typeof token.callbackURL === 'string' &&
+  !!token.request
+
+const isRPCResult = <T>(token: any): token is Result<T> =>
+  isRPC<Result<T>>(token) && !!token.result
+
+export const isEncryptionRequest = (token: any): token is EncryptionRequest =>
+  isRPCCall<{ target: string; data: string }>(token) &&
+  token.rpc === CallType.AsymEncrypt &&
+  typeof token.request.target === 'string' &&
+  typeof token.request.data === 'string'
+
+export const isEncryptionResponse = (token: any): token is EncryptionResponse =>
+  isRPCResult<string>(token) &&
+  token.rpc === CallType.AsymEncrypt &&
+  typeof token.result === 'string'
+
+export const isDecryptionRequest = (token: any): token is DecryptionRequest =>
+  isRPCCall<string>(token) &&
+  token.rpc === CallType.AsymDecrypt &&
+  typeof token.request === 'string'
+
+export const isDecryptionResponse = (token: any): token is DecryptionResponse =>
+  isRPCResult<string>(token) &&
+  token.rpc === CallType.AsymDecrypt &&
+  typeof token.result === 'string'

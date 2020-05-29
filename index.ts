@@ -157,13 +157,14 @@ export class JolocomSDK {
     toDecrypt: Buffer
     callbackURL: string
   }): Promise<string> {
-    const token = await this.idw.create.interactionTokens.request.generic(
+    const token = await this.idw.create.message(
       {
-        callbackURL: req.callbackURL,
-        body: {
+        message: {
+          callbackURL: req.callbackURL,
           rpc: CallType.AsymDecrypt,
           request: req.toDecrypt.toString('base64'),
         },
+        typ: CallType.AsymDecrypt,
       },
       await this.bemw.keyChainLib.getPassword(),
     )
@@ -178,16 +179,17 @@ export class JolocomSDK {
     target: string
     callbackURL: string
   }): Promise<string> {
-    const token = await this.idw.create.interactionTokens.request.generic(
+    const token = await this.idw.create.message(
       {
-        callbackURL: req.callbackURL,
-        body: {
+        message: {
+          callbackURL: req.callbackURL,
           rpc: CallType.AsymEncrypt,
           request: {
             data: req.toEncrypt.toString('base64'),
             target: req.target,
           },
         },
+        typ: CallType.AsymEncrypt,
       },
       await this.bemw.keyChainLib.getPassword(),
     )
