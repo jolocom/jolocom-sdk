@@ -86,39 +86,18 @@ export interface IPasswordStore {
   getPassword: () => Promise<string>
 }
 
+export class NaivePasswordStore implements IPasswordStore {
+  private _pass: string
 
-/** TODO
- * extract this into a separate npm module?
- * it assumes node of course
- */
-import { writeFileSync, readFileSync } from 'fs'
-
-export class FilePasswordStore implements IPasswordStore {
-  private filePath: string
-
-  constructor(filePath = './password.txt') {
-    this.filePath = filePath
+  constructor() {
+    this._pass = 'default_pass'
   }
 
   public async getPassword() {
-    try {
-      return readFileSync(this.filePath).toString()
-    } catch (err) {
-      console.error('Error reading password file', err, '\n\n')
-      throw err
-    }
+    return this._pass
   }
 
   public async savePassword(pass: string) {
-    console.log('Saving password to: ', this.filePath)
-    return writeFileSync(this.filePath, pass)
-  }
-}
-
-export class EmptyPasswordStore implements IPasswordStore {
-  public async getPassword() {
-    return Buffer.from('aaaaaaaaaaaaaaaa', 'hex').toString('base64')
-  }
-  public async savePassword() {
+    this._pass = pass
   }
 }

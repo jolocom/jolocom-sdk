@@ -25,7 +25,7 @@ export {
 import { BackendMiddleware } from './src/backendMiddleware'
 import defaultConfig from './src/config'
 import { IStorage, IPasswordStore } from './src/lib/storage'
-export { FilePasswordStore } from './src/lib/storage'
+export { NaivePasswordStore } from './src/lib/storage'
 
 import { CallType } from './src/lib/interactionManager/rpc'
 
