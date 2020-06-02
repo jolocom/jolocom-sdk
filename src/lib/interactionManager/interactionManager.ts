@@ -1,7 +1,4 @@
-import {
-  JSONWebToken,
-  JWTEncodable,
-} from 'jolocom-lib/js/interactionTokens/JSONWebToken'
+import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { Interaction } from './interaction'
 import { BackendMiddleware } from '../../backendMiddleware'
 import { InteractionChannel } from './types'
@@ -26,10 +23,7 @@ export class InteractionManager {
     this.backendMiddleware = backendMiddleware
   }
 
-  public async start(
-    channel: InteractionChannel,
-    token: JSONWebToken<JWTEncodable>,
-  ) {
+  public async start<T>(channel: InteractionChannel, token: JSONWebToken<T>) {
     console.log(JSON.stringify(token))
 
     const interaction = await Interaction.start(
