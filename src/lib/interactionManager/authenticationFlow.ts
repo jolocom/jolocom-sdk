@@ -1,4 +1,3 @@
-import { JWTEncodable } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { InteractionType } from 'jolocom-lib/js/interactionTokens/types'
 import { Interaction } from './interaction'
@@ -6,7 +5,7 @@ import { Flow } from './flow'
 import { AuthenticationFlowState } from './types'
 import { isAuthenticationRequest } from './guards'
 
-export class AuthenticationFlow extends Flow {
+export class AuthenticationFlow extends Flow<Authentication> {
   public state: AuthenticationFlowState = { description: '' }
 
   public constructor(ctx: Interaction) {
@@ -15,8 +14,8 @@ export class AuthenticationFlow extends Flow {
 
   // TODO InteractionType.AuthenticaitonResponse should exist
   public handleInteractionToken(
-    token: JWTEncodable,
-    interactionType: InteractionType,
+    token: Authentication,
+    interactionType: string,
   ) {
     switch (interactionType) {
       case InteractionType.Authentication:

@@ -43,9 +43,7 @@ export const isCredentialOfferResponse = (
 ): token is CredentialOfferResponse =>
   !!(token as CredentialOfferResponse).selectedCredentials
 
-export const isCredentialReceive = (
-  token: JWTEncodable,
-): token is CredentialsReceive =>
+export const isCredentialReceive = (token: any): token is CredentialsReceive =>
   !!(token as CredentialsReceive).signedCredentials
 
 const isRPC = <T extends RPC>(token: any): token is T =>

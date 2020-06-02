@@ -1,4 +1,3 @@
-import { JWTEncodable } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { InteractionType } from 'jolocom-lib/js/interactionTokens/types'
 import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRequest'
 import { getUiCredentialTypeByType } from '../util'
@@ -10,7 +9,9 @@ import { CredentialResponse } from 'jolocom-lib/js/interactionTokens/credentialR
 import { AttributeSummary, CredentialRequestFlowState } from './types'
 import { isCredentialRequest, isCredentialResponse } from './guards'
 
-export class CredentialRequestFlow extends Flow {
+export class CredentialRequestFlow extends Flow<
+  CredentialRequest | CredentialResponse
+> {
   public state: CredentialRequestFlowState = {
     constraints: [],
     providedCredentials: [],
@@ -26,8 +27,8 @@ export class CredentialRequestFlow extends Flow {
    */
 
   public async handleInteractionToken(
-    token: JWTEncodable,
-    interactionType: InteractionType,
+    token: CredentialRequest | CredentialResponse,
+    interactionType: string,
   ) {
     switch (interactionType) {
       case InteractionType.CredentialRequest:
