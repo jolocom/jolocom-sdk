@@ -99,9 +99,12 @@ export class JolocomSDK {
    *                      should be sent
    * @returns Base64 encoded signed Authentication Request
    */
-  public async authRequestToken(callbackURL: string): Promise<string> {
+  public async authRequestToken(auth: {
+    callbackURL: string
+    description?: string
+  }): Promise<string> {
     const token = await this.idw.create.interactionTokens.request.auth(
-      { callbackURL },
+      auth,
       await this.bemw.keyChainLib.getPassword(),
     )
     await this.bemw.interactionManager.start(
