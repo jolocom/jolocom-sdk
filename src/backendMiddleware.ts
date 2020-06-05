@@ -157,6 +157,17 @@ export class BackendMiddleware {
     return identityWallet.identity
   }
 
+  /*
+   * Returns the seed phrase based on a buffer of entropy
+   *
+   * @param entropy - Buffer of private entropy
+   * @returns The seed phrase corresponding to the entropy
+   */
+  public fromEntropyToMnemonic(entropy: Buffer): string {
+    const vkp = JolocomLib.KeyProvider.fromSeed(entropy, 'a')
+    return vkp.getMnemonic('a')
+  }
+
   /**
    * Loads an Identity based on a buffer of entropy.
    *
@@ -165,8 +176,7 @@ export class BackendMiddleware {
    */
   public async initWithEntropy(entropy: Buffer): Promise<Identity> {
     // this is ugly but it works, is no less unsafe, and was quick
-    const vkp = JolocomLib.KeyProvider.fromSeed(entropy, 'a')
-    return this.initWithMnemonic(vkp.getMnemonic('a'))
+    return this.initWithMnemonic(this.fromEntropyToMnemonic(entropy))
   }
 
   public async createKeyProvider(encodedEntropy: string): Promise<void> {
