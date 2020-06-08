@@ -21,8 +21,17 @@ import { Linking } from '../../polyfills/reactNative'
 import { AppError, ErrorCode } from '../errors'
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { Identity } from 'jolocom-lib/js/identity/identity'
+import { EncryptionFlow } from './encryptionFlow'
+import { DecryptionFlow } from './decryptionFlow'
 import { isCredentialReceive } from './guards'
 import { generateIdentitySummary } from '../../utils/generateIdentitySummary'
+import {
+  CallType,
+  EncryptionRequest,
+  EncryptionResponse,
+  DecryptionRequest,
+  DecryptionResponse,
+} from './rpc'
 
 /***
  * - initiated by InteractionManager when an interaction starts
@@ -34,6 +43,8 @@ const interactionFlowForMessage = {
   [InteractionType.CredentialOfferRequest]: CredentialOfferFlow,
   [InteractionType.CredentialRequest]: CredentialRequestFlow,
   [InteractionType.Authentication]: AuthenticationFlow,
+  [CallType.AsymEncrypt]: EncryptionFlow,
+  [CallType.AsymDecrypt]: DecryptionFlow,
 }
 
 export class Interaction {
@@ -151,6 +162,60 @@ export class Interaction {
     )
   }
 
+  public async createEncResponseToken(): Promise<
+    JSONWebToken<EncryptionResponse>
+  > {
+    const encRequest = this.findMessageByType(
+      CallType.AsymEncrypt,
+    ) as JSONWebToken<EncryptionRequest>
+
+    return this.ctx.identityWallet.create.message(
+      {
+        message: {
+          callbackURL: encRequest.payload.interactionToken!.callbackURL,
+          // @ts-ignore
+          result: await this.ctx.identityWallet.asymEncryptToDidKey(
+            Buffer.from(
+              encRequest.payload.interactionToken!.request.data,
+              'base64',
+            ),
+            encRequest.payload.interactionToken!.request.target,
+          ),
+          rpc: CallType.AsymEncrypt,
+        },
+        typ: CallType.AsymEncrypt,
+      },
+      await this.ctx.keyChainLib.getPassword(),
+      encRequest,
+    )
+  }
+
+  public async createDecResponseToken(): Promise<
+    JSONWebToken<DecryptionResponse>
+  > {
+    const decRequest = this.findMessageByType(
+      CallType.AsymDecrypt,
+    ) as JSONWebToken<DecryptionRequest>
+
+    return this.ctx.identityWallet.create.message(
+      {
+        message: {
+          callbackURL: decRequest.payload.interactionToken!.callbackURL,
+          result: await this.ctx.identityWallet
+            .asymDecrypt(decRequest.payload.interactionToken!.request, {
+              derivationPath: JolocomLib.KeyTypes.jolocomIdentityKey,
+              encryptionPass: await this.ctx.keyChainLib.getPassword(),
+            })
+            .then(buf => buf.toString('base64')),
+          rpc: CallType.AsymDecrypt,
+        },
+        typ: CallType.AsymDecrypt,
+      },
+      await this.ctx.keyChainLib.getPassword(),
+      decRequest,
+    )
+  }
+
   public async processInteractionToken<T>(token: JSONWebToken<T>) {
     if (!this.participants) {
       // TODO what happens if the signer isnt resolvable
@@ -223,6 +288,7 @@ export class Interaction {
    *   the server only holds the status code right now)
    *   If we're linking, the return value is a promise, as per {@see http://reactnative.dev/docs/linking.html#openurl}
    */
+
   public async send<T>(token: JSONWebToken<T>) {
     // @ts-ignore - CredentialReceive has no callbackURL, needs fix on the lib for JWTEncodable.
     const { callbackURL } = token.interactionToken
