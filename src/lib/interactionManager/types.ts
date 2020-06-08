@@ -3,11 +3,12 @@ import {
   CredentialOfferResponseSelection,
 } from 'jolocom-lib/js/interactionTokens/interactionTokens.types'
 import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
-import { IdentitySummary } from '../types'
-import { FlowState } from './flow'
 import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRequest'
 import { CredentialResponse } from 'jolocom-lib/js/interactionTokens/credentialResponse'
 import { ChannelTransport } from '../channels'
+import { IdentitySummary } from '../types'
+import { FlowState } from './flow'
+import { EncryptionRequest, DecryptionRequest } from './rpc'
 
 export enum InteractionRole {
   Requester = 'requester',
@@ -91,6 +92,14 @@ export interface CredentialOfferFlowState extends FlowState {
   issued: SignedCredential[]
   credentialsValidity: boolean[]
   credentialsAllValid: boolean
+}
+
+export interface EncryptionFlowState extends FlowState {
+  req: EncryptionRequest
+}
+
+export interface DecryptionFlowState extends FlowState {
+  req: DecryptionRequest
 }
 
 export interface CredentialTypeSummary {
