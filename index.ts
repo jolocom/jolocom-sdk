@@ -27,8 +27,6 @@ import defaultConfig from './src/config'
 import { IStorage, IPasswordStore } from './src/lib/storage'
 export { NaivePasswordStore } from './src/lib/storage'
 
-import { CallType } from './src/lib/interactionManager/rpc'
-
 export interface IJolocomSDKConfig {
   storage: IStorage
   passwordStore: IPasswordStore
@@ -149,52 +147,6 @@ export class JolocomSDK {
       await this.bemw.keyChainLib.getPassword(),
       JolocomLib.parse.interactionToken.fromJWT(selection),
     )
-
-    return token.encode()
-  }
-
-  public async rpcDecRequest(req: {
-    toDecrypt: Buffer
-    callbackURL: string
-  }): Promise<string> {
-    const token = await this.idw.create.message(
-      {
-        message: {
-          callbackURL: req.callbackURL,
-          rpc: CallType.AsymDecrypt,
-          request: req.toDecrypt.toString('base64'),
-        },
-        typ: CallType.AsymDecrypt,
-      },
-      await this.bemw.keyChainLib.getPassword(),
-    )
-
-    await this.bemw.interactionManager.start(InteractionChannel.HTTP, token)
-
-    return token.encode()
-  }
-
-  public async rpcEncRequest(req: {
-    toEncrypt: Buffer
-    target: string
-    callbackURL: string
-  }): Promise<string> {
-    const token = await this.idw.create.message(
-      {
-        message: {
-          callbackURL: req.callbackURL,
-          rpc: CallType.AsymEncrypt,
-          request: {
-            data: req.toEncrypt.toString('base64'),
-            target: req.target,
-          },
-        },
-        typ: CallType.AsymEncrypt,
-      },
-      await this.bemw.keyChainLib.getPassword(),
-    )
-
-    await this.bemw.interactionManager.start(InteractionChannel.HTTP, token)
 
     return token.encode()
   }
