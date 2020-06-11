@@ -11,7 +11,6 @@
     "prepare": "yarn build",
     "clean:node": "rm -rf node_modules",
     "format": "eslint --fix --ext .ts --ext .tsx .",
-    "terms": "ts-node -O '{\"module\": \"commonjs\"}' bin/generateTerms.ts",
     "repl": "REPL=1 ts-node -P . -r ./bin/repl.ts",
     "typeorm": "ts-node -O '{\"module\": \"commonjs\"}' -r ./bin/repl.ts node_modules/.bin/typeorm"
   },
@@ -63,7 +62,6 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "precise-commits; node bin/precommit.js",
       "prepare-commit-msg": "exec < /dev/tty && git cz --hook || true"
     }
   },

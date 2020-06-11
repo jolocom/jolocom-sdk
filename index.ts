@@ -90,9 +90,29 @@ export class JolocomSDK {
     if (interaction) {
       return interaction.processInteractionToken(token)
     } else {
-      this.bemw.interactionManager.start(InteractionChannel.HTTP, token)
+      await this.bemw.interactionManager.start(InteractionChannel.HTTP, token)
       return true
     }
+  }
+
+  /**
+   * Creates a signed, base64 encoded Authentication Request, given a
+   * callbackURL
+   *
+   * @param callbackURL - the callbackURL to which the Authentication Response
+   *                      should be sent
+   * @returns Base64 encoded signed Authentication Request
+   */
+  public async authRequestToken(auth: {
+    callbackURL: string
+    description?: string
+  }): Promise<string> {
+    const token = await this.idw.create.interactionTokens.request.auth(
+      auth,
+      await this.bemw.keyChainLib.getPassword(),
+    )
+    await this.bemw.interactionManager.start(InteractionChannel.HTTP, token)
+    return token.encode()
   }
 
   /**

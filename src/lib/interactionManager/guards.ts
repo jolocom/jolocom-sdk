@@ -16,32 +16,24 @@ import {
 } from './rpc'
 
 export const isCredentialRequest = (token: any): token is CredentialRequest =>
-  !!(token as CredentialRequest).requestedCredentialTypes
+  token instanceof CredentialRequest
 
-export const isCredentialResponse = (
-  token: any,
-): token is CredentialResponse => {
-  return !!(token as CredentialResponse).suppliedCredentials
-}
+export const isCredentialResponse = (token: any): token is CredentialResponse =>
+  token instanceof CredentialResponse
 
-export const isAuthenticationRequest = (
-  token: any,
-): token is Authentication => {
-  return !!(token as Authentication).description
-}
+export const isAuthenticationRequest = (token: any): token is Authentication =>
+  token instanceof Authentication
 
 export const isCredentialOfferRequest = (
   token: any,
-): token is CredentialOfferRequest =>
-  !!(token as CredentialOfferRequest).offeredCredentials
+): token is CredentialOfferRequest => token instanceof CredentialOfferRequest
 
 export const isCredentialOfferResponse = (
   token: any,
-): token is CredentialOfferResponse =>
-  !!(token as CredentialOfferResponse).selectedCredentials
+): token is CredentialOfferResponse => token instanceof CredentialOfferResponse
 
 export const isCredentialReceive = (token: any): token is CredentialsReceive =>
-  !!(token as CredentialsReceive).signedCredentials
+  token instanceof CredentialsReceive
 
 const isRPC = <T extends RPC>(token: any): token is T =>
   typeof token.rpc === 'string'
@@ -74,3 +66,4 @@ export const isDecryptionResponse = (token: any): token is DecryptionResponse =>
   isRPCResult<string>(token) &&
   token.rpc === CallType.AsymDecrypt &&
   typeof token.result === 'string'
+
