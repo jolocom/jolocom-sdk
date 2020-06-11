@@ -315,10 +315,10 @@ export class JolocomSDK extends BackendMiddleware {
         },
         typ: CallType.AsymDecrypt,
       },
-      await this.bemw.keyChainLib.getPassword(),
+      await this.keyChainLib.getPassword(),
     )
 
-    await this.bemw.interactionManager.start(InteractionChannel.HTTP, token)
+    await this.interactionManager.start(InteractionTransportType.HTTP, token)
 
     return token.encode()
   }
@@ -340,10 +340,10 @@ export class JolocomSDK extends BackendMiddleware {
         },
         typ: CallType.AsymEncrypt,
       },
-      await this.bemw.keyChainLib.getPassword(),
+      await this.keyChainLib.getPassword(),
     )
 
-    await this.bemw.interactionManager.start(InteractionChannel.HTTP, token)
+    await this.interactionManager.start(InteractionTransportType.HTTP, token)
 
     return token.encode()
   }

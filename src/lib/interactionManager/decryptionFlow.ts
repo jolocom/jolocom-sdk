@@ -19,7 +19,7 @@ export class DecryptionFlow extends Flow<
     token: DecryptionRequest | DecryptionResponse,
     interactionType: string,
   ) {
-    if (interactionType === CallType.AsymEncrypt) {
+    if (interactionType === CallType.AsymDecrypt) {
       if (isDecryptionRequest(token))
         return this.consumeDecryptionRequest(token)
       else if (isDecryptionResponse(token))
