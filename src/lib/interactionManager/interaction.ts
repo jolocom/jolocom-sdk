@@ -206,7 +206,7 @@ export class Interaction {
               derivationPath: JolocomLib.KeyTypes.jolocomIdentityKey,
               encryptionPass: await this.ctx.keyChainLib.getPassword(),
             })
-            .then(buf => buf.toString('base64')),
+            .then(buf => buf.toString()),
           rpc: CallType.AsymDecrypt,
         },
         typ: CallType.AsymDecrypt,
