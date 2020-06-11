@@ -1,9 +1,6 @@
 import { plainToClass } from 'class-transformer'
 
-import {
-  JWTEncodable,
-  JSONWebToken,
-} from 'jolocom-lib/js/interactionTokens/JSONWebToken'
+import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 
 export class InteractionTokenEntity {
   id!: number
@@ -13,7 +10,7 @@ export class InteractionTokenEntity {
   timestamp!: number
   original!: string
 
-  static fromJWT(jwt: JSONWebToken<JWTEncodable>): InteractionTokenEntity {
+  static fromJWT(jwt: JSONWebToken<any>): InteractionTokenEntity {
     return plainToClass(InteractionTokenEntity, {
       nonce: jwt.nonce,
       type: jwt.interactionType,

@@ -1,7 +1,6 @@
 import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credentialOfferRequest'
 import { CredentialOfferResponse } from 'jolocom-lib/js/interactionTokens/credentialOfferResponse'
 import { CredentialsReceive } from 'jolocom-lib/js/interactionTokens/credentialsReceive'
-import { JWTEncodable } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { InteractionType } from 'jolocom-lib/js/interactionTokens/types'
 import { last } from 'ramda'
 import { Flow } from './flow'
@@ -13,7 +12,9 @@ import {
   isCredentialReceive,
 } from './guards'
 
-export class CredentialOfferFlow extends Flow {
+export class CredentialOfferFlow extends Flow<
+  CredentialOfferRequest | CredentialOfferResponse | CredentialsReceive
+> {
   public state: CredentialOfferFlowState = {
     offerSummary: [],
     selection: [],
@@ -25,10 +26,13 @@ export class CredentialOfferFlow extends Flow {
   }
 
   public async handleInteractionToken(
-    token: JWTEncodable,
-    messageType: InteractionType,
+    token:
+      | CredentialOfferRequest
+      | CredentialOfferResponse
+      | CredentialsReceive,
+    interactionType: string,
   ): Promise<boolean> {
-    switch (messageType) {
+    switch (interactionType) {
       case InteractionType.CredentialOfferRequest:
         if (isCredentialOfferRequest(token))
           return this.handleOfferRequest(token)

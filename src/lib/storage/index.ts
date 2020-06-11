@@ -4,10 +4,7 @@ import {
   CredentialOfferMetadata,
   CredentialOfferRenderInfo,
 } from 'jolocom-lib/js/interactionTokens/interactionTokens.types'
-import {
-  JWTEncodable,
-  JSONWebToken,
-} from 'jolocom-lib/js/interactionTokens/JSONWebToken'
+import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 
 import { IdentitySummary } from '../types'
 
@@ -49,7 +46,7 @@ export interface IStorageStore {
   credentialMetadata(credentialMetadata: CredentialMetadataSummary): Promise<void>
   issuerProfile(issuer: IdentitySummary): Promise<void>
   didDoc(doc: DidDocument): Promise<void>
-  interactionToken(token: JSONWebToken<JWTEncodable>): Promise<void>
+  interactionToken(token: JSONWebToken<any>): Promise<void>
 }
 
 export interface IStorageGet {
@@ -68,7 +65,7 @@ export interface IStorageGet {
     nonce?: string
     type?: string
     issuer?: string
-  }): Promise<JSONWebToken<JWTEncodable>[]>
+  }): Promise<JSONWebToken<any>[]>
 }
 
 export interface IStorageDelete {

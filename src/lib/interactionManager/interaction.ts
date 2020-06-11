@@ -1,9 +1,6 @@
 import { CredentialOfferFlow } from './credentialOfferFlow'
 import { InteractionType } from 'jolocom-lib/js/interactionTokens/types'
-import {
-  JSONWebToken,
-  JWTEncodable,
-} from 'jolocom-lib/js/interactionTokens/JSONWebToken'
+import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { BackendMiddleware } from '../../backendMiddleware'
 import {
   InteractionChannel,
@@ -20,11 +17,11 @@ import { last } from 'ramda'
 import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credentialOfferRequest'
 import { AuthenticationFlow } from './authenticationFlow'
 import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRequest'
-import { CredentialsReceive } from 'jolocom-lib/js/interactionTokens/credentialsReceive'
 import { Linking } from '../../polyfills/reactNative'
 import { AppError, ErrorCode } from '../errors'
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { Identity } from 'jolocom-lib/js/identity/identity'
+import { isCredentialReceive } from './guards'
 import { generateIdentitySummary } from '../../utils/generateIdentitySummary'
 
 /***
@@ -40,10 +37,10 @@ const interactionFlowForMessage = {
 }
 
 export class Interaction {
-  private interactionMessages: JSONWebToken<JWTEncodable>[] = []
+  private interactionMessages: JSONWebToken<any>[] = []
   public id: string
   public ctx: BackendMiddleware
-  public flow: Flow
+  public flow: Flow<any>
 
   // The channel through which the request (first token) came in
   public channel: InteractionChannel
@@ -57,19 +54,37 @@ export class Interaction {
     ctx: BackendMiddleware,
     channel: InteractionChannel,
     id: string,
-    interactionType: InteractionType,
+    interactionType: string,
   ) {
     this.ctx = ctx
     this.channel = channel
     this.id = id
+
     this.flow = new interactionFlowForMessage[interactionType](this)
+  }
+
+  public static async start<T>(
+    ctx: BackendMiddleware,
+    channel: InteractionChannel,
+    token: JSONWebToken<T>,
+  ): Promise<Interaction> {
+    const interaction = new Interaction(
+      ctx,
+      channel,
+      token.nonce,
+      token.interactionType,
+    )
+
+    await interaction.processInteractionToken(token)
+
+    return interaction
   }
 
   public getMessages() {
     return this.interactionMessages
   }
 
-  private findMessageByType(type: InteractionType) {
+  private findMessageByType(type: string) {
     return this.getMessages().find(
       ({ interactionType }) => interactionType === type,
     )
@@ -136,7 +151,7 @@ export class Interaction {
     )
   }
 
-  public async processInteractionToken(token: JSONWebToken<JWTEncodable>) {
+  public async processInteractionToken<T>(token: JSONWebToken<T>) {
     if (!this.participants) {
       // TODO what happens if the signer isnt resolvable
       const requester = await this.ctx.registry.resolve(token.signer.did)
@@ -160,10 +175,12 @@ export class Interaction {
       )
     }
 
-    if (token.interactionType === InteractionType.CredentialsReceive) {
+    if (
+      token.interactionType === InteractionType.CredentialsReceive &&
+      isCredentialReceive(token.interactionToken)
+    ) {
       await JolocomLib.util.validateDigestables(
-        (token as JSONWebToken<CredentialsReceive>).interactionToken
-          .signedCredentials,
+        token.interactionToken.signedCredentials,
       )
     }
 
@@ -206,8 +223,7 @@ export class Interaction {
    *   the server only holds the status code right now)
    *   If we're linking, the return value is a promise, as per {@see http://reactnative.dev/docs/linking.html#openurl}
    */
-
-  public async send(token: JSONWebToken<JWTEncodable>) {
+  public async send<T>(token: JSONWebToken<T>) {
     // @ts-ignore - CredentialReceive has no callbackURL, needs fix on the lib for JWTEncodable.
     const { callbackURL } = token.interactionToken
 
