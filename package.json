@@ -16,6 +16,7 @@
   },
   "private": false,
   "devDependencies": {
+    "assert": "^2.0.0",
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.5",
     "@babel/plugin-proposal-decorators": "^7.4.4",
@@ -69,7 +70,6 @@
     "jolocom-lib": "^4.3.0"
   },
   "dependencies": {
-    "assert": "^2.0.0",
     "form-data": "^3.0.0",
     "ramda": "^0.26.1"
   },
