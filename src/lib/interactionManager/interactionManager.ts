@@ -36,6 +36,7 @@ export class InteractionManager {
     return interaction
   }
 
+  // FIXME this can return UNDEFINED, should throw an error
   public getInteraction(id: string) {
     return this.interactions[id]
   }

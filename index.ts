@@ -26,6 +26,7 @@ import { BackendMiddleware } from './src/backendMiddleware'
 import defaultConfig from './src/config'
 import { IStorage, IPasswordStore } from './src/lib/storage'
 export { NaivePasswordStore } from './src/lib/storage'
+export { JolocomLib } from 'jolocom-lib'
 
 export interface IJolocomSDKConfig {
   storage: IStorage
