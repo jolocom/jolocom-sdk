@@ -17,7 +17,7 @@ Interested in our vision? Take a look at our [whitepaper](https://jolocom.io/wp-
 
 ### In another project
 
-1. use `npm i jolocom-sdk` or `yarn add jolocom-sdk`
+1. use `npm i jolocom-sdk jolocom-lib` or `yarn add jolocom-sdk jolocom-lib`
 2. `import { JolocomSDK } from 'jolocom-sdk'`
 
 An instance of an agent can be instantiated with crypto material in a variety of
