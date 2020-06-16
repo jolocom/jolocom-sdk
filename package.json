@@ -16,7 +16,6 @@
   },
   "private": false,
   "devDependencies": {
-    "assert": "^2.0.0",
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.5",
     "@babel/plugin-proposal-decorators": "^7.4.4",
@@ -32,6 +31,7 @@
     "@typescript-eslint/eslint-plugin": "^2.20.0",
     "@typescript-eslint/parser": "^1.5.0",
     "@zerollup/ts-transform-paths": "^1.7.17",
+    "assert": "^2.0.0",
     "babel-jest": "^24.8.0",
     "babel-plugin-inline-import": "^3.0.0",
     "babel-plugin-transform-typescript-metadata": "^0.2.2",
