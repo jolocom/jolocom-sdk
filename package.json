@@ -28,7 +28,6 @@
     "@types/node-fetch": "^2.5.5",
     "@types/ramda": "^0.26.8",
     "@types/redux-mock-store": "^1.0.1",
-    "@types/sjcl": "^1.0.28",
     "@typescript-eslint/eslint-plugin": "^2.20.0",
     "@typescript-eslint/parser": "^1.5.0",
     "@zerollup/ts-transform-paths": "^1.7.17",
@@ -80,13 +79,8 @@
     "form-data": "^3.0.0",
     "i18n-js": "^3.1.0",
     "ramda": "^0.26.1",
-    "sjcl": "^1.0.7",
-    "sqlite3": "^4.0.0",
-    "squel": "^5.12.1",
     "stream-browserify": "^2.0.2",
-    "unorm": "^1.6.0",
-    "vm-browserify": "^1.1.0",
-    "wif": "^2.0.6"
+    "vm-browserify": "^1.1.0"
   },
   "config": {
     "commitizen": {
