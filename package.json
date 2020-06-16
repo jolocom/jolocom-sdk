@@ -70,11 +70,6 @@
   },
   "dependencies": {
     "assert": "^2.0.0",
-    "bip39": "^3.0.2",
-    "browser-ipfs": "^0.0.6",
-    "cred-types-jolocom-core": "^0.0.11",
-    "ethereumjs-wallet": "^0.6.0",
-    "events": "^3.0.0",
     "form-data": "^3.0.0",
     "ramda": "^0.26.1"
   },
