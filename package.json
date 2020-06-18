@@ -1,6 +1,6 @@
 {
   "name": "@jolocom/sdk",
-  "version": "0.9.15",
+  "version": "0.10.0",
   "main": "js/index.js",
   "files": [
     "js/"
