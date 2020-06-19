@@ -27,11 +27,10 @@
     "@types/node": "^13.9.8",
     "@types/node-fetch": "^2.5.5",
     "@types/ramda": "^0.26.8",
-    "@types/redux-mock-store": "^1.0.1",
-    "@types/sjcl": "^1.0.28",
     "@typescript-eslint/eslint-plugin": "^2.20.0",
     "@typescript-eslint/parser": "^1.5.0",
     "@zerollup/ts-transform-paths": "^1.7.17",
+    "assert": "^2.0.0",
     "babel-jest": "^24.8.0",
     "babel-plugin-inline-import": "^3.0.0",
     "babel-plugin-transform-typescript-metadata": "^0.2.2",
@@ -46,11 +45,11 @@
     "fs-extra": "^8.1.0",
     "husky": "^3.0.5",
     "jest": "^24.8.0",
+    "jolocom-lib": "^4.3.0",
     "mockdate": "^2.0.2",
     "node-fetch": "^2.6.0",
     "precise-commits": "^1.0.2",
     "prettier": "^1.18.2",
-    "redux-mock-store": "^1.5.1",
     "regenerator-runtime": "^0.13.5",
     "ts-jest": "^24.0.2",
     "ts-loader": "3.5.0",
@@ -65,25 +64,12 @@
       "prepare-commit-msg": "exec < /dev/tty && git cz --hook || true"
     }
   },
+  "peerDependencies": {
+    "jolocom-lib": "^4.3.0"
+  },
   "dependencies": {
-    "assert": "^2.0.0",
-    "bip39": "^3.0.2",
-    "browser-ipfs": "^0.0.6",
-    "cred-types-jolocom-core": "^0.0.11",
-    "crypto-browserify": "^3.12.0",
-    "ethereumjs-wallet": "^0.6.0",
-    "events": "^3.0.0",
     "form-data": "^3.0.0",
-    "i18n-js": "^3.1.0",
-    "jolocom-lib": "^4.3.0",
-    "ramda": "^0.26.1",
-    "sjcl": "^1.0.7",
-    "sqlite3": "^4.0.0",
-    "squel": "^5.12.1",
-    "stream-browserify": "^2.0.2",
-    "unorm": "^1.6.0",
-    "vm-browserify": "^1.1.0",
-    "wif": "^2.0.6"
+    "ramda": "^0.26.1"
   },
   "config": {
     "commitizen": {

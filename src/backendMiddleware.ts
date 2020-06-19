@@ -4,10 +4,6 @@ import {
   createJolocomRegistry,
   JolocomRegistry,
 } from 'jolocom-lib/js/registries/jolocomRegistry'
-import { IpfsCustomConnector } from './lib/ipfs'
-import { jolocomContractsAdapter } from 'jolocom-lib/js/contracts/contractsAdapter'
-import { jolocomEthereumResolver } from 'jolocom-lib/js/ethereum/ethereum'
-import { jolocomContractsGateway } from 'jolocom-lib/js/contracts/contractsGateway'
 import { JolocomLib } from 'jolocom-lib'
 import { publicKeyToDID } from 'jolocom-lib/js/utils/crypto'
 import { Identity } from 'jolocom-lib/js/identity/identity'
@@ -35,18 +31,7 @@ export class BackendMiddleware {
     // FIXME actually use fuelingEndpoint
     this.storageLib = config.storage
     this.keyChainLib = config.passwordStore || new NaivePasswordStore()
-    this.registry = createJolocomRegistry({
-      ipfsConnector: new IpfsCustomConnector({
-        host: 'ipfs.jolocom.com',
-        port: 443,
-        protocol: 'https',
-      }),
-      ethereumConnector: jolocomEthereumResolver,
-      contracts: {
-        adapter: jolocomContractsAdapter,
-        gateway: jolocomContractsGateway,
-      },
-    })
+    this.registry = createJolocomRegistry()
     this.interactionManager = new InteractionManager(this)
   }
 
