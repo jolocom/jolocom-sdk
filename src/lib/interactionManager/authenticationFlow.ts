@@ -2,11 +2,12 @@ import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { InteractionType } from 'jolocom-lib/js/interactionTokens/types'
 import { Interaction } from './interaction'
 import { Flow } from './flow'
-import { AuthenticationFlowState } from './types'
+import { AuthenticationFlowState, FlowType } from './types'
 import { isAuthenticationRequest } from './guards'
 
 export class AuthenticationFlow extends Flow<Authentication> {
   public state: AuthenticationFlowState = { description: '' }
+  public type = FlowType.Authentication
 
   public constructor(ctx: Interaction) {
     super(ctx)

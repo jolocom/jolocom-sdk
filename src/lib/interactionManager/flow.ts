@@ -1,10 +1,12 @@
 import { Interaction } from './interaction'
+import { FlowType } from './types'
 
 export interface FlowState {}
 
 export abstract class Flow<T> {
   protected ctx: Interaction
   public abstract state: FlowState
+  public abstract type: FlowType
 
   constructor(ctx: Interaction) {
     this.ctx = ctx
