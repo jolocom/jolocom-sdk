@@ -5,7 +5,7 @@ import { InteractionType } from 'jolocom-lib/js/interactionTokens/types'
 import { last } from 'ramda'
 import { Flow } from './flow'
 import { Interaction } from './interaction'
-import { CredentialOfferFlowState, IssuanceResult } from './types'
+import { CredentialOfferFlowState, IssuanceResult, FlowType } from './types'
 import {
   isCredentialOfferRequest,
   isCredentialOfferResponse,
@@ -20,6 +20,7 @@ export class CredentialOfferFlow extends Flow<
     selection: [],
     issued: [],
   }
+  public type = FlowType.CredentialReceive
 
   public constructor(ctx: Interaction) {
     super(ctx)

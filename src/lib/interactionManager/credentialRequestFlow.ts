@@ -6,7 +6,7 @@ import { Interaction } from './interaction'
 import { isEmpty } from 'ramda'
 import { Flow } from './flow'
 import { CredentialResponse } from 'jolocom-lib/js/interactionTokens/credentialResponse'
-import { AttributeSummary, CredentialRequestFlowState } from './types'
+import { AttributeSummary, CredentialRequestFlowState, FlowType } from './types'
 import { isCredentialRequest, isCredentialResponse } from './guards'
 
 export class CredentialRequestFlow extends Flow<
@@ -16,6 +16,7 @@ export class CredentialRequestFlow extends Flow<
     constraints: [],
     providedCredentials: [],
   }
+  public type = FlowType.CredentialShare
 
   constructor(ctx: Interaction) {
     super(ctx)

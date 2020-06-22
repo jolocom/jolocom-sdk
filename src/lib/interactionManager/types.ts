@@ -22,6 +22,12 @@ export enum InteractionChannel {
   NFC = 'NFC',
 }
 
+export enum FlowType {
+  Authentication = 'Authentication',
+  CredentialShare = 'CredentialShare',
+  CredentialReceive = 'CredentialReceive',
+}
+
 export interface AuthenticationFlowState extends FlowState {
   description: string
 }
