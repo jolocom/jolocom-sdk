@@ -23,6 +23,7 @@ import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { Identity } from 'jolocom-lib/js/identity/identity'
 import { EncryptionFlow } from './encryptionFlow'
 import { DecryptionFlow } from './decryptionFlow'
+import { SigningFlow } from './signingFlow'
 import { isCredentialReceive } from './guards'
 import { generateIdentitySummary } from '../../utils/generateIdentitySummary'
 import {
@@ -31,6 +32,8 @@ import {
   EncryptionResponse,
   DecryptionRequest,
   DecryptionResponse,
+  SigningRequest,
+  SigningResponse,
 } from './rpc'
 
 /***
@@ -45,6 +48,7 @@ const interactionFlowForMessage = {
   [InteractionType.Authentication]: AuthenticationFlow,
   [CallType.AsymEncrypt]: EncryptionFlow,
   [CallType.AsymDecrypt]: DecryptionFlow,
+  [CallType.Sign]: SigningFlow,
 }
 
 export class Interaction {
@@ -213,6 +217,32 @@ export class Interaction {
       },
       await this.ctx.keyChainLib.getPassword(),
       decRequest,
+    )
+  }
+
+  public async createSigningResponseToken(): Promise<
+    JSONWebToken<SigningResponse>
+  > {
+    const sigRequest = this.findMessageByType(CallType.Sign) as JSONWebToken<
+      SigningRequest
+    >
+
+    return this.ctx.identityWallet.create.message(
+      {
+        message: {
+          callbackURL: sigRequest.payload.interactionToken!.callbackURL,
+          rpc: CallType.Sign,
+          result: '',
+          // pending merge of #409 in the lib
+          // result: this.ctx.identityWallet.sign(
+          //   Buffer.from(sigRequest.payload.interactionToken!.request, 'base64'),
+          //   this.ctx.keyChainLib.getPassword(),
+          // ),
+        },
+        typ: CallType.Sign,
+      },
+      await this.ctx.keyChainLib.getPassword(),
+      sigRequest,
     )
   }
 

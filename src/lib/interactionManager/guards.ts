@@ -9,6 +9,8 @@ import {
   EncryptionResponse,
   DecryptionRequest,
   DecryptionResponse,
+  SigningRequest,
+  SigningResponse,
   CallType,
   Call,
   Result,
@@ -67,3 +69,12 @@ export const isDecryptionResponse = (token: any): token is DecryptionResponse =>
   token.rpc === CallType.AsymDecrypt &&
   typeof token.result === 'string'
 
+export const isSigningRequest = (token: any): token is SigningRequest =>
+  isRPCCall<string>(token) &&
+  token.rpc === CallType.Sign &&
+  typeof token.request === 'string'
+
+export const isSigningResponse = (token: any): token is SigningResponse =>
+  isRPCResult<string>(token) &&
+  token.rpc === CallType.Sign &&
+  typeof token.result === 'string'

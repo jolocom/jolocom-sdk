@@ -46,6 +46,10 @@ export interface DecryptionFlowState extends FlowState {
   req: DecryptionRequest
 }
 
+export interface SigningFlowState extends FlowState {
+  req: string
+}
+
 export interface CredentialTypeSummary {
   type: string
   values: string[]

@@ -1,6 +1,7 @@
 export enum CallType {
   AsymEncrypt = 'asymEncrypt',
   AsymDecrypt = 'asymDecrypt',
+  Sign = 'sign',
 }
 
 export type RPC = {
@@ -30,4 +31,12 @@ export type EncryptionRequest = Call<{ target: string; data: string }> & {
 
 export type EncryptionResponse = Result<string> & {
   rpc: CallType.AsymEncrypt
+}
+
+export type SigningRequest = Call<string> & {
+  rpc: CallType.Sign
+}
+
+export type SigningResponse = Result<string> & {
+  rpc: CallType.Sign
 }

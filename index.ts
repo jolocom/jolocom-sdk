@@ -219,6 +219,27 @@ export class JolocomSDK {
     return token.encode()
   }
 
+  public async signingRequest(req: {
+    toSign: Buffer
+    callbackURL: string
+  }): Promise<string> {
+    const token = await this.idw.create.message(
+      {
+        message: {
+          callbackURL: req.callbackURL,
+          rpc: CallType.Sign,
+          request: req.toSign.toString('base64'),
+        },
+        typ: CallType.Sign,
+      },
+      await this.bemw.keyChainLib.getPassword(),
+    )
+
+    await this.bemw.interactionManager.start(InteractionChannel.HTTP, token)
+
+    return token.encode()
+  }
+
   /**
    * Returns a Signed Credential
    *
