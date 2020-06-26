@@ -1,26 +1,12 @@
 import { Flow } from './flow'
-import { FlowType } from './types'
-
-export enum AuthorizationType {
-  AuthorizationRequest = 'authorizationRequest',
-  AuthorizationResponse = 'authorizationResponse',
-}
-
-export interface AuthorizationResponse {
-  description: string
-  imageURL?: string
-  action?: string
-}
-
-export interface AuthorizationRequest extends AuthorizationResponse {
-  callbackURL: string
-}
-
-export interface AuthorizationFlowState {
-  description: string
-  imageURL?: string
-  action?: string
-}
+import {
+  FlowType,
+  AuthorizationResponse,
+  AuthorizationRequest,
+  AuthorizationType,
+  AuthorizationFlowState,
+} from './types'
+import { isAuthorizationRequest, isAuthorizationResponse } from './guards'
 
 export class AuthorizationFlow extends Flow<
   AuthorizationResponse | AuthorizationRequest
@@ -38,9 +24,11 @@ export class AuthorizationFlow extends Flow<
   ) {
     switch (interactionType) {
       case AuthorizationType.AuthorizationRequest:
-        return this.consumeAuthorizationRequest(token as AuthorizationRequest)
+        if (isAuthorizationRequest(token))
+          return this.consumeAuthorizationRequest(token as AuthorizationRequest)
       case AuthorizationType.AuthorizationResponse:
-        return this.consumeAuthorizationResponse(token)
+        if (isAuthorizationResponse(token))
+          return this.consumeAuthorizationResponse(token)
       default:
         throw new Error('Interaction type not found')
     }
@@ -55,7 +43,14 @@ export class AuthorizationFlow extends Flow<
   }
 
   public async consumeAuthorizationResponse(response: AuthorizationResponse) {
-    //TODO add logic that checks if the request data matches the response
-    return true
+    const { description, imageURL, action } = this.state
+
+    const isValidDesc = description === response.description
+    const isValidImageURL = imageURL?.length
+      ? imageURL === response.imageURL
+      : true
+    const isValidAction = action?.length ? action === response.action : true
+
+    return isValidDesc && isValidAction && isValidImageURL
   }
 }
