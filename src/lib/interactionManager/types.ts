@@ -26,6 +26,7 @@ export enum FlowType {
   Authentication = 'Authentication',
   CredentialShare = 'CredentialShare',
   CredentialReceive = 'CredentialReceive',
+  Authorization = 'Authorization',
 }
 
 export interface AuthenticationFlowState extends FlowState {

@@ -25,6 +25,7 @@ export {
 import { BackendMiddleware } from './src/backendMiddleware'
 import defaultConfig from './src/config'
 import { IStorage, IPasswordStore } from './src/lib/storage'
+import { AuthorizationType } from 'src/lib/interactionManager/authorizationFlow'
 export { NaivePasswordStore } from './src/lib/storage'
 export { JolocomLib } from 'jolocom-lib'
 
@@ -110,6 +111,24 @@ export class JolocomSDK {
       auth,
       await this.bemw.keyChainLib.getPassword(),
     )
+    await this.bemw.interactionManager.start(InteractionChannel.HTTP, token)
+    return token.encode()
+  }
+
+  public async authorizationRequestToken(auth: {
+    callbackURL: string
+    description: string
+    imageURL?: string
+    action?: string
+  }): Promise<string> {
+    const token = await this.idw.create.message(
+      {
+        message: auth,
+        typ: AuthorizationType.AuthorizationRequest,
+      },
+      await this.bemw.keyChainLib.getPassword(),
+    )
+
     await this.bemw.interactionManager.start(InteractionChannel.HTTP, token)
     return token.encode()
   }
