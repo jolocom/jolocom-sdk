@@ -29,4 +29,6 @@ export enum ErrorCode {
 
   // ui/generic/appInit
   AppInitFailed = 'AppInitFailed',
+
+  InvalidToken = 'InvalidToken'
 }

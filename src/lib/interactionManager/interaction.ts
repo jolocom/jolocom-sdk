@@ -150,7 +150,16 @@ export class Interaction {
     )
   }
 
-  public async processInteractionToken<T>(token: JSONWebToken<T>) {
+  /**
+   * Validate an interaction token and process it to update the interaction
+   * state (via the associated InteractionFlow)
+   *
+   * @param token JSONWebToken the token to
+   * @returns Promise<boolean> whether or not processing was successful
+   * @throws AppError<InvalidToken> with `origError` set to the original token
+   *                                validation error from the jolocom library
+   */
+  public async processInteractionToken<T>(token: JSONWebToken<T>): Promise<boolean> {
     if (!this.participants) {
       // TODO what happens if the signer isnt resolvable
       const requester = await this.ctx.registry.resolve(token.signer.did)
@@ -167,20 +176,15 @@ export class Interaction {
     }
 
     if (token.signer.did !== this.ctx.identityWallet.did) {
-      await this.ctx.identityWallet.validateJWT(
-        token,
-        last(this.getMessages()),
-        this.ctx.registry,
-      )
-    }
-
-    if (
-      token.interactionType === InteractionType.CredentialsReceive &&
-      isCredentialReceive(token.interactionToken)
-    ) {
-      await JolocomLib.util.validateDigestables(
-        token.interactionToken.signedCredentials,
-      )
+      try {
+        await this.ctx.identityWallet.validateJWT(
+          token,
+          last(this.getMessages()),
+          this.ctx.registry,
+        )
+      } catch (err) {
+        throw new AppError(ErrorCode.InvalidToken, err)
+      }
     }
 
     return this.flow
