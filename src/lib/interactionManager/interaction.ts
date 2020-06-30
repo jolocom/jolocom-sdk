@@ -21,7 +21,6 @@ import { Linking } from '../../polyfills/reactNative'
 import { AppError, ErrorCode } from '../errors'
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { Identity } from 'jolocom-lib/js/identity/identity'
-import { isCredentialReceive } from './guards'
 import { generateIdentitySummary } from '../../utils/generateIdentitySummary'
 
 /***

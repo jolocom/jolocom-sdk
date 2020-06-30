@@ -41,6 +41,8 @@ export interface CredentialOfferFlowState extends FlowState {
   offerSummary: CredentialOffer[]
   selection: CredentialOfferResponseSelection[]
   issued: SignedCredential[]
+  credentialsValidity: boolean[]
+  credentialsAllValid: boolean
 }
 
 export interface CredentialTypeSummary {
