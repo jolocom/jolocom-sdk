@@ -103,6 +103,8 @@ export class JolocomSDK {
    *
    * @param jwt recieved jwt string
    * @returns Promise<Interaction> the associated Interaction object
+   * @throws AppError<InvalidToken> with `origError` set to the original token
+   *                                validation error from the jolocom library
    */
   public async processJWT(jwt: string): Promise<Interaction> {
     const token = JolocomLib.parse.interactionToken.fromJWT(jwt)
