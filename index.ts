@@ -27,6 +27,7 @@ import defaultConfig from './src/config'
 import { IStorage, IPasswordStore } from './src/lib/storage'
 export { NaivePasswordStore } from './src/lib/storage'
 export { JolocomLib } from 'jolocom-lib'
+export { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { Interaction } from './src/lib/interactionManager/interaction'
 
