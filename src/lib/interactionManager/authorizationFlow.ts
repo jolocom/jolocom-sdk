@@ -24,10 +24,10 @@ export class AuthorizationFlow extends Flow<
   ) {
     switch (interactionType) {
       case AuthorizationType.AuthorizationRequest:
-        if (isAuthorizationRequest(token))
+        if (isAuthorizationRequest(token, interactionType))
           return this.consumeAuthorizationRequest(token)
       case AuthorizationType.AuthorizationResponse:
-        if (isAuthorizationResponse(token))
+        if (isAuthorizationResponse(token, interactionType))
           return this.consumeAuthorizationResponse(token)
       default:
         throw new Error('Interaction type not found')
