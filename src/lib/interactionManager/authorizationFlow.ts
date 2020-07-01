@@ -25,7 +25,7 @@ export class AuthorizationFlow extends Flow<
     switch (interactionType) {
       case AuthorizationType.AuthorizationRequest:
         if (isAuthorizationRequest(token))
-          return this.consumeAuthorizationRequest(token as AuthorizationRequest)
+          return this.consumeAuthorizationRequest(token)
       case AuthorizationType.AuthorizationResponse:
         if (isAuthorizationResponse(token))
           return this.consumeAuthorizationResponse(token)

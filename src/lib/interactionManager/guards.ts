@@ -4,10 +4,7 @@ import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credentialOfferRequest'
 import { CredentialOfferResponse } from 'jolocom-lib/js/interactionTokens/credentialOfferResponse'
 import { CredentialsReceive } from 'jolocom-lib/js/interactionTokens/credentialsReceive'
-import {
-  AuthorizationRequest,
-  AuthorizationResponse,
-} from './authorizationFlow'
+import { AuthorizationRequest, AuthorizationResponse } from './types'
 
 export const isCredentialRequest = (token: any): token is CredentialRequest =>
   token instanceof CredentialRequest
