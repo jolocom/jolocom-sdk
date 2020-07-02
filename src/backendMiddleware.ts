@@ -11,11 +11,13 @@ import { SoftwareKeyProvider } from 'jolocom-lib/js/vaultedKeyProvider/softwareP
 import { generateSecureRandomBytes } from './lib/util'
 import { InteractionManager } from './lib/interactionManager/interactionManager'
 import { BackendError, BackendMiddlewareErrorCodes } from './lib/errors/types'
+import { JolocomSDK } from 'index'
 
 export class BackendMiddleware {
   private _identityWallet!: IdentityWallet
   private _keyProvider!: SoftwareKeyProvider
 
+  ctx: JolocomSDK
   public storageLib: IStorage
   public keyChainLib: IPasswordStore
   public registry: JolocomRegistry
@@ -27,12 +29,14 @@ export class BackendMiddleware {
     fuelingEndpoint: string
     storage: IStorage
     passwordStore?: IPasswordStore
+    sdk: JolocomSDK
   }) {
     // FIXME actually use fuelingEndpoint
     this.storageLib = config.storage
     this.keyChainLib = config.passwordStore || new NaivePasswordStore()
     this.registry = createJolocomRegistry()
     this.interactionManager = new InteractionManager(this)
+    this.ctx = config.sdk
   }
 
   public get identityWallet(): IdentityWallet {

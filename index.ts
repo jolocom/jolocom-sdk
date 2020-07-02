@@ -53,6 +53,7 @@ export class JolocomSDK {
       ...defaultConfig,
       storage: conf.storage,
       passwordStore: conf.passwordStore,
+      sdk: this
     })
   }
 
