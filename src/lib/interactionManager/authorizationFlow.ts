@@ -35,7 +35,10 @@ export class AuthorizationFlow extends Flow<
 
   public async consumeAuthorizationRequest(request: AuthorizationRequest) {
     if (!this.state.description.length) {
-      this.state = request
+      const { description, imageURL, action } = request
+      this.state.description = description
+      imageURL && (this.state.imageURL = imageURL)
+      action && (this.state.action = action)
       return true
     }
 
