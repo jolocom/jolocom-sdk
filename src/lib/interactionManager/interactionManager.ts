@@ -2,6 +2,7 @@ import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { Interaction } from './interaction'
 import { BackendMiddleware } from '../../backendMiddleware'
 import { InteractionChannel } from './types'
+//import { WebSocketsKeeper } from './websockets'
 
 /***
  * - initiated inside BackendMiddleware

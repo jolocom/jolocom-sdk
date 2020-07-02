@@ -20,12 +20,15 @@ export enum InteractionChannel {
   HTTP = 'HTTP',
   Bluetooth = 'Bluetooth',
   NFC = 'NFC',
+  WebSocket = 'WebSocket'
 }
 
 export enum FlowType {
   Authentication = 'Authentication',
   CredentialShare = 'CredentialShare',
   CredentialReceive = 'CredentialReceive',
+  Encryption = 'Encryption',
+  Decryption = 'Decryption'
 }
 
 export interface AuthenticationFlowState extends FlowState {

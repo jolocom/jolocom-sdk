@@ -21,7 +21,12 @@ import { Linking } from '../../polyfills/reactNative'
 import { AppError, ErrorCode } from '../errors'
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { Identity } from 'jolocom-lib/js/identity/identity'
+import { httpAgent } from '../http'
+
 import { generateIdentitySummary } from '../../utils/generateIdentitySummary'
+
+// @ts-ignore
+let WebSocket = global.WebSocket || require('ws')
 
 /***
  * - initiated by InteractionManager when an interaction starts
@@ -29,6 +34,10 @@ import { generateIdentitySummary } from '../../utils/generateIdentitySummary'
  * - holds the instance of the particular interaction (e.g. CredentialOffer, Authentication)
  */
 
+/**
+ * TODO this map should be constructed from all known flows at runtime
+ * Each flow should define its `startMessage`
+ */
 const interactionFlowForMessage = {
   [InteractionType.CredentialOfferRequest]: CredentialOfferFlow,
   [InteractionType.CredentialRequest]: CredentialRequestFlow,
@@ -36,10 +45,15 @@ const interactionFlowForMessage = {
 }
 
 export class Interaction {
+  /**
+   * A list of tokens, beginning with a request and alternating between
+   * ResponseToken and RequestToken otherwise
+   */
   private interactionMessages: JSONWebToken<any>[] = []
+
   public id: string
   public ctx: BackendMiddleware
-  public flow: Flow<any>
+  public flow: Flow<any, any>
 
   // The channel through which the request (first token) came in
   public channel: InteractionChannel
@@ -83,10 +97,83 @@ export class Interaction {
     return this.interactionMessages
   }
 
-  private findMessageByType(type: string) {
+  public getMessage(idx = 0) {
+    const msg = this.interactionMessages[idx]
+    if (typeof msg === 'undefined') {
+      throw new Error('no message at index ' + idx)
+    }
+    return msg
+  }
+
+  /**
+   * Get the `n`th request message
+   *
+   * @param n number
+   * @returns the message at index 2n, which should be a response message
+   */
+  public getRequest(n = 0): JSONWebToken<any> {
+    const idx = 2*n
+    return this.getMessage(idx)
+  }
+
+  /**
+   * Get the `n`th response message
+   *
+   * @param n number
+   * @returns the message at index 2n+1, which should be a response message
+   */
+  public getResponse(n = 0): JSONWebToken<any> {
+    const idx = 2*n+1
+    return this.getMessage(idx)
+  }
+
+  /**
+   * Get or create the `n`th response message
+   *
+   * @param n number
+   * @returns the message at index 2n+1, which should be a response message
+   */
+  public async getOrCreateResponse(n = 0): Promise<JSONWebToken<any>> {
+    try {
+      return this.getResponse(n)
+    } catch {
+      return this.createResponse(n)
+    }
+  }
+
+  public async createResponse(n = 0): Promise<JSONWebToken<any>> {
+    const idx = 2*n+1
+    // TODO error codes
+    if (this.interactionMessages[idx]) throw new Error(idx + 'th response message already exists')
+
+    const resp = this.interactionMessages[idx] = await this.flow.createResponseMessage(n)
+    return resp
+  }
+
+  /**
+   * Respond to the nth request. Will create the response and send it.
+   *
+   */
+  public async respond(n = 0): Promise<JSONWebToken<any>> {
+    debugger
+    const req = this.getRequest(n)
+    const resp = await this.getOrCreateResponse(n)
+    console.log('Responding to', req, '\nResponding with', resp)
+    return this.send(resp, req).then(() => resp)
+  }
+
+  private findMessageByType(type: InteractionType) {
     return this.getMessages().find(
-      ({ interactionType }) => interactionType === type,
+      ({ interactionType }) => interactionType === type
     )
+  }
+
+  public async createResponseMessage<T, R>(
+    args: { message: T; typ: string; expires?: Date; aud?: string },
+    recieved?: JSONWebToken<R>,
+  ) {
+    const pass = await this.ctx.keyChainLib.getPassword()
+    return this.ctx.identityWallet.create.message<T, R>(args, pass, recieved)
   }
 
   // TODO Try to write a respond function that collapses these
@@ -226,44 +313,113 @@ export class Interaction {
    *   the server only holds the status code right now)
    *   If we're linking, the return value is a promise, as per {@see http://reactnative.dev/docs/linking.html#openurl}
    */
-  public async send<T>(token: JSONWebToken<T>) {
+  public async send<T, R>(respToken: JSONWebToken<T>, _reqToken?: JSONWebToken<R>) {
     // @ts-ignore - CredentialReceive has no callbackURL, needs fix on the lib for JWTEncodable.
-    const { callbackURL } = token.interactionToken
+    const { respCallbackURL } = respToken.interactionToken
+    let reqToken = _reqToken || this.getRequest()
+    // @ts-ignore
+    const reqCallbackURL = reqToken ? reqToken.interactionToken.callbackURL : null
+    const callbackURL = respCallbackURL || reqCallbackURL
 
     switch (this.channel) {
       case InteractionChannel.HTTP:
-        const response = await fetch(callbackURL, {
-          method: 'POST',
-          body: JSON.stringify({ token: token.encode() }),
-          headers: { 'Content-Type': 'application/json' },
-        })
-
-        if (!response.ok) {
+        let response: string
+        try {
+          response = await httpAgent.postRequest<string>(callbackURL,
+            { 'Content-Type': 'application/json' },
+            JSON.stringify({ token: respToken.encode() })
+          )
+        } catch (err) {
+          console.error('HTTP Post to ' + callbackURL + ' failed', err)
           // TODO Error code for failed send?
           // TODO Actually include some info about the error
-          throw new AppError(ErrorCode.Unknown)
+          throw new AppError(ErrorCode.Unknown, err)
         }
 
-        const text = await response.text()
-
-        if (text.length) {
-          const { token } = JSON.parse(text)
+        if (response.length) {
+          const { token } = JSON.parse(response)
           return JolocomLib.parse.interactionToken.fromJWT(token)
         }
         break
 
       case InteractionChannel.Deeplink:
-        const callback = `${callbackURL}/${token.encode()}`
+        const callback = `${callbackURL}/${respToken.encode()}`
         if (!(await Linking.canOpenURL(callback))) {
           throw new AppError(ErrorCode.DeepLinkUrlNotFound)
         }
 
         return Linking.openURL(callback).then(() => {})
+
+      case InteractionChannel.WebSocket:
+        // TODO
+        // look for already pre-established channel to this did?
+        // reuse old channel to transport the new token?
+        //
+        // or else establish new channel
+        // send response token
+        // keep channel alive and reply process other tokens through the system
+        //
+        // TODO IMPORTANT TODO
+        // But better keep this out of transport layer!
+        // This is implicitly establishing a long lived channel as a side effect
+        // to some other thing (currently an Authentication flow)
+        //
+        // probably need to create a new flow, EstablishRPCChannel
+        // { requestedCalls: { rpcDecRequest: 'Needed to decrypt invoices' } }
+        // and going through that flow successfully will establish a thing in
+        // the background
+        //
+        return new Promise((resolve, reject) => {
+          const ws = new WebSocket(callbackURL)
+
+          let ready = false
+          // TODO check for open errors and reject the promise
+          ws.on('open', () => {
+            console.log('Websocket opened to', callbackURL)
+            console.log('Sending response', respToken)
+            // FIXME don't JSON.stringify
+            ws.send(JSON.stringify(respToken.encode()))
+          });
+
+          ws.on('close', () => {
+            // TODO check for close errors and reject the promise
+            resolve()
+          })
+
+          ws.on('message', async (message: string) => {
+            if (!ready) {
+              ready = true
+              console.log('READY!')
+              //ws.send(JSON.stringify({}))
+              return
+            }
+            console.log('received message:', message)
+            if (!message.trim()) {
+              console.log('no payload')
+              return
+            }
+
+            const interaction = await this.ctx.ctx.processJWT(message)
+            const resp = await interaction.getOrCreateResponse()
+            // TODO no strigify
+            ws.send(JSON.stringify(resp.encode()))
+          })
+
+        })
+        break
+
       default:
         throw new AppError(ErrorCode.TransportNotSupported)
     }
   }
 
+  /**
+   * FIXME
+   * The following methods do not make any use of the Interaction object
+   * They also access the ctx to far, perhaps need to be lifted up
+   * They seem to be more suitable for just remaining on storage
+   * where are they used?
+   */
   public async storeCredential(toSave: SignedCredentialWithMetadata[]) {
     return Promise.all(
       toSave.map(

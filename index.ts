@@ -108,15 +108,24 @@ export class JolocomSDK {
    *                                validation error from the jolocom library
    */
   public async processJWT(jwt: string): Promise<Interaction> {
-    const token = JolocomLib.parse.interactionToken.fromJWT(jwt)
-
+    const token = JolocomLib.parse.interactionToken.fromJWT<any>(jwt)
     const interaction = this.bemw.interactionManager.getInteraction(token.nonce)
+
+    const callbackURL: string = token.payload.interactionToken.callbackURL
+    const isHTTP = callbackURL ? callbackURL.startsWith('http') : false
+    const isWS = callbackURL ? callbackURL.startsWith('ws') : false
+
+    const channel = isHTTP ?
+      InteractionChannel.HTTP :
+      isWS ?
+        InteractionChannel.WebSocket :
+        InteractionChannel.HTTP
 
     if (interaction) {
       await interaction.processInteractionToken(token)
       return interaction
     } else {
-      return this.bemw.interactionManager.start(InteractionChannel.HTTP, token)
+      return this.bemw.interactionManager.start(channel, token)
     }
   }
 

@@ -9,6 +9,14 @@ export class AppError extends Error {
   public navigateTo: routeList
   public code: ErrorCode
 
+  toString() {
+    let msg = super.toString()
+    if (this.origError) {
+      msg += `: ${this.origError}`
+    }
+    return msg
+  }
+
   public constructor(
     code = ErrorCode.Unknown,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
