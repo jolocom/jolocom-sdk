@@ -24,11 +24,11 @@ import { Identity } from 'jolocom-lib/js/identity/identity'
 import { isCredentialReceive } from './guards'
 import { generateIdentitySummary } from '../../utils/generateIdentitySummary'
 import {
-  AuthorizationFlow,
   AuthorizationType,
   AuthorizationRequest,
   AuthorizationFlowState,
-} from './authorizationFlow'
+} from './types'
+import { AuthorizationFlow } from './authorizationFlow'
 
 /***
  * - initiated by InteractionManager when an interaction starts

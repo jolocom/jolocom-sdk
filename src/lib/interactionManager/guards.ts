@@ -31,13 +31,13 @@ export const isCredentialReceive = (token: any): token is CredentialsReceive =>
   token instanceof CredentialsReceive
 
 export const isAuthorizationRequest = (
-  type: AuthorizationType,
   token: any,
+  type: AuthorizationType,
 ): token is AuthorizationRequest =>
   type === AuthorizationType.AuthorizationRequest
 
 export const isAuthorizationResponse = (
-  type: AuthorizationType,
   token: any,
+  type: AuthorizationType,
 ): token is AuthorizationResponse =>
   type === AuthorizationType.AuthorizationResponse
