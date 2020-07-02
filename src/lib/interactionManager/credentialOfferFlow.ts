@@ -78,7 +78,7 @@ export class CredentialOfferFlow extends Flow<
     const validArr = this.state.credentialsValidity = await JolocomLib.util.validateDigestables(
       signedCredentials,
     )
-    this.state.credentialsAllValid = validArr.reduce((prev, cur) => prev && cur, true)
+    this.state.credentialsAllValid = validArr.every(v => v)
     return true
   }
 
