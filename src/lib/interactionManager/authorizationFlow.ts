@@ -1,3 +1,4 @@
+import { equals } from 'ramda'
 import { Flow } from './flow'
 import {
   FlowType,
@@ -14,8 +15,6 @@ export class AuthorizationFlow extends Flow<
   public type = FlowType.Authorization
   public state: AuthorizationFlowState = {
     description: '',
-    imageURL: '',
-    action: '',
   }
 
   public handleInteractionToken(
@@ -35,22 +34,17 @@ export class AuthorizationFlow extends Flow<
   }
 
   public async consumeAuthorizationRequest(request: AuthorizationRequest) {
-    if (!this.state.description) this.state.description = request.description
-    if (!this.state.imageURL && request.imageURL)
-      this.state.imageURL = request.imageURL
-    if (!this.state.action && request.action) this.state.action = request.action
-    return true
+    if (!this.state.description.length) {
+      this.state = request
+      return true
+    }
+
+    return false
   }
 
   public async consumeAuthorizationResponse(response: AuthorizationResponse) {
-    const { description, imageURL, action } = this.state
+    if (!this.state.description.length) return false
 
-    const isValidDesc = description === response.description
-    const isValidImageURL = imageURL?.length
-      ? imageURL === response.imageURL
-      : true
-    const isValidAction = action?.length ? action === response.action : true
-
-    return isValidDesc && isValidAction && isValidImageURL
+    return equals(this.state, response)
   }
 }

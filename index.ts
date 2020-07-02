@@ -9,7 +9,10 @@ import {
   ICredentialsReceiveAttrs,
 } from 'jolocom-lib/js/interactionTokens/interactionTokens.types'
 import { ISignedCredCreationArgs } from 'jolocom-lib/js/credentials/signedCredential/types'
-import { InteractionChannel } from './src/lib/interactionManager/types'
+import {
+  InteractionChannel,
+  AuthorizationRequest,
+} from './src/lib/interactionManager/types'
 import { generateSecureRandomBytes } from './src/lib/util'
 import { BackendError } from './src/lib/errors/types'
 
@@ -25,7 +28,7 @@ export {
 import { BackendMiddleware } from './src/backendMiddleware'
 import defaultConfig from './src/config'
 import { IStorage, IPasswordStore } from './src/lib/storage'
-import { AuthorizationType } from 'src/lib/interactionManager/authorizationFlow'
+import { AuthorizationType } from 'src/lib/interactionManager/types'
 export { NaivePasswordStore } from './src/lib/storage'
 export { JolocomLib } from 'jolocom-lib'
 
@@ -115,15 +118,19 @@ export class JolocomSDK {
     return token.encode()
   }
 
-  public async authorizationRequestToken(auth: {
-    callbackURL: string
-    description: string
-    imageURL?: string
-    action?: string
-  }): Promise<string> {
+  /**
+   * Creates a signed, base64 encoded Authorization Request, given the request
+   * attributes
+   *
+   * @param request - Authrization Request Attributes
+   * @returns Base64 encoded signed Authentication Request
+   */
+  public async authorizationRequestToken(
+    request: AuthorizationRequest,
+  ): Promise<string> {
     const token = await this.idw.create.message(
       {
-        message: auth,
+        message: request,
         typ: AuthorizationType.AuthorizationRequest,
       },
       await this.bemw.keyChainLib.getPassword(),
