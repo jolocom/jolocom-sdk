@@ -23,6 +23,12 @@ import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { Identity } from 'jolocom-lib/js/identity/identity'
 import { isCredentialReceive } from './guards'
 import { generateIdentitySummary } from '../../utils/generateIdentitySummary'
+import {
+  AuthorizationType,
+  AuthorizationRequest,
+  AuthorizationFlowState,
+} from './types'
+import { AuthorizationFlow } from './authorizationFlow'
 
 /***
  * - initiated by InteractionManager when an interaction starts
@@ -34,6 +40,7 @@ const interactionFlowForMessage = {
   [InteractionType.CredentialOfferRequest]: CredentialOfferFlow,
   [InteractionType.CredentialRequest]: CredentialRequestFlow,
   [InteractionType.Authentication]: AuthenticationFlow,
+  [AuthorizationType.AuthorizationRequest]: AuthorizationFlow,
 }
 
 export class Interaction {
@@ -59,7 +66,6 @@ export class Interaction {
     this.ctx = ctx
     this.channel = channel
     this.id = id
-
     this.flow = new interactionFlowForMessage[interactionType](this)
   }
 
@@ -101,6 +107,28 @@ export class Interaction {
       {
         description,
         callbackURL: request.interactionToken.callbackURL,
+      },
+      await this.ctx.keyChainLib.getPassword(),
+      request,
+    )
+  }
+
+  public async createAuthorizationResponse() {
+    const request = this.findMessageByType(
+      AuthorizationType.AuthorizationRequest,
+    ) as JSONWebToken<AuthorizationRequest>
+
+    const { description, imageURL, action } = this.getSummary()
+      .state as AuthorizationFlowState
+
+    return this.ctx.identityWallet.create.message(
+      {
+        message: {
+          description,
+          ...(imageURL && { imageURL }),
+          ...(action && { action }),
+        },
+        typ: AuthorizationType.AuthorizationResponse,
       },
       await this.ctx.keyChainLib.getPassword(),
       request,
