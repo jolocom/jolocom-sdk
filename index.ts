@@ -44,11 +44,6 @@ export interface IJolocomSDKInitOptions {
   dontAutoRegister?: boolean
 }
 
-// @ts-ignore
-// const injectPassFn = (passFn: () => Promise<string>) => <A, T>(
-//   delayedFn: (arg1: A, pass: string, ...rest) => Promise<T>,
-// ) => async (a1: A, ...rest) => await delayedFn(a1, await passFn())
-
 export class JolocomSDK {
   public bemw: BackendMiddleware
 
