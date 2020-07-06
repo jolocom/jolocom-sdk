@@ -31,6 +31,9 @@ import { IStorage, IPasswordStore } from './src/lib/storage'
 import { AuthorizationType } from 'src/lib/interactionManager/types'
 export { NaivePasswordStore } from './src/lib/storage'
 export { JolocomLib } from 'jolocom-lib'
+export { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
+import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
+import { Interaction } from './src/lib/interactionManager/interaction'
 
 export interface IJolocomSDKConfig {
   storage: IStorage
@@ -54,6 +57,7 @@ export class JolocomSDK {
       ...defaultConfig,
       storage: conf.storage,
       passwordStore: conf.passwordStore,
+      sdk: this
     })
   }
 
@@ -96,6 +100,53 @@ export class JolocomSDK {
       await this.bemw.interactionManager.start(InteractionChannel.HTTP, token)
       return true
     }
+  }
+
+  /**
+   * Parses a recieved interaction token in JWT format and process it through
+   * the interaction system, returning the corresponding Interaction
+   *
+   * @param jwt recieved jwt string
+   * @returns Promise<Interaction> the associated Interaction object
+   * @throws AppError<InvalidToken> with `origError` set to the original token
+   *                                validation error from the jolocom library
+   */
+  public async processJWT(jwt: string): Promise<Interaction> {
+    const token = JolocomLib.parse.interactionToken.fromJWT(jwt)
+
+    const interaction = this.bemw.interactionManager.getInteraction(token.nonce)
+
+    if (interaction) {
+      await interaction.processInteractionToken(token)
+      return interaction
+    } else {
+      return this.bemw.interactionManager.start(InteractionChannel.HTTP, token)
+    }
+  }
+
+  /**
+   * Find an interaction, by id or by jwt, or by JSONWebToken object
+   *
+   * @param inp id, JWT string, or JSONWebToken object
+   * @returns Promise<Interaction> the associated Interaction object
+   */
+  public findInteraction(inp: string | JSONWebToken<any>): Interaction | null {
+    let id
+    if (typeof inp === 'string') {
+      try {
+        const token = JolocomLib.parse.interactionToken.fromJWT(inp)
+        id = token.nonce
+      } catch {
+        // not a JWT, but maybe it's the nonce itself?
+        id = inp
+      }
+    } else if (inp && inp.nonce) {
+      id = inp.nonce
+    } else {
+      return null
+    }
+
+    return this.bemw.interactionManager.getInteraction(id)
   }
 
   /**

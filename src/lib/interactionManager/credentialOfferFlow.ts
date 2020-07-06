@@ -2,6 +2,7 @@ import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credent
 import { CredentialOfferResponse } from 'jolocom-lib/js/interactionTokens/credentialOfferResponse'
 import { CredentialsReceive } from 'jolocom-lib/js/interactionTokens/credentialsReceive'
 import { InteractionType } from 'jolocom-lib/js/interactionTokens/types'
+import { JolocomLib } from 'jolocom-lib'
 import { last } from 'ramda'
 import { Flow } from './flow'
 import { Interaction } from './interaction'
@@ -19,6 +20,8 @@ export class CredentialOfferFlow extends Flow<
     offerSummary: [],
     selection: [],
     issued: [],
+    credentialsValidity: [],
+    credentialsAllValid: true
   }
   public type = FlowType.CredentialReceive
 
@@ -60,7 +63,7 @@ export class CredentialOfferFlow extends Flow<
 
   // Sets the validity map, currently if the issuer and if the subjects are correct.
   // also populates the SignedCredentialWithMetadata with credentials
-  private handleCredentialReceive({ signedCredentials }: CredentialsReceive) {
+  private async handleCredentialReceive({ signedCredentials }: CredentialsReceive) {
     this.state.issued = signedCredentials
     this.state.issued.map(cred => {
       const offer = this.state.offerSummary.find(
@@ -72,6 +75,10 @@ export class CredentialOfferFlow extends Flow<
       }
     })
 
+    const validArr = this.state.credentialsValidity = await JolocomLib.util.validateDigestables(
+      signedCredentials,
+    )
+    this.state.credentialsAllValid = validArr.every(v => v)
     return true
   }
 
