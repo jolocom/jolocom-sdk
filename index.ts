@@ -44,25 +44,38 @@ export interface IJolocomSDKInitOptions {
   dontAutoRegister?: boolean
 }
 
-export class JolocomSDK {
-  public bemw: BackendMiddleware
+export class JolocomSDK extends BackendMiddleware {
+  /**
+   * FIXME merge the backendMiddleware code in here instead of extending??
+   *       or perhaps the BackendMiddleware becomes the more "pure" layer,
+   *       and the "sdk" instance is platform specific
+   *
+   * TODO: use the Keeper pattern
+   *       so we can do sdk.identities.create()
+                        sdk.interactions.create()
+                        sdk.interactions.find()
+                        etc
+
+  identities: IdentityKeeper
+  interactions: InteractionKeeper
+
+  /**/
 
   constructor(conf: IJolocomSDKConfig) {
-    this.bemw = new BackendMiddleware({
+    super({
       ...defaultConfig,
       storage: conf.storage,
-      passwordStore: conf.passwordStore,
-      sdk: this
+      passwordStore: conf.passwordStore
     })
   }
 
   public get idw(): IdentityWallet {
-    return this.bemw.identityWallet
+    return this.identityWallet
   }
 
   async init(opts: IJolocomSDKInitOptions = {}) {
     try {
-      return await this.bemw.prepareIdentityWallet()
+      return await this.prepareIdentityWallet()
     } catch (err) {
       if (!(err instanceof BackendError)) throw err
 
@@ -71,7 +84,7 @@ export class JolocomSDK {
         err.message === BackendError.codes.NoEntropy
       ) {
         const seed = await generateSecureRandomBytes(16)
-        return this.bemw.createNewIdentity(seed)
+        return this.createNewIdentity(seed)
       }
 
       throw err
@@ -87,12 +100,12 @@ export class JolocomSDK {
   public async tokenRecieved(jwt: string) {
     const token = JolocomLib.parse.interactionToken.fromJWT(jwt)
 
-    const interaction = this.bemw.interactionManager.getInteraction(token.nonce)
+    const interaction = this.interactionManager.getInteraction(token.nonce)
 
     if (interaction) {
       return interaction.processInteractionToken(token)
     } else {
-      await this.bemw.interactionManager.start(InteractionChannel.HTTP, token)
+      await this.interactionManager.start(InteractionChannel.HTTP, token)
       return true
     }
   }
@@ -109,13 +122,13 @@ export class JolocomSDK {
   public async processJWT(jwt: string): Promise<Interaction> {
     const token = JolocomLib.parse.interactionToken.fromJWT(jwt)
 
-    const interaction = this.bemw.interactionManager.getInteraction(token.nonce)
+    const interaction = this.interactionManager.getInteraction(token.nonce)
 
     if (interaction) {
       await interaction.processInteractionToken(token)
       return interaction
     } else {
-      return this.bemw.interactionManager.start(InteractionChannel.HTTP, token)
+      return this.interactionManager.start(InteractionChannel.HTTP, token)
     }
   }
 
@@ -141,7 +154,7 @@ export class JolocomSDK {
       return null
     }
 
-    return this.bemw.interactionManager.getInteraction(id)
+    return this.interactionManager.getInteraction(id)
   }
 
   /**
@@ -158,9 +171,9 @@ export class JolocomSDK {
   }): Promise<string> {
     const token = await this.idw.create.interactionTokens.request.auth(
       auth,
-      await this.bemw.keyChainLib.getPassword(),
+      await this.keyChainLib.getPassword(),
     )
-    await this.bemw.interactionManager.start(InteractionChannel.HTTP, token)
+    await this.interactionManager.start(InteractionChannel.HTTP, token)
     return token.encode()
   }
 
@@ -179,10 +192,10 @@ export class JolocomSDK {
         message: request,
         typ: AuthorizationType.AuthorizationRequest,
       },
-      await this.bemw.keyChainLib.getPassword(),
+      await this.keyChainLib.getPassword(),
     )
 
-    await this.bemw.interactionManager.start(InteractionChannel.HTTP, token)
+    await this.interactionManager.start(InteractionChannel.HTTP, token)
     return token.encode()
   }
 
@@ -197,9 +210,9 @@ export class JolocomSDK {
   ): Promise<string> {
     const token = await this.idw.create.interactionTokens.request.share(
       request,
-      await this.bemw.keyChainLib.getPassword(),
+      await this.keyChainLib.getPassword(),
     )
-    await this.bemw.interactionManager.start(InteractionChannel.HTTP, token)
+    await this.interactionManager.start(InteractionChannel.HTTP, token)
     return token.encode()
   }
 
@@ -216,9 +229,9 @@ export class JolocomSDK {
   ): Promise<string> {
     const token = await this.idw.create.interactionTokens.request.offer(
       offer,
-      await this.bemw.keyChainLib.getPassword(),
+      await this.keyChainLib.getPassword(),
     )
-    await this.bemw.interactionManager.start(InteractionChannel.HTTP, token)
+    await this.interactionManager.start(InteractionChannel.HTTP, token)
     return token.encode()
   }
 
@@ -237,7 +250,7 @@ export class JolocomSDK {
   ): Promise<string> {
     const token = await this.idw.create.interactionTokens.response.issue(
       issuance,
-      await this.bemw.keyChainLib.getPassword(),
+      await this.keyChainLib.getPassword(),
       JolocomLib.parse.interactionToken.fromJWT(selection),
     )
 
@@ -255,7 +268,7 @@ export class JolocomSDK {
   ) {
     return await this.idw.create.signedCredential(
       credParams,
-      await this.bemw.keyChainLib.getPassword(),
+      await this.keyChainLib.getPassword(),
     )
   }
 }
