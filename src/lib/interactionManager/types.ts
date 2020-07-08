@@ -14,7 +14,7 @@ export interface InteractionSummary {
   state: FlowState
 }
 
-export enum InteractionChannel {
+export enum InteractionTransportType {
   QR = 'QR',
   Deeplink = 'Deeplink',
   HTTP = 'HTTP',

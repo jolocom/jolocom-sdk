@@ -2,7 +2,7 @@ import { CredentialOfferFlow } from './credentialOfferFlow'
 import { InteractionType } from 'jolocom-lib/js/interactionTokens/types'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import {
-  InteractionChannel,
+  InteractionTransportType,
   InteractionSummary,
   SignedCredentialWithMetadata,
   CredentialVerificationSummary,
@@ -48,8 +48,8 @@ export class Interaction {
   public ctx: InteractionManager
   public flow: Flow<any>
 
-  // The channel through which the request (first token) came in
-  public channel: InteractionChannel
+  // The transport type through which the request (first token) came in
+  public transportType: InteractionTransportType | string
 
   public participants!: {
     requester: Identity
@@ -58,24 +58,24 @@ export class Interaction {
 
   public constructor(
     ctx: InteractionManager,
-    channel: InteractionChannel,
+    transportType: InteractionTransportType,
     id: string,
     interactionType: string,
   ) {
     this.ctx = ctx
-    this.channel = channel
+    this.transportType = transportType
     this.id = id
     this.flow = new interactionFlowForMessage[interactionType](this)
   }
 
   public static async start<T>(
     ctx: InteractionManager,
-    channel: InteractionChannel,
+    transportType: InteractionTransportType,
     token: JSONWebToken<T>,
   ): Promise<Interaction> {
     const interaction = new Interaction(
       ctx,
-      channel,
+      transportType,
       token.nonce,
       token.interactionType,
     )
@@ -258,8 +258,8 @@ export class Interaction {
     // @ts-ignore - CredentialReceive has no callbackURL, needs fix on the lib for JWTEncodable.
     const { callbackURL } = token.interactionToken
 
-    switch (this.channel) {
-      case InteractionChannel.HTTP:
+    switch (this.transportType) {
+      case InteractionTransportType.HTTP:
         const response = await fetch(callbackURL, {
           method: 'POST',
           body: JSON.stringify({ token: token.encode() }),
@@ -280,7 +280,7 @@ export class Interaction {
         }
         break
 
-      case InteractionChannel.Deeplink:
+      case InteractionTransportType.Deeplink:
         const callback = `${callbackURL}/${token.encode()}`
         if (!(await Linking.canOpenURL(callback))) {
           throw new AppError(ErrorCode.DeepLinkUrlNotFound)
