@@ -9,7 +9,6 @@ import { publicKeyToDID } from 'jolocom-lib/js/utils/crypto'
 import { Identity } from 'jolocom-lib/js/identity/identity'
 import { SoftwareKeyProvider } from 'jolocom-lib/js/vaultedKeyProvider/softwareProvider'
 import { generateSecureRandomBytes } from './lib/util'
-import { InteractionManager } from './lib/interactionManager/interactionManager'
 import { BackendError, BackendMiddlewareErrorCodes } from './lib/errors/types'
 
 export class BackendMiddleware {
@@ -19,7 +18,6 @@ export class BackendMiddleware {
   public storageLib: IStorage
   public keyChainLib: IPasswordStore
   public registry: JolocomRegistry
-  public interactionManager: InteractionManager
 
   private newIdentityPromise!: Promise<IdentityWallet>
 
@@ -32,7 +30,6 @@ export class BackendMiddleware {
     this.storageLib = config.storage
     this.keyChainLib = config.passwordStore || new NaivePasswordStore()
     this.registry = createJolocomRegistry()
-    this.interactionManager = new InteractionManager(this)
   }
 
   public get identityWallet(): IdentityWallet {

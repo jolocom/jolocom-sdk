@@ -1,7 +1,6 @@
 import { CredentialOfferFlow } from './credentialOfferFlow'
 import { InteractionType } from 'jolocom-lib/js/interactionTokens/types'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
-import { BackendMiddleware } from '../../backendMiddleware'
 import {
   InteractionChannel,
   InteractionSummary,
@@ -28,6 +27,7 @@ import {
   AuthorizationFlowState,
 } from './types'
 import { AuthorizationFlow } from './authorizationFlow'
+import { InteractionManager } from './interactionManager'
 
 /***
  * - initiated by InteractionManager when an interaction starts
@@ -45,7 +45,7 @@ const interactionFlowForMessage = {
 export class Interaction {
   private interactionMessages: JSONWebToken<any>[] = []
   public id: string
-  public ctx: BackendMiddleware
+  public ctx: InteractionManager
   public flow: Flow<any>
 
   // The channel through which the request (first token) came in
@@ -57,7 +57,7 @@ export class Interaction {
   }
 
   public constructor(
-    ctx: BackendMiddleware,
+    ctx: InteractionManager,
     channel: InteractionChannel,
     id: string,
     interactionType: string,
@@ -69,7 +69,7 @@ export class Interaction {
   }
 
   public static async start<T>(
-    ctx: BackendMiddleware,
+    ctx: InteractionManager,
     channel: InteractionChannel,
     token: JSONWebToken<T>,
   ): Promise<Interaction> {
@@ -102,12 +102,12 @@ export class Interaction {
     ) as JSONWebToken<Authentication>
     const { description } = this.getSummary().state as AuthenticationFlowState
 
-    return this.ctx.identityWallet.create.interactionTokens.response.auth(
+    return this.ctx.ctx.identityWallet.create.interactionTokens.response.auth(
       {
         description,
         callbackURL: request.interactionToken.callbackURL,
       },
-      await this.ctx.keyChainLib.getPassword(),
+      await this.ctx.ctx.keyChainLib.getPassword(),
       request,
     )
   }
@@ -120,7 +120,7 @@ export class Interaction {
     const { description, imageURL, action } = this.getSummary()
       .state as AuthorizationFlowState
 
-    return this.ctx.identityWallet.create.message(
+    return this.ctx.ctx.identityWallet.create.message(
       {
         message: {
           description,
@@ -129,7 +129,7 @@ export class Interaction {
         },
         typ: AuthorizationType.AuthorizationResponse,
       },
-      await this.ctx.keyChainLib.getPassword(),
+      await this.ctx.ctx.keyChainLib.getPassword(),
       request,
     )
   }
@@ -147,12 +147,12 @@ export class Interaction {
       ),
     )
 
-    return this.ctx.identityWallet.create.interactionTokens.response.share(
+    return this.ctx.ctx.identityWallet.create.interactionTokens.response.share(
       {
         callbackURL: request.interactionToken.callbackURL,
         suppliedCredentials: credentials.map(c => c.toJSON()),
       },
-      await this.ctx.keyChainLib.getPassword(),
+      await this.ctx.ctx.keyChainLib.getPassword(),
       request,
     )
   }
@@ -171,9 +171,9 @@ export class Interaction {
       })),
     }
 
-    return this.ctx.identityWallet.create.interactionTokens.response.offer(
+    return this.ctx.ctx.identityWallet.create.interactionTokens.response.offer(
       credentialOfferResponseAttr,
-      await this.ctx.keyChainLib.getPassword(),
+      await this.ctx.ctx.keyChainLib.getPassword(),
       credentialOfferRequest,
     )
   }
@@ -190,25 +190,25 @@ export class Interaction {
   public async processInteractionToken<T>(token: JSONWebToken<T>): Promise<boolean> {
     if (!this.participants) {
       // TODO what happens if the signer isnt resolvable
-      const requester = await this.ctx.registry.resolve(token.signer.did)
+      const requester = await this.ctx.ctx.registry.resolve(token.signer.did)
       this.participants = {
         requester,
       }
-      if (requester.did !== this.ctx.identityWallet.did) {
-        this.participants.responder = this.ctx.identityWallet.identity
+      if (requester.did !== this.ctx.ctx.identityWallet.did) {
+        this.participants.responder = this.ctx.ctx.identityWallet.identity
       }
     } else if (!this.participants.responder) {
-      this.participants.responder = await this.ctx.registry.resolve(
+      this.participants.responder = await this.ctx.ctx.registry.resolve(
         token.signer.did,
       )
     }
 
-    if (token.signer.did !== this.ctx.identityWallet.did) {
+    if (token.signer.did !== this.ctx.ctx.identityWallet.did) {
       try {
-        await this.ctx.identityWallet.validateJWT(
+        await this.ctx.ctx.identityWallet.validateJWT(
           token,
           last(this.getMessages()),
-          this.ctx.registry,
+          this.ctx.ctx.registry,
         )
       } catch (err) {
         throw new AppError(ErrorCode.InvalidToken, err)
@@ -219,7 +219,7 @@ export class Interaction {
       .handleInteractionToken(token.interactionToken, token.interactionType)
       .then(res => {
         this.interactionMessages.push(token)
-        // this.ctx.storageLib.store.interactionToken(token)
+        // this.ctx.ctx.storageLib.store.interactionToken(token)
         return res
       })
   }
@@ -232,17 +232,17 @@ export class Interaction {
   }
 
   public getAttributesByType = (type: string[]) => {
-    return this.ctx.storageLib.get.attributesByType(type)
+    return this.ctx.ctx.storageLib.get.attributesByType(type)
   }
 
   public async getStoredCredentialById(id: string) {
-    return this.ctx.storageLib.get.verifiableCredential({
+    return this.ctx.ctx.storageLib.get.verifiableCredential({
       id,
     })
   }
 
   public getVerifiableCredential = (query?: object) => {
-    return this.ctx.storageLib.get.verifiableCredential(query)
+    return this.ctx.ctx.storageLib.get.verifiableCredential(query)
   }
 
   /**
@@ -297,16 +297,16 @@ export class Interaction {
       toSave.map(
         ({ signedCredential }) =>
           signedCredential &&
-          this.ctx.storageLib.store.verifiableCredential(signedCredential),
+          this.ctx.ctx.storageLib.store.verifiableCredential(signedCredential),
       ),
     )
   }
 
   public storeCredentialMetadata = (metadata: CredentialMetadataSummary) =>
-    this.ctx.storageLib.store.credentialMetadata(metadata)
+    this.ctx.ctx.storageLib.store.credentialMetadata(metadata)
 
   public storeIssuerProfile = () =>
-    this.ctx.storageLib.store.issuerProfile(
+    this.ctx.ctx.storageLib.store.issuerProfile(
       generateIdentitySummary(this.participants.requester),
     )
 }

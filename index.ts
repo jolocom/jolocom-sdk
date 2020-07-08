@@ -34,6 +34,7 @@ export { JolocomLib } from 'jolocom-lib'
 export { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { Interaction } from './src/lib/interactionManager/interaction'
+import { InteractionManager } from 'src/lib/interactionManager/interactionManager'
 
 export interface IJolocomSDKConfig {
   storage: IStorage
@@ -45,6 +46,8 @@ export interface IJolocomSDKInitOptions {
 }
 
 export class JolocomSDK extends BackendMiddleware {
+  public interactionManager: InteractionManager
+
   /**
    * FIXME merge the backendMiddleware code in here instead of extending??
    *       or perhaps the BackendMiddleware becomes the more "pure" layer,
@@ -67,6 +70,7 @@ export class JolocomSDK extends BackendMiddleware {
       storage: conf.storage,
       passwordStore: conf.passwordStore
     })
+    this.interactionManager = new InteractionManager(this)
   }
 
   public get idw(): IdentityWallet {
