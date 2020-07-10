@@ -34,7 +34,9 @@ export enum FlowType {
   CredentialShare = 'CredentialShare',
   CredentialOffer = 'CredentialOffer',
   Authorization = 'Authorization',
-  EstablishChannel = 'EstablishChannel'
+  EstablishChannel = 'EstablishChannel',
+  Encrypt = 'Encrypt',
+  Decrypt = 'Decrypt',
 }
 
 export enum EstablishChannelType {
