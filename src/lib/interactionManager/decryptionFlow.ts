@@ -1,12 +1,15 @@
 import { Interaction } from './interaction'
 import { Flow } from './flow'
-import { DecryptionFlowState } from './types'
+import { DecryptionFlowState, FlowType } from './types'
 import { isDecryptionRequest, isDecryptionResponse } from './guards'
 import { CallType, DecryptionRequest, DecryptionResponse } from './rpc'
 
 export class DecryptionFlow extends Flow<
   DecryptionRequest | DecryptionResponse
 > {
+  public type = FlowType.Decrypt
+
+  // TODO remove 'rpc'
   public state: DecryptionFlowState = {
     req: { callbackURL: '', rpc: CallType.AsymDecrypt, request: '' },
   }

@@ -1,12 +1,13 @@
 import { Interaction } from './interaction'
 import { Flow } from './flow'
-import { EncryptionFlowState } from './types'
+import { EncryptionFlowState, FlowType } from './types'
 import { isEncryptionRequest, isEncryptionResponse } from './guards'
 import { CallType, EncryptionRequest, EncryptionResponse } from './rpc'
 
 export class EncryptionFlow extends Flow<
   EncryptionRequest | EncryptionResponse
 > {
+  public type = FlowType.Encrypt
   public state: EncryptionFlowState = {
     req: {
       callbackURL: '',
