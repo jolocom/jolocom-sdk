@@ -1,0 +1,85 @@
+{
+  "name": "@jolocom/sdk",
+  "version": "0.12.0",
+  "main": "js/index.js",
+  "files": [
+    "js/"
+  ],
+  "scripts": {
+    "test": "jest",
+    "build": "ttsc -p .",
+    "prepare": "yarn build",
+    "clean:node": "rm -rf node_modules",
+    "format": "eslint --fix --ext .ts --ext .tsx .",
+    "repl": "REPL=1 ts-node -P . -r ./bin/repl.ts",
+    "typeorm": "ts-node -O '{\"module\": \"commonjs\"}' -r ./bin/repl.ts node_modules/.bin/typeorm"
+  },
+  "private": false,
+  "devDependencies": {
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.5",
+    "@babel/plugin-proposal-decorators": "^7.4.4",
+    "@babel/preset-env": "^7.9.0",
+    "@babel/preset-typescript": "^7.9.0",
+    "@babel/runtime": "^7.4.5",
+    "@types/i18n-js": "^3.0.1",
+    "@types/jest": "^24.0.13",
+    "@types/node": "^13.9.8",
+    "@types/node-fetch": "^2.5.5",
+    "@types/ramda": "^0.26.8",
+    "@typescript-eslint/eslint-plugin": "^2.20.0",
+    "@typescript-eslint/parser": "^1.5.0",
+    "@zerollup/ts-transform-paths": "^1.7.17",
+    "assert": "^2.0.0",
+    "babel-jest": "^24.8.0",
+    "babel-plugin-inline-import": "^3.0.0",
+    "babel-plugin-transform-typescript-metadata": "^0.2.2",
+    "case-sensitive-paths-webpack-plugin": "^2.1.2",
+    "class-transformer": "^0.1.9",
+    "commitizen": "^4.0.3",
+    "cz-conventional-changelog": "3.0.2",
+    "eslint": "^5.15.3",
+    "eslint-config-prettier": "^4.1.0",
+    "eslint-plugin-prettier": "^3.0.1",
+    "eslint-plugin-react": "^7.12.4",
+    "fs-extra": "^8.1.0",
+    "husky": "^3.0.5",
+    "jest": "^24.8.0",
+    "jolocom-lib": "^4.3.0",
+    "mockdate": "^2.0.2",
+    "node-fetch": "^2.6.0",
+    "precise-commits": "^1.0.2",
+    "prettier": "^1.18.2",
+    "regenerator-runtime": "^0.13.5",
+    "ts-jest": "^24.0.2",
+    "ts-loader": "3.5.0",
+    "tsconfig-paths": "^3.8.0",
+    "tslib": "^1.7.1",
+    "ttypescript": "^1.5.10",
+    "typescript": "^3.7.5",
+    "yarn": "^1.22.0"
+  },
+  "husky": {
+    "hooks": {
+      "prepare-commit-msg": "exec < /dev/tty && git cz --hook || true"
+    }
+  },
+  "peerDependencies": {
+    "jolocom-lib": "^4.3.0"
+  },
+  "dependencies": {
+    "form-data": "^3.0.0",
+    "ramda": "^0.26.1"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "keywords": [
+    "Jolocom",
+    "Self-Sovereign Identity",
+    "jolocom-sdk",
+    "typeorm"
+  ]
+}
