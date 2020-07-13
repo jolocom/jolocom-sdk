@@ -10,7 +10,7 @@ import {
 } from 'jolocom-lib/js/interactionTokens/interactionTokens.types'
 import { ISignedCredCreationArgs } from 'jolocom-lib/js/credentials/signedCredential/types'
 import {
-  InteractionChannel,
+  InteractionTransportType,
   AuthorizationRequest,
 } from './src/lib/interactionManager/types'
 import { generateSecureRandomBytes } from './src/lib/util'
@@ -28,12 +28,13 @@ export {
 import { BackendMiddleware } from './src/backendMiddleware'
 import defaultConfig from './src/config'
 import { IStorage, IPasswordStore } from './src/lib/storage'
-import { AuthorizationType } from 'src/lib/interactionManager/types'
+import { AuthorizationType } from './src/lib/interactionManager/types'
 export { NaivePasswordStore } from './src/lib/storage'
 export { JolocomLib } from 'jolocom-lib'
 export { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { Interaction } from './src/lib/interactionManager/interaction'
+import { InteractionManager } from './src/lib/interactionManager/interactionManager'
 
 export interface IJolocomSDKConfig {
   storage: IStorage
@@ -45,6 +46,8 @@ export interface IJolocomSDKInitOptions {
 }
 
 export class JolocomSDK extends BackendMiddleware {
+  public interactionManager: InteractionManager
+
   /**
    * FIXME merge the backendMiddleware code in here instead of extending??
    *       or perhaps the BackendMiddleware becomes the more "pure" layer,
@@ -67,6 +70,7 @@ export class JolocomSDK extends BackendMiddleware {
       storage: conf.storage,
       passwordStore: conf.passwordStore
     })
+    this.interactionManager = new InteractionManager(this)
   }
 
   public get idw(): IdentityWallet {
@@ -105,7 +109,7 @@ export class JolocomSDK extends BackendMiddleware {
     if (interaction) {
       return interaction.processInteractionToken(token)
     } else {
-      await this.interactionManager.start(InteractionChannel.HTTP, token)
+      await this.interactionManager.start(InteractionTransportType.HTTP, token)
       return true
     }
   }
@@ -128,7 +132,7 @@ export class JolocomSDK extends BackendMiddleware {
       await interaction.processInteractionToken(token)
       return interaction
     } else {
-      return this.interactionManager.start(InteractionChannel.HTTP, token)
+      return this.interactionManager.start(InteractionTransportType.HTTP, token)
     }
   }
 
@@ -173,7 +177,7 @@ export class JolocomSDK extends BackendMiddleware {
       auth,
       await this.keyChainLib.getPassword(),
     )
-    await this.interactionManager.start(InteractionChannel.HTTP, token)
+    await this.interactionManager.start(InteractionTransportType.HTTP, token)
     return token.encode()
   }
 
@@ -195,7 +199,7 @@ export class JolocomSDK extends BackendMiddleware {
       await this.keyChainLib.getPassword(),
     )
 
-    await this.interactionManager.start(InteractionChannel.HTTP, token)
+    await this.interactionManager.start(InteractionTransportType.HTTP, token)
     return token.encode()
   }
 
@@ -212,7 +216,7 @@ export class JolocomSDK extends BackendMiddleware {
       request,
       await this.keyChainLib.getPassword(),
     )
-    await this.interactionManager.start(InteractionChannel.HTTP, token)
+    await this.interactionManager.start(InteractionTransportType.HTTP, token)
     return token.encode()
   }
 
@@ -231,7 +235,7 @@ export class JolocomSDK extends BackendMiddleware {
       offer,
       await this.keyChainLib.getPassword(),
     )
-    await this.interactionManager.start(InteractionChannel.HTTP, token)
+    await this.interactionManager.start(InteractionTransportType.HTTP, token)
     return token.encode()
   }
 
