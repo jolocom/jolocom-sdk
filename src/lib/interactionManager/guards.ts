@@ -8,6 +8,9 @@ import {
   AuthorizationRequest,
   AuthorizationResponse,
   AuthorizationType,
+  EstablishChannelResponse,
+  EstablishChannelRequest,
+  EstablishChannelType,
 } from './types'
 
 export const isCredentialRequest = (token: any): token is CredentialRequest =>
@@ -41,3 +44,15 @@ export const isAuthorizationResponse = (
   type: AuthorizationType,
 ): token is AuthorizationResponse =>
   type === AuthorizationType.AuthorizationResponse
+
+export const isEstablishChannelRequest = (
+  token: any,
+  type: EstablishChannelType
+): token is EstablishChannelRequest =>
+  type === EstablishChannelType.EstablishChannelRequest
+
+export const isEstablishChannelResponse = (
+  token: any,
+  type: EstablishChannelType
+): token is EstablishChannelResponse =>
+  type === EstablishChannelType.EstablishChannelResponse

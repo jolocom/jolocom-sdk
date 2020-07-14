@@ -12,6 +12,8 @@ import { ISignedCredCreationArgs } from 'jolocom-lib/js/credentials/signedCreden
 import {
   InteractionTransportType,
   AuthorizationRequest,
+  EstablishChannelRequest,
+  EstablishChannelType,
 } from './src/lib/interactionManager/types'
 import { generateSecureRandomBytes } from './src/lib/util'
 import { BackendError } from './src/lib/errors/types'
@@ -35,6 +37,7 @@ export { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { Interaction } from './src/lib/interactionManager/interaction'
 import { InteractionManager } from './src/lib/interactionManager/interactionManager'
+import { ChannelKeeper } from './src/lib/channels'
 
 export interface IJolocomSDKConfig {
   storage: IStorage
@@ -52,6 +55,7 @@ export interface JolocomPlugin {
 
 export class JolocomSDK extends BackendMiddleware {
   public interactionManager: InteractionManager
+  public channels = new ChannelKeeper(this)
 
   /**
    * FIXME merge the backendMiddleware code in here instead of extending??
@@ -209,6 +213,27 @@ export class JolocomSDK extends BackendMiddleware {
       {
         message: request,
         typ: AuthorizationType.AuthorizationRequest,
+      },
+      await this.keyChainLib.getPassword(),
+    )
+
+    await this.interactionManager.start(InteractionTransportType.HTTP, token)
+    return token.encode()
+  }
+
+  /**
+   * Creates a signed, base64 encoded JWT for an EstablishChannelRequest interaction token
+   *
+   * @param request - EstablishChannelRequest Attributes
+   * @returns Base64 encoded signed EstablishChannelRequest
+   */
+  public async establishChannelRequestToken(
+    request: EstablishChannelRequest,
+  ): Promise<string> {
+    const token = await this.idw.create.message(
+      {
+        message: request,
+        typ: EstablishChannelType.EstablishChannelRequest
       },
       await this.keyChainLib.getPassword(),
     )

@@ -94,6 +94,7 @@ export class InteractionManager extends Transportable<InteractionTransport, Inte
   }
 
   // FIXME this can return UNDEFINED, should throw an error
+  // FIXME need to be async to support storage backends
   public getInteraction(id: string) {
     return this.interactions[id]
   }
