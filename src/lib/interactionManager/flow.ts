@@ -1,6 +1,7 @@
 import { Interaction } from './interaction'
 import { FlowType } from './types'
 
+// FIXME why is this exported?
 export interface FlowState {}
 
 export abstract class Flow<T> {

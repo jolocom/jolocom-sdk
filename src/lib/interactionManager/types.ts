@@ -7,6 +7,7 @@ import { IdentitySummary } from '../types'
 import { FlowState } from './flow'
 import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRequest'
 import { CredentialResponse } from 'jolocom-lib/js/interactionTokens/credentialResponse'
+import { ChannelTransport } from '../channels'
 
 export enum InteractionRole {
   Requester = 'requester',
@@ -32,6 +33,25 @@ export enum FlowType {
   CredentialShare = 'CredentialShare',
   CredentialOffer = 'CredentialOffer',
   Authorization = 'Authorization',
+  EstablishChannel = 'EstablishChannel'
+}
+
+export enum EstablishChannelType {
+  EstablishChannelRequest = 'EstablishChannelRequest',
+  EstablishChannelResponse = 'EstablishChannelResponse',
+}
+export interface EstablishChannelRequest {
+  description: string
+  transports: ChannelTransport[]
+}
+export interface EstablishChannelResponse {
+  transportIdx: number
+}
+export interface EstablishChannelFlowState {
+  description: string
+  established: boolean
+  transports?: ChannelTransport[]
+  transport?: ChannelTransport
 }
 
 export enum AuthorizationType {
