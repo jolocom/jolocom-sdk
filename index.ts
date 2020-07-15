@@ -45,6 +45,10 @@ export interface IJolocomSDKInitOptions {
   dontAutoRegister?: boolean
 }
 
+export interface JolocomPlugin {
+  register(sdk: JolocomSDK): Promise<void>
+}
+
 export class JolocomSDK extends BackendMiddleware {
   public interactionManager: InteractionManager
 
@@ -93,6 +97,11 @@ export class JolocomSDK extends BackendMiddleware {
 
       throw err
     }
+  }
+
+  async usePlugins(...plugs: JolocomPlugin[]) {
+    const promises = plugs.map(p => p.register(this))
+    await Promise.all(promises)
   }
 
   /**
