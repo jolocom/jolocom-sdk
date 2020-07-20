@@ -266,17 +266,17 @@ export class Interaction {
   ): Promise<boolean> {
     if (!this.participants.requester) {
       // TODO what happens if the signer isnt resolvable
-      this.participants.requester = await this.ctx.ctx.registry.resolve(
-        token.signer.did,
-      )
-      if (this.participants.requester.did === this.ctx.ctx.identityWallet.did) {
+      const requester = this.participants.requester =
+        await this.ctx.ctx.didMethods.getDefault().resolve(token.signer.did)
+      
+      if (requester.did === this.ctx.ctx.identityWallet.did) {
+        this.participants.responder = this.ctx.ctx.identityWallet.identity
         this.role = InteractionRole.Requester
       }
     } else if (!this.participants.responder) {
-      this.participants.responder = await this.ctx.ctx.registry.resolve(
-        token.signer.did,
-      )
-      if (this.participants.responder.did === this.ctx.ctx.identityWallet.did) {
+      const responder = this.participants.responder =
+        await this.ctx.ctx.didMethods.getDefault().resolve(token.signer.did)
+      if (responder.did === this.ctx.ctx.identityWallet.did) {
         this.role = InteractionRole.Responder
       }
     }
@@ -286,7 +286,7 @@ export class Interaction {
         await this.ctx.ctx.identityWallet.validateJWT(
           token,
           last(this.getMessages()),
-          this.ctx.ctx.registry,
+          this.ctx.ctx.didMethods.getDefault(),
         )
       } catch (err) {
         throw new AppError(ErrorCode.InvalidToken, err)

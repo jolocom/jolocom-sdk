@@ -1,15 +1,14 @@
 import { IdentityWallet } from 'jolocom-lib/js/identityWallet/identityWallet'
 import { IStorage, IPasswordStore, NaivePasswordStore } from './lib/storage'
-import {
-  createJolocomRegistry,
-  JolocomRegistry,
-} from 'jolocom-lib/js/registries/jolocomRegistry'
 import { JolocomLib } from 'jolocom-lib'
 import { publicKeyToDID } from 'jolocom-lib/js/utils/crypto'
 import { Identity } from 'jolocom-lib/js/identity/identity'
+import { jolocomContractsAdapter } from 'jolocom-lib/js/contracts/contractsAdapter'
+import { jolocomContractsGateway } from 'jolocom-lib/js/contracts/contractsGateway'
 import { SoftwareKeyProvider } from 'jolocom-lib/js/vaultedKeyProvider/softwareProvider'
 import { generateSecureRandomBytes } from './lib/util'
 import { BackendError, BackendMiddlewareErrorCodes } from './lib/errors/types'
+import { methodKeeper } from 'index'
 
 export class BackendMiddleware {
   private _identityWallet!: IdentityWallet
@@ -17,7 +16,7 @@ export class BackendMiddleware {
 
   public storageLib: IStorage
   public keyChainLib: IPasswordStore
-  public registry: JolocomRegistry
+  public didMethods = methodKeeper()
 
   private newIdentityPromise!: Promise<IdentityWallet>
 
@@ -29,7 +28,6 @@ export class BackendMiddleware {
     // FIXME actually use fuelingEndpoint
     this.storageLib = config.storage
     this.keyChainLib = config.passwordStore || new NaivePasswordStore()
-    this.registry = createJolocomRegistry()
   }
 
   public get identityWallet(): IdentityWallet {
@@ -98,11 +96,11 @@ export class BackendMiddleware {
           derivationPath,
           keyId: identity.publicKeySection[0].id,
         },
-        contractsAdapter: this.registry.contractsAdapter,
-        contractsGateway: this.registry.contractsGateway,
+        contractsAdapter: jolocomContractsAdapter,
+        contractsGateway: jolocomContractsGateway,
       }))
     } else {
-      const identityWallet = await this.registry.authenticate(
+      const identityWallet = await this.didMethods.getDefault().authenticate(
         this._keyProvider,
         {
           encryptionPass,
@@ -129,7 +127,7 @@ export class BackendMiddleware {
     ) as SoftwareKeyProvider
     const { jolocomIdentityKey: derivationPath } = JolocomLib.KeyTypes
 
-    const identityWallet = await this.registry.authenticate(this._keyProvider, {
+    const identityWallet = await this.didMethods.getDefault().authenticate(this._keyProvider, {
       encryptionPass: password,
       derivationPath,
     })
@@ -182,17 +180,10 @@ export class BackendMiddleware {
 
   public async createIdentity(): Promise<IdentityWallet> {
     const password = await this.keyChainLib.getPassword()
-    // FIXME
-    // registry.create fails while storing json in ipfs
-    // it seems the request is badly formatted
-    // something to do with FormData or node-fetch
-    // needs to remove the polyfill stuff
-    // console.log('does registry.create fail?')
-    this._identityWallet = await this.registry.create(
+    this._identityWallet = await this.didMethods.getDefault().create(
       this.keyProvider,
       password,
     )
-    // console.log('registry.create doesn't fail!')
     await this.storeIdentityData()
     return this._identityWallet
   }

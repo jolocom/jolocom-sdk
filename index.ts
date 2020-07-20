@@ -40,6 +40,8 @@ import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { Interaction } from './src/lib/interactionManager/interaction'
 import { InteractionManager } from './src/lib/interactionManager/interactionManager'
 import { ChannelKeeper } from './src/lib/channels'
+import { IRegistry } from 'jolocom-lib/js/registries/types'
+import { createJolocomRegistry } from 'jolocom-lib/js/registries/jolocomRegistry'
 
 export interface IJolocomSDKConfig {
   storage: IStorage
@@ -53,6 +55,26 @@ export interface IJolocomSDKInitOptions {
 
 export interface JolocomPlugin {
   register(sdk: JolocomSDK): Promise<void>
+}
+
+// TODO move to backendMiddleware?
+export const methodKeeper = () => {
+  const methods: {[k: string]: IRegistry} = {}
+
+  return {
+    register: (methodName: string, implementation: IRegistry) => {
+      if (methods[methodName]) {
+        return false
+      }
+
+      methods[name] = implementation
+      return true
+    },
+    find: (methodName: string) => {
+      return methods[methodName]
+    },
+    getDefault: () => createJolocomRegistry() // TODO make sure this is fine
+  }
 }
 
 export class JolocomSDK extends BackendMiddleware {
