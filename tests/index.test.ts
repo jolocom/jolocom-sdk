@@ -24,7 +24,8 @@ afterEach(() => {
     return conn.close();
 });
 
-test("Create identity", async () => {
-  const SDK = getSdk(getConnection())
-  console.log(SDK)
+test("Create local identity", async () => {
+  const SDK = await getSdk(getConnection())
+  // TODO Continue from here
+  // SDK.didMethods.registerDefault('un', { })
 });
