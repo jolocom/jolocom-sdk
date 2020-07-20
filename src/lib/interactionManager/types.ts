@@ -27,6 +27,7 @@ export enum FlowType {
   CredentialShare = 'CredentialShare',
   CredentialOffer = 'CredentialOffer',
   Authorization = 'Authorization',
+  Resolution = 'Resolution',
 }
 
 export enum AuthorizationType {
