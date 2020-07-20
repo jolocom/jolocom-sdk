@@ -9,6 +9,7 @@ dist/
 db.sqlite3
 */sentry.properties
 local_identity.password.txt
+js
 
 #### Below is the default react native .gitignore ###
 ############### DO NOT EDIT BELOW ###################
