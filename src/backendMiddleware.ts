@@ -8,7 +8,7 @@ import { jolocomContractsGateway } from 'jolocom-lib/js/contracts/contractsGatew
 import { SoftwareKeyProvider } from 'jolocom-lib/js/vaultedKeyProvider/softwareProvider'
 import { generateSecureRandomBytes } from './lib/util'
 import { BackendError, BackendMiddlewareErrorCodes } from './lib/errors/types'
-import { methodKeeper } from 'index'
+import { methodKeeper } from '../index'
 
 export class BackendMiddleware {
   private _identityWallet!: IdentityWallet
