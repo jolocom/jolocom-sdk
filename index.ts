@@ -52,22 +52,38 @@ export interface JolocomPlugin {
 }
 
 // TODO move to backendMiddleware?
-export const methodKeeper = () => {
-  const methods: {[k: string]: IRegistry} = {}
+// Decide if default should be configurable or not
+export const methodKeeper = (defaultMethod = {
+  prefix: 'jolo',
+  implementation: createJolocomRegistry() as IRegistry
+}) => {
+  const methods: {[k: string]: IRegistry} = {
+    [defaultMethod.prefix]: defaultMethod.implementation
+  }
+
+  let defaultDidMethod = defaultMethod
 
   return {
-    register: (methodName: string, implementation: IRegistry) => {
+    register: (methodName: string, implementation: IRegistry, makeDefault?: boolean) => {
       if (methods[methodName]) {
         return false
       }
 
       methods[name] = implementation
+
+      if (makeDefault) {
+        defaultDidMethod = {
+          prefix: methodName,
+          implementation
+        }
+      }
+
       return true
     },
     find: (methodName: string) => {
       return methods[methodName]
     },
-    getDefault: () => createJolocomRegistry() // TODO make sure this is fine
+    getDefault: () => defaultDidMethod.implementation
   }
 }
 
