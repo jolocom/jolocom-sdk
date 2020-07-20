@@ -37,6 +37,7 @@ export enum FlowType {
   EstablishChannel = 'EstablishChannel',
   Encrypt = 'Encrypt',
   Decrypt = 'Decrypt',
+  Resolution = 'Resolution',
 }
 
 export enum EstablishChannelType {
