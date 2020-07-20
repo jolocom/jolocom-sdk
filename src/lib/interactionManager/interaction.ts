@@ -190,7 +190,7 @@ export class Interaction {
   public async processInteractionToken<T>(token: JSONWebToken<T>): Promise<boolean> {
     if (!this.participants) {
       // TODO what happens if the signer isnt resolvable
-      const requester = await this.ctx.ctx.registry.resolve(token.signer.did)
+      const requester = await this.ctx.ctx.didMethods.getDefault().resolve(token.signer.did)
       this.participants = {
         requester,
       }
@@ -198,7 +198,7 @@ export class Interaction {
         this.participants.responder = this.ctx.ctx.identityWallet.identity
       }
     } else if (!this.participants.responder) {
-      this.participants.responder = await this.ctx.ctx.registry.resolve(
+      this.participants.responder = await this.ctx.ctx.didMethods.getDefault().resolve(
         token.signer.did,
       )
     }
@@ -208,7 +208,7 @@ export class Interaction {
         await this.ctx.ctx.identityWallet.validateJWT(
           token,
           last(this.getMessages()),
-          this.ctx.ctx.registry,
+          this.ctx.ctx.didMethods.getDefault(),
         )
       } catch (err) {
         throw new AppError(ErrorCode.InvalidToken, err)
