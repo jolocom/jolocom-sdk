@@ -64,25 +64,27 @@ export const methodKeeper = (defaultMethod = {
   let defaultDidMethod = defaultMethod
 
   return {
-    register: (methodName: string, implementation: IRegistry, makeDefault?: boolean) => {
+    register: (methodName: string, implementation: IRegistry) => {
       if (methods[methodName]) {
         return false
       }
 
       methods[name] = implementation
 
-      if (makeDefault) {
-        defaultDidMethod = {
-          prefix: methodName,
-          implementation
-        }
-      }
-
       return true
     },
+
     find: (methodName: string) => {
       return methods[methodName]
     },
+
+    registerDefault: (methodName: string, implementation: IRegistry) => {
+      defaultDidMethod = {
+        prefix: methodName,
+        implementation
+      }
+    },
+
     getDefault: () => defaultDidMethod.implementation
   }
 }
