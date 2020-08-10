@@ -21,9 +21,9 @@ export class CredentialOfferFlow extends Flow<
     selection: [],
     issued: [],
     credentialsValidity: [],
-    credentialsAllValid: true
+    credentialsAllValid: true,
   }
-  public type = FlowType.CredentialReceive
+  public type = FlowType.CredentialOffer
 
   public constructor(ctx: Interaction) {
     super(ctx)
@@ -63,7 +63,9 @@ export class CredentialOfferFlow extends Flow<
 
   // Sets the validity map, currently if the issuer and if the subjects are correct.
   // also populates the SignedCredentialWithMetadata with credentials
-  private async handleCredentialReceive({ signedCredentials }: CredentialsReceive) {
+  private async handleCredentialReceive({
+    signedCredentials,
+  }: CredentialsReceive) {
     this.state.issued = signedCredentials
     this.state.issued.map(cred => {
       const offer = this.state.offerSummary.find(
@@ -75,9 +77,9 @@ export class CredentialOfferFlow extends Flow<
       }
     })
 
-    const validArr = this.state.credentialsValidity = await JolocomLib.util.validateDigestables(
+    const validArr = (this.state.credentialsValidity = await JolocomLib.util.validateDigestables(
       signedCredentials,
-    )
+    ))
     this.state.credentialsAllValid = validArr.every(v => v)
     return true
   }
