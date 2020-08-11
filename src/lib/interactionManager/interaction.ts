@@ -2,7 +2,6 @@ import { CredentialOfferFlow } from './credentialOfferFlow'
 import { InteractionType } from 'jolocom-lib/js/interactionTokens/types'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import {
-  InteractionTransportType,
   InteractionSummary,
   SignedCredentialWithMetadata,
   CredentialVerificationSummary,
@@ -11,13 +10,11 @@ import {
   FlowType,
 } from './types'
 import { CredentialRequestFlow } from './credentialRequestFlow'
-import { JolocomLib } from 'jolocom-lib'
 import { Flow } from './flow'
 import { last } from 'ramda'
 import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credentialOfferRequest'
 import { AuthenticationFlow } from './authenticationFlow'
 import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRequest'
-import { Linking } from '../../polyfills/reactNative'
 import { AppError, ErrorCode } from '../errors'
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { Identity } from 'jolocom-lib/js/identity/identity'
@@ -28,7 +25,7 @@ import {
   AuthorizationFlowState,
 } from './types'
 import { AuthorizationFlow } from './authorizationFlow'
-import { InteractionManager } from './interactionManager'
+import { InteractionManager, InteractionTransportAPI } from './interactionManager'
 
 /***
  * - initiated by InteractionManager when an interaction starts
@@ -49,8 +46,7 @@ export class Interaction {
   public ctx: InteractionManager
   public flow: Flow<any>
 
-  // The transport type through which the request (first token) came in
-  public transportType: InteractionTransportType | string
+  public transportAPI: InteractionTransportAPI
 
   public participants!: {
     requester: Identity
@@ -59,31 +55,14 @@ export class Interaction {
 
   public constructor(
     ctx: InteractionManager,
-    transportType: InteractionTransportType,
+    transportAPI: InteractionTransportAPI,
     id: string,
     interactionType: string,
   ) {
     this.ctx = ctx
-    this.transportType = transportType
+    this.transportAPI = transportAPI
     this.id = id
     this.flow = new interactionFlowForMessage[interactionType](this)
-  }
-
-  public static async start<T>(
-    ctx: InteractionManager,
-    transportType: InteractionTransportType,
-    token: JSONWebToken<T>,
-  ): Promise<Interaction> {
-    const interaction = new Interaction(
-      ctx,
-      transportType,
-      token.nonce,
-      token.interactionType,
-    )
-
-    await interaction.processInteractionToken(token)
-
-    return interaction
   }
 
   public getMessages() {
@@ -260,39 +239,7 @@ export class Interaction {
   public async send<T>(token: JSONWebToken<T>) {
     // @ts-ignore - CredentialReceive has no callbackURL, needs fix on the lib for JWTEncodable.
     const { callbackURL } = token.interactionToken
-
-    switch (this.transportType) {
-      case InteractionTransportType.HTTP:
-        const response = await fetch(callbackURL, {
-          method: 'POST',
-          body: JSON.stringify({ token: token.encode() }),
-          headers: { 'Content-Type': 'application/json' },
-        })
-
-        if (!response.ok) {
-          // TODO Error code for failed send?
-          // TODO Actually include some info about the error
-          throw new AppError(ErrorCode.Unknown)
-        }
-
-        const text = await response.text()
-
-        if (text.length) {
-          const { token } = JSON.parse(text)
-          return JolocomLib.parse.interactionToken.fromJWT(token)
-        }
-        break
-
-      case InteractionTransportType.Deeplink:
-        const callback = `${callbackURL}/${token.encode()}`
-        if (!(await Linking.canOpenURL(callback))) {
-          throw new AppError(ErrorCode.DeepLinkUrlNotFound)
-        }
-
-        return Linking.openURL(callback).then(() => {})
-      default:
-        throw new AppError(ErrorCode.TransportNotSupported)
-    }
+    return this.transportAPI.send(token)
   }
 
   private checkFlow(flow: FlowType) {
