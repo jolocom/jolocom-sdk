@@ -9,9 +9,9 @@ import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRe
 import { CredentialResponse } from 'jolocom-lib/js/interactionTokens/credentialResponse'
 
 // TODO define and refactor how the UI components/containers handle the InteractionSummary.
-export interface InteractionSummary {
+export interface InteractionSummary<T extends FlowState> {
   initiator: IdentitySummary
-  state: FlowState
+  state: T
 }
 
 export enum InteractionTransportType {

@@ -3,9 +3,9 @@ import { FlowType } from './types'
 
 export interface FlowState {}
 
-export abstract class Flow<T> {
+export abstract class Flow<T, K extends FlowState> {
   protected ctx: Interaction
-  public abstract state: FlowState
+  public abstract state: K
   public abstract type: FlowType
 
   constructor(ctx: Interaction) {
