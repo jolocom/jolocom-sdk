@@ -25,7 +25,7 @@ export enum InteractionTransportType {
 export enum FlowType {
   Authentication = 'Authentication',
   CredentialShare = 'CredentialShare',
-  CredentialReceive = 'CredentialReceive',
+  CredentialOffer = 'CredentialOffer',
   Authorization = 'Authorization',
 }
 
