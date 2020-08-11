@@ -10,7 +10,8 @@ import { AttributeSummary, CredentialRequestFlowState, FlowType } from './types'
 import { isCredentialRequest, isCredentialResponse } from './guards'
 
 export class CredentialRequestFlow extends Flow<
-  CredentialRequest | CredentialResponse
+  CredentialRequest | CredentialResponse,
+  CredentialRequestFlowState
 > {
   public state: CredentialRequestFlowState = {
     constraints: [],

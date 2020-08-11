@@ -10,7 +10,8 @@ import {
 import { isAuthorizationRequest, isAuthorizationResponse } from './guards'
 
 export class AuthorizationFlow extends Flow<
-  AuthorizationResponse | AuthorizationRequest
+  AuthorizationResponse | AuthorizationRequest,
+  AuthorizationFlowState
 > {
   public type = FlowType.Authorization
   public state: AuthorizationFlowState = {

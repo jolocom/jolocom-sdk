@@ -5,7 +5,10 @@ import { Flow } from './flow'
 import { AuthenticationFlowState, FlowType } from './types'
 import { isAuthenticationRequest } from './guards'
 
-export class AuthenticationFlow extends Flow<Authentication> {
+export class AuthenticationFlow extends Flow<
+  Authentication,
+  AuthenticationFlowState
+> {
   public state: AuthenticationFlowState = { description: '' }
   public type = FlowType.Authentication
 

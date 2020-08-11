@@ -25,7 +25,10 @@ import {
   AuthorizationFlowState,
 } from './types'
 import { AuthorizationFlow } from './authorizationFlow'
-import { InteractionManager, InteractionTransportAPI } from './interactionManager'
+import {
+  InteractionManager,
+  InteractionTransportAPI,
+} from './interactionManager'
 
 /***
  * - initiated by InteractionManager when an interaction starts
@@ -44,7 +47,7 @@ export class Interaction {
   private interactionMessages: JSONWebToken<any>[] = []
   public id: string
   public ctx: InteractionManager
-  public flow: Flow<any>
+  public flow: Flow<any, any>
 
   public transportAPI: InteractionTransportAPI
 
@@ -80,7 +83,7 @@ export class Interaction {
     const request = this.findMessageByType(
       InteractionType.Authentication,
     ) as JSONWebToken<Authentication>
-    const { description } = this.getSummary().state as AuthenticationFlowState
+    const { description } = this.getSummary<AuthenticationFlowState>().state
 
     return this.ctx.ctx.identityWallet.create.interactionTokens.response.auth(
       {
@@ -97,8 +100,9 @@ export class Interaction {
       AuthorizationType.AuthorizationRequest,
     ) as JSONWebToken<AuthorizationRequest>
 
-    const { description, imageURL, action } = this.getSummary()
-      .state as AuthorizationFlowState
+    const { description, imageURL, action } = this.getSummary<
+      AuthorizationFlowState
+    >().state
 
     return this.ctx.ctx.identityWallet.create.message(
       {
@@ -206,7 +210,7 @@ export class Interaction {
       })
   }
 
-  public getSummary(): InteractionSummary {
+  public getSummary<T>(): InteractionSummary<T> {
     return {
       initiator: generateIdentitySummary(this.participants.requester),
       state: this.flow.getState(),
@@ -249,8 +253,9 @@ export class Interaction {
   public storeSelectedCredentials() {
     this.checkFlow(FlowType.CredentialOffer)
 
-    const { issued, credentialsValidity } = this.flow
-      .state as CredentialOfferFlowState
+    const { issued, credentialsValidity } = this.getSummary<
+      CredentialOfferFlowState
+    >().state
 
     if (!issued.length)
       throw new AppError(ErrorCode.SaveExternalCredentialFailed)
@@ -266,8 +271,9 @@ export class Interaction {
   public storeCredentialMetadata() {
     this.checkFlow(FlowType.CredentialOffer)
 
-    const { offerSummary, selection, credentialsValidity } = this.flow
-      .state as CredentialOfferFlowState
+    const { offerSummary, selection, credentialsValidity } = this.getSummary<
+      CredentialOfferFlowState
+    >().state
 
     if (!selection.length)
       throw new AppError(ErrorCode.SaveCredentialMetadataFailed)

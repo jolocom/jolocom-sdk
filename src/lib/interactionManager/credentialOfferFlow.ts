@@ -14,7 +14,8 @@ import {
 } from './guards'
 
 export class CredentialOfferFlow extends Flow<
-  CredentialOfferRequest | CredentialOfferResponse | CredentialsReceive
+  CredentialOfferRequest | CredentialOfferResponse | CredentialsReceive,
+  CredentialOfferFlowState
 > {
   public state: CredentialOfferFlowState = {
     offerSummary: [],
