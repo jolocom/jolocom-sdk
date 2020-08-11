@@ -197,6 +197,24 @@ export class BackendMiddleware {
     return this._identityWallet
   }
 
+  public async loadIdentityFromMnemonic(mnemonic: string): Promise<Identity> {
+    const password = (await generateSecureRandomBytes(32)).toString('base64')
+    this._keyProvider = JolocomLib.KeyProvider.recoverKeyPair(
+      mnemonic,
+      password,
+    ) as SoftwareKeyProvider
+    const { jolocomIdentityKey: derivationPath } = JolocomLib.KeyTypes
+
+    const identityWallet = await this.registry.authenticate(this._keyProvider, {
+      encryptionPass: password,
+      derivationPath,
+    })
+    this._identityWallet = identityWallet
+    await this.keyChainLib.savePassword(password)
+    await this.storeIdentityData()
+    return identityWallet.identity
+  }
+
   private async storeIdentityData(): Promise<void> {
     const personaData = {
       did: this._identityWallet.identity.did,

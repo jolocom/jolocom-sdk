@@ -42,6 +42,7 @@ export interface IJolocomSDKConfig {
 }
 
 export interface IJolocomSDKInitOptions {
+  mnemonic?: string
   dontAutoRegister?: boolean
 }
 
@@ -82,6 +83,10 @@ export class JolocomSDK extends BackendMiddleware {
   }
 
   async init(opts: IJolocomSDKInitOptions = {}) {
+    if (opts.mnemonic) {
+      return this.loadIdentityFromMnemonic(opts.mnemonic)
+    }
+
     try {
       return await this.prepareIdentityWallet()
     } catch (err) {

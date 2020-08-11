@@ -6,9 +6,10 @@ import {
   SignedCredentialWithMetadata,
   CredentialVerificationSummary,
   AuthenticationFlowState,
+  CredentialOfferFlowState,
+  FlowType,
 } from './types'
 import { CredentialRequestFlow } from './credentialRequestFlow'
-import { CredentialMetadataSummary } from '../storage'
 import { Flow } from './flow'
 import { last } from 'ramda'
 import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credentialOfferRequest'
@@ -166,7 +167,9 @@ export class Interaction {
    * @throws AppError<InvalidToken> with `origError` set to the original token
    *                                validation error from the jolocom library
    */
-  public async processInteractionToken<T>(token: JSONWebToken<T>): Promise<boolean> {
+  public async processInteractionToken<T>(
+    token: JSONWebToken<T>,
+  ): Promise<boolean> {
     if (!this.participants) {
       // TODO what happens if the signer isnt resolvable
       const requester = await this.ctx.ctx.registry.resolve(token.signer.did)
@@ -239,21 +242,55 @@ export class Interaction {
     return this.transportAPI.send(token)
   }
 
-  public async storeCredential(toSave: SignedCredentialWithMetadata[]) {
+  private checkFlow(flow: FlowType) {
+    if (this.flow.type !== flow) throw new AppError(ErrorCode.WrongFlow)
+  }
+
+  public storeSelectedCredentials() {
+    this.checkFlow(FlowType.CredentialOffer)
+
+    const { issued, credentialsValidity } = this.flow
+      .state as CredentialOfferFlowState
+
+    if (!issued.length)
+      throw new AppError(ErrorCode.SaveExternalCredentialFailed)
+
     return Promise.all(
-      toSave.map(
-        ({ signedCredential }) =>
-          signedCredential &&
-          this.ctx.ctx.storageLib.store.verifiableCredential(signedCredential),
-      ),
+      issued.map((cred, i) => {
+        credentialsValidity[i] &&
+          this.ctx.ctx.storageLib.store.verifiableCredential(cred)
+      }),
     )
   }
 
-  public storeCredentialMetadata = (metadata: CredentialMetadataSummary) =>
-    this.ctx.ctx.storageLib.store.credentialMetadata(metadata)
+  public storeCredentialMetadata() {
+    this.checkFlow(FlowType.CredentialOffer)
 
-  public storeIssuerProfile = () =>
+    const { offerSummary, selection, credentialsValidity } = this.flow
+      .state as CredentialOfferFlowState
+
+    if (!selection.length)
+      throw new AppError(ErrorCode.SaveCredentialMetadataFailed)
+
+    const issuer = generateIdentitySummary(this.participants.requester)
+
+    Promise.all(
+      selection.map(({ type }, i) => {
+        const metadata = offerSummary.find(metadata => metadata.type === type)
+
+        metadata &&
+          credentialsValidity[i] &&
+          this.ctx.ctx.storageLib.store.credentialMetadata({
+            ...metadata,
+            issuer,
+          })
+      }),
+    )
+  }
+
+  public storeIssuerProfile() {
     this.ctx.ctx.storageLib.store.issuerProfile(
       generateIdentitySummary(this.participants.requester),
     )
+  }
 }
