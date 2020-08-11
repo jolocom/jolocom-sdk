@@ -8,6 +8,7 @@ import {
   CredentialVerificationSummary,
   AuthenticationFlowState,
   CredentialOfferFlowState,
+  FlowType,
 } from './types'
 import { CredentialRequestFlow } from './credentialRequestFlow'
 import { JolocomLib } from 'jolocom-lib'
@@ -294,9 +295,18 @@ export class Interaction {
     }
   }
 
+  private checkFlow(flow: FlowType) {
+    if (this.flow.type !== flow) throw new AppError(ErrorCode.WrongFlow)
+  }
+
   public storeSelectedCredentials() {
+    this.checkFlow(FlowType.CredentialOffer)
+
     const { issued, credentialsValidity } = this.flow
       .state as CredentialOfferFlowState
+
+    if (!issued.length)
+      throw new AppError(ErrorCode.SaveExternalCredentialFailed)
 
     return Promise.all(
       issued.map((cred, i) => {
@@ -307,8 +317,14 @@ export class Interaction {
   }
 
   public storeCredentialMetadata() {
+    this.checkFlow(FlowType.CredentialOffer)
+
     const { offerSummary, selection, credentialsValidity } = this.flow
       .state as CredentialOfferFlowState
+
+    if (!selection.length)
+      throw new AppError(ErrorCode.SaveCredentialMetadataFailed)
+
     const issuer = generateIdentitySummary(this.participants.requester)
 
     Promise.all(

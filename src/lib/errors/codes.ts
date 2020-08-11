@@ -5,6 +5,7 @@ export enum ErrorCode {
   WalletInitFailed = 'WalletInit',
   SaveClaimFailed = 'SaveClaim',
   SaveExternalCredentialFailed = 'SaveExtCred',
+  SaveCredentialMetadataFailed = 'SaveCredMetadata',
   TransportNotSupported = 'UnsuportedTransport',
   // actions/sso
   DeepLinkUrlNotFound = 'DeepLinkUrlNotFound',
@@ -12,6 +13,7 @@ export enum ErrorCode {
   InvalidSignature = 'InvalidSignature',
   WrongDID = 'WrongDID',
   WrongNonce = 'WrongNonce',
+  WrongFlow = 'WrongFlow',
   // actions/sso/authenticationRequest
   AuthenticationRequestFailed = 'AuthRequest',
   AuthenticationResponseFailed = 'AuthResponse',
@@ -30,5 +32,5 @@ export enum ErrorCode {
   // ui/generic/appInit
   AppInitFailed = 'AppInitFailed',
 
-  InvalidToken = 'InvalidToken'
+  InvalidToken = 'InvalidToken',
 }
