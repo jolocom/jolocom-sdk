@@ -43,9 +43,8 @@ export class ChannelKeeper extends Transportable<ChannelTransport, ChannelTransp
     }
     const flowState = initInterxn.flow.getState() as EstablishChannelFlowState
     const transportConfig = flowState.transport
-    if (!transportConfig) throw new Error('no transport coniguration!')
-    const transportAPI = await this.createTransport(transportConfig)
-    await transportAPI.ready
+    const transportAPI = transportConfig && await this.createTransport(transportConfig)
+    if (transportAPI) await transportAPI.ready
 
     const ch = new Channel(
       this,
