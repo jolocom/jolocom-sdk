@@ -25,7 +25,10 @@ import {
   AuthorizationFlowState,
 } from './types'
 import { AuthorizationFlow } from './authorizationFlow'
-import { InteractionManager, InteractionTransportAPI } from './interactionManager'
+import {
+  InteractionManager,
+  InteractionTransportAPI,
+} from './interactionManager'
 
 /***
  * - initiated by InteractionManager when an interaction starts
@@ -274,7 +277,7 @@ export class Interaction {
 
     const issuer = generateIdentitySummary(this.participants.requester)
 
-    Promise.all(
+    return Promise.all(
       selection.map(({ type }, i) => {
         const metadata = offerSummary.find(metadata => metadata.type === type)
 
@@ -289,7 +292,7 @@ export class Interaction {
   }
 
   public storeIssuerProfile() {
-    this.ctx.ctx.storageLib.store.issuerProfile(
+    return this.ctx.ctx.storageLib.store.issuerProfile(
       generateIdentitySummary(this.participants.requester),
     )
   }
