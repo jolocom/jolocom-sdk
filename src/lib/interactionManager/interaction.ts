@@ -56,6 +56,8 @@ export class Interaction {
     responder?: Identity
   }
 
+  counterparty?: Identity
+
   public constructor(
     ctx: InteractionManager,
     transportAPI: InteractionTransportAPI,
@@ -180,10 +182,11 @@ export class Interaction {
         requester,
       }
       if (requester.did !== this.ctx.ctx.identityWallet.did) {
+        this.counterparty = requester
         this.participants.responder = this.ctx.ctx.identityWallet.identity
       }
     } else if (!this.participants.responder) {
-      this.participants.responder = await this.ctx.ctx.registry.resolve(
+      this.counterparty = this.participants.responder = await this.ctx.ctx.registry.resolve(
         token.signer.did,
       )
     }
