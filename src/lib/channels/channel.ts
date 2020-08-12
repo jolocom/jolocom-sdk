@@ -1,7 +1,8 @@
-import { InteractionSummary, FlowType } from '../interactionManager/types'
+import { InteractionSummary, FlowType, EstablishChannelFlowState } from '../interactionManager/types'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { Interaction } from '../interactionManager/interaction'
 import { ChannelTransportAPI, ChannelKeeper } from './channelKeeper'
+import { JolocomLib } from 'jolocom-lib'
 
 export interface ChannelSummary {
   initialInteraction: InteractionSummary
@@ -20,34 +21,40 @@ export class Channel {
   public ctx: ChannelKeeper
   public id: string
   public initialInteraction: Interaction
-  public transportAPI!: ChannelTransportAPI
-  private _authenticated = false
+  public authPromise: Promise<boolean>
   private _threads: {[id: string]: ChannelQuery} = {}
   private _threadIdList: string[] = []
-  private _transportAPI: ChannelTransportAPI
+  private _transportAPI?: ChannelTransportAPI
   private _started = false
   private _startedPromise: Promise<void> | null = null
+  private _resolveAuthPromise!: (value?: boolean) => void
 
   public constructor(
     ctx: ChannelKeeper,
     initialInteraction: Interaction,
-    transportAPI: ChannelTransportAPI
+    transportAPI?: ChannelTransportAPI
   ) {
     this.ctx = ctx
     this.id = initialInteraction.id
     this.initialInteraction = initialInteraction
     this._transportAPI = transportAPI
-    const resp = this.initialInteraction.getMessages()[1]
-    this._transportAPI.send(resp.encode())
-    this._authenticated = true
+
+    this.authPromise = new Promise<boolean>(resolve => {
+      this._resolveAuthPromise = resolve
+    })
 
     // TODO for a "server" side, the interaction will not yet have a response
     //      and the server should wait till a response is received before
     //      setting it as authenticated
   }
 
+  get counterparty() {
+    return this.initialInteraction.counterparty
+  }
+
   get authenticated() {
-    return this._authenticated
+    const flowState = this.initialInteraction.flow.getState() as EstablishChannelFlowState
+    return flowState.established
   }
 
   public getSummary(): ChannelSummary {
@@ -62,10 +69,28 @@ export class Channel {
     }
   }
 
-  public async processJWT(jwt: string) {
-    this._ensureAuthenticated()
+  get transportAPI() {
+    if (!this._transportAPI) throw new Error('no channel transport')
+    return this._transportAPI
+  }
 
+  set transportAPI(api: ChannelTransportAPI) {
+    this._transportAPI = api
+  }
+
+  public send(msg: string) {
+    return this.transportAPI.send(msg)
+  }
+
+  public async processJWT(jwt: string) {
     const interxn = await this.ctx.ctx.processJWT(jwt)
+    if (interxn.id === this.id) {
+      // this is the channel establishment response, update if necessary
+      this.initialInteraction = interxn
+      // TODO check if response valid?
+
+      if (this.authenticated) this._resolveAuthPromise(true)
+    }
 
     // TODO ~ @mnzaki
     // this is currently hardcoded to handle certain kinds of requests
@@ -79,13 +104,18 @@ export class Channel {
     // const resp = await interxn.getOrCreateResponse()
 
 
+    // TODO
+    // some form of simple permission system so that the user knows what they
+    // are consenting to when they open a channel
+
+    this._ensureAuthenticated()
     let resp
     if (interxn.flow.type === FlowType.Authentication) {
       resp = await interxn.createAuthenticationResponse()
     }
 
     if (resp) {
-      this._transportAPI.send(resp.encode())
+      this.send(resp.encode())
     }
 
     // const token = JolocomLib.parse.interactionToken.fromJWT(jwt)
@@ -98,7 +128,7 @@ export class Channel {
   }
 
   private _ensureAuthenticated() {
-    if (!this._authenticated) {
+    if (!this.authenticated) {
       throw new Error('not authenticated') // FIXME new errcode ChannelNotAuthenticated
     }
   }
@@ -110,7 +140,7 @@ export class Channel {
       this._started = true
       this._startedPromise = new Promise(async (resolve) => {
         while (this._started) {
-          const msg = await this._transportAPI.receive()
+          const msg = await this.transportAPI.receive()
           this.processJWT(msg)
         }
         resolve()
@@ -123,7 +153,7 @@ export class Channel {
   public stop() {
     if (!this._started) return
 
-    this._transportAPI.stop()
+    this.transportAPI.stop()
     this._started = false
   }
 
@@ -133,7 +163,7 @@ export class Channel {
       promise: new Promise((resolve, reject) => {
         query.resolve = resolve
         query.reject = reject
-        return this._transportAPI.send(token.encode())
+        return this.send(token.encode())
       })
     }
 
