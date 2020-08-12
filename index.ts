@@ -13,7 +13,6 @@ import {
   InteractionTransportType,
   AuthorizationRequest,
 } from './src/lib/interactionManager/types'
-import { generateSecureRandomBytes } from './src/lib/util'
 import { BackendError } from './src/lib/errors/types'
 
 export {
@@ -35,8 +34,8 @@ export { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { Interaction } from './src/lib/interactionManager/interaction'
 import { InteractionManager } from './src/lib/interactionManager/interactionManager'
-import { IRegistry } from 'jolocom-lib/js/registries/types'
-import { createJolocomRegistry } from 'jolocom-lib/js/registries/jolocomRegistry'
+import { IDidMethod } from 'jolocom-lib/js/didMethods/types'
+import { didMethods } from 'jolocom-lib/js/didMethods'
 
 export interface IJolocomSDKConfig {
   storage: IStorage
@@ -45,7 +44,7 @@ export interface IJolocomSDKConfig {
 
 export interface IJolocomSDKInitOptions {
   mnemonic?: string
-  dontAutoRegister?: boolean
+  register?: boolean
 }
 
 export interface JolocomPlugin {
@@ -54,18 +53,15 @@ export interface JolocomPlugin {
 
 // TODO move to backendMiddleware?
 // Decide if default should be configurable or not
-export const methodKeeper = (defaultMethod = {
-  prefix: 'jolo',
-  implementation: createJolocomRegistry() as IRegistry
-}) => {
-  const methods: {[k: string]: IRegistry} = {
-    [defaultMethod.prefix]: defaultMethod.implementation
+export const methodKeeper = (defaultMethod: IDidMethod = didMethods.jolo) => {
+  const methods: { [k: string]: IDidMethod } = {
+    [defaultMethod.prefix]: defaultMethod,
   }
 
   let defaultDidMethod = defaultMethod
 
   return {
-    register: (methodName: string, implementation: IRegistry) => {
+    register: (methodName: string, implementation: IDidMethod) => {
       if (methods[methodName]) {
         return false
       }
@@ -79,14 +75,11 @@ export const methodKeeper = (defaultMethod = {
       return methods[methodName]
     },
 
-    registerDefault: (methodName: string, implementation: IRegistry) => {
-      defaultDidMethod = {
-        prefix: methodName,
-        implementation
-      }
+    registerDefault: (implementation: IDidMethod) => {
+      defaultDidMethod = implementation
     },
 
-    getDefault: () => defaultDidMethod.implementation
+    getDefault: () => defaultDidMethod,
   }
 }
 
@@ -113,7 +106,7 @@ export class JolocomSDK extends BackendMiddleware {
     super({
       ...defaultConfig,
       storage: conf.storage,
-      passwordStore: conf.passwordStore
+      passwordStore: conf.passwordStore,
     })
     this.interactionManager = new InteractionManager(this)
   }
@@ -132,12 +125,9 @@ export class JolocomSDK extends BackendMiddleware {
     } catch (err) {
       if (!(err instanceof BackendError)) throw err
 
-      if (
-        !opts.dontAutoRegister &&
-        err.message === BackendError.codes.NoEntropy
-      ) {
-        const seed = await generateSecureRandomBytes(16)
-        return this.createNewIdentity(seed)
+      if (opts.register && err.message === BackendError.codes.NoEntropy) {
+        // const seed = await generateSecureRandomBytes(16)
+        // return this.createNewIdentity(seed)
       }
 
       throw err

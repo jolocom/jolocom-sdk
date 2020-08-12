@@ -172,7 +172,9 @@ export class Interaction {
   ): Promise<boolean> {
     if (!this.participants) {
       // TODO what happens if the signer isnt resolvable
-      const requester = await this.ctx.ctx.didMethods.getDefault().resolve(token.signer.did)
+      const requester = await this.ctx.ctx.didMethods
+        .getDefault()
+        .resolver.resolve(token.signer.did)
       this.participants = {
         requester,
       }
@@ -180,9 +182,9 @@ export class Interaction {
         this.participants.responder = this.ctx.ctx.identityWallet.identity
       }
     } else if (!this.participants.responder) {
-      this.participants.responder = await this.ctx.ctx.didMethods.getDefault().resolve(
-        token.signer.did,
-      )
+      this.participants.responder = await this.ctx.ctx.didMethods
+        .getDefault()
+        .resolver.resolve(token.signer.did)
     }
 
     if (token.signer.did !== this.ctx.ctx.identityWallet.did) {
@@ -190,7 +192,7 @@ export class Interaction {
         await this.ctx.ctx.identityWallet.validateJWT(
           token,
           last(this.getMessages()),
-          this.ctx.ctx.didMethods.getDefault(),
+          this.ctx.ctx.didMethods.getDefault().resolver,
         )
       } catch (err) {
         throw new AppError(ErrorCode.InvalidToken, err)
