@@ -1,7 +1,52 @@
-import { JolocomSDK } from 'index'
+import { JolocomSDK, JolocomLib } from 'index'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { Interaction } from './interaction'
 import { InteractionTransportType } from './types'
+import { Transportable } from '../transports'
+import { AppError, ErrorCode } from '../errors'
+
+export interface InteractionTransport {
+  type: InteractionTransportType
+  callbackURL: string
+}
+
+export interface InteractionTransportAPI {
+  send: (jwt: JSONWebToken<any>) => Promise<any>
+  receive?: () => Promise<JSONWebToken<any>>
+  ready?: Promise<void>
+}
+
+// TODO move out to environment specific plugins
+const httpTransport = {
+  type: InteractionTransportType.HTTP,
+  handler: function(config: InteractionTransport) {
+    const { callbackURL } = config
+    return {
+      send: async (token: JSONWebToken<any>) => {
+        const response = await fetch(callbackURL, {
+          method: 'POST',
+          body: JSON.stringify({ token: token.encode() }),
+          headers: { 'Content-Type': 'application/json' },
+        })
+
+        if (!response.ok) {
+          // TODO Error code for failed send?
+          // TODO Actually include some info about the error
+          throw new AppError(ErrorCode.Unknown)
+        }
+
+        const text = await response.text()
+
+        if (text.length) {
+          const { token } = JSON.parse(text)
+          return JolocomLib.parse.interactionToken.fromJWT(token)
+        }
+        return
+      }
+    }
+  }
+}
+
 
 /***
  * - initiated inside BackendMiddleware
@@ -12,7 +57,7 @@ import { InteractionTransportType } from './types'
  *
  */
 
-export class InteractionManager {
+export class InteractionManager extends Transportable<InteractionTransport, InteractionTransportAPI> {
   public readonly ctx: JolocomSDK
 
   public interactions: {
@@ -20,15 +65,29 @@ export class InteractionManager {
   } = {}
 
   public constructor(ctx: JolocomSDK) {
+    super()
     this.ctx = ctx
+    // TODO move this out to an environemnt specific plugin
+    this.registerTransportHandler(InteractionTransportType.HTTP, httpTransport.handler)
   }
 
-  public async start<T>(channel: InteractionTransportType, token: JSONWebToken<T>) {
-    const interaction = await Interaction.start(
+  public async start<T>(transportType: InteractionTransportType, token: JSONWebToken<T>) {
+    // @ts-ignore - CredentialReceive has no callbackURL, needs fix on the lib for JWTEncodable.
+    const { callbackURL } = token.interactionToken
+    const transportConfig: InteractionTransport = {
+      type: transportType,
+      callbackURL
+    }
+
+    if (!transportConfig) throw new Error('no transport coniguration!')
+    const transportAPI = await this.createTransport(transportConfig)
+    const interaction = new Interaction(
       this,
-      channel,
-      token,
+      transportAPI,
+      token.nonce,
+      token.interactionType,
     )
+    await interaction.processInteractionToken(token)
 
     this.interactions[token.nonce] = interaction
     return interaction

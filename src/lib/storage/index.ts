@@ -32,8 +32,8 @@ export interface CredentialMetadataSummary extends CredentialMetadata {
 
 export interface CredentialMetadata {
   type: string
-  renderInfo: CredentialOfferRenderInfo
-  metadata: CredentialOfferMetadata
+  renderInfo?: CredentialOfferRenderInfo
+  metadata?: CredentialOfferMetadata
 }
 
 /**
@@ -43,14 +43,15 @@ export interface CredentialMetadata {
  * are more generic and can be reused.
  */
 
-
 export interface IStorageStore {
   setting(key: string, value: any): Promise<void>
   persona(args: PersonaAttributes): Promise<void>
   verifiableCredential(vCred: SignedCredential): Promise<void>
   encryptedSeed(args: EncryptedSeedAttributes): Promise<void>
-  credentialMetadata(credentialMetadata: CredentialMetadataSummary): Promise<void>
   encryptedWallet(args: EncryptedWalletAttributes): Promise<void>
+  credentialMetadata(
+    credentialMetadata: CredentialMetadataSummary,
+  ): Promise<void>
   issuerProfile(issuer: IdentitySummary): Promise<void>
   didDoc(doc: DidDocument): Promise<void>
   interactionToken(token: JSONWebToken<any>): Promise<void>
@@ -62,11 +63,13 @@ export interface IStorageGet {
   persona(query?: object): Promise<PersonaEntity[]>
   verifiableCredential(query?: object): Promise<SignedCredential[]>
   // FIXME types
-  attributesByType(type: string[]): Promise<{ type: string[], results: any[] }>
+  attributesByType(type: string[]): Promise<{ type: string[]; results: any[] }>
   vCredentialsByAttributeValue(attribute: string): Promise<SignedCredential[]>
   encryptedSeed(): Promise<string | null>
-  credentialMetadata(credential: SignedCredential): Promise<CredentialMetadataSummary>
   encryptedWallet(): Promise<EncryptedWalletAttributes | null>
+  credentialMetadata(
+    credential: SignedCredential,
+  ): Promise<CredentialMetadataSummary>
   publicProfile(did: string): Promise<IdentitySummary>
   didDoc(did: string): Promise<DidDocument>
   interactionTokens(attrs: {
