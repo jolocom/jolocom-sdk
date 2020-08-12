@@ -20,6 +20,12 @@ export interface EncryptedSeedAttributes {
   timestamp: number
 }
 
+export interface EncryptedWalletAttributes {
+  id: string
+  encryptedWallet: string
+  timestamp: number
+}
+
 export interface CredentialMetadataSummary extends CredentialMetadata {
   issuer: IdentitySummary
 }
@@ -42,9 +48,8 @@ export interface IStorageStore {
   persona(args: PersonaAttributes): Promise<void>
   verifiableCredential(vCred: SignedCredential): Promise<void>
   encryptedSeed(args: EncryptedSeedAttributes): Promise<void>
-  credentialMetadata(
-    credentialMetadata: CredentialMetadataSummary,
-  ): Promise<void>
+  credentialMetadata(credentialMetadata: CredentialMetadataSummary): Promise<void>
+  encryptedWallet(args: EncryptedWalletAttributes): Promise<void>
   issuerProfile(issuer: IdentitySummary): Promise<void>
   didDoc(doc: DidDocument): Promise<void>
   interactionToken(token: JSONWebToken<any>): Promise<void>
@@ -59,9 +64,8 @@ export interface IStorageGet {
   attributesByType(type: string[]): Promise<{ type: string[]; results: any[] }>
   vCredentialsByAttributeValue(attribute: string): Promise<SignedCredential[]>
   encryptedSeed(): Promise<string | null>
-  credentialMetadata(
-    credential: SignedCredential,
-  ): Promise<CredentialMetadataSummary>
+  credentialMetadata(credential: SignedCredential): Promise<CredentialMetadataSummary>
+  encryptedWallet(): Promise<EncryptedWalletAttributes | null>
   publicProfile(did: string): Promise<IdentitySummary>
   didDoc(did: string): Promise<DidDocument>
   interactionTokens(attrs: {
