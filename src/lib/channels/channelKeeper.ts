@@ -31,6 +31,12 @@ export class ChannelKeeper extends Transportable<ChannelTransport, ChannelTransp
     this.ctx = ctx
   }
 
+  public async get(id: string) {
+    const ch = this._channels[id]
+    if (!ch) throw new Error('no such channel ' + id)
+    return ch
+  }
+
   public async create(initInterxn: Interaction) {
     if (initInterxn.flow.type !== FlowType.EstablishChannel) {
       throw new Error('not an EstablishChannel interaction: ' + initInterxn.flow.type)
