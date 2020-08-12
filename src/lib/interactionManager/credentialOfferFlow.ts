@@ -12,6 +12,7 @@ import {
   isCredentialOfferResponse,
   isCredentialReceive,
 } from './guards'
+import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
 
 export class CredentialOfferFlow extends Flow<
   CredentialOfferRequest | CredentialOfferResponse | CredentialsReceive
@@ -77,11 +78,24 @@ export class CredentialOfferFlow extends Flow<
       }
     })
 
-    const validArr = (this.state.credentialsValidity = await JolocomLib.util.validateDigestables(
+    const validArr = (this.state.credentialsValidity = await this.validateCredentials(
       signedCredentials,
     ))
+
     this.state.credentialsAllValid = validArr.every(v => v)
     return true
+  }
+
+  private async validateCredentials(signedCredentials: SignedCredential[]) {
+    return Promise.all(
+      signedCredentials.map(async cred => {
+        const validDigestable = await JolocomLib.util.validateDigestable(cred)
+        const validIssuer = cred.issuer !== this.ctx.participants.requester.did
+        const validSubject =
+          cred.subject !== this.ctx.participants.responder!.did
+        return validDigestable && validIssuer && validSubject
+      }),
+    )
   }
 
   // return a list of types which are both offered and requested
