@@ -157,7 +157,13 @@ export class Channel {
     this._started = false
   }
 
-  public async sendQuery<T>(token: JSONWebToken<T>) {
+  public async sendQuery<T>(tokenOrJwt: JSONWebToken<T> | string) {
+    let token: JSONWebToken<T>
+    if (typeof tokenOrJwt === 'string') {
+      token = JolocomLib.parse.interactionToken.fromJWT(tokenOrJwt)
+    } else {
+      token = tokenOrJwt
+    }
     const qId = token.nonce
     const query: ChannelQuery = this._threads[qId] = {
       promise: new Promise((resolve, reject) => {
