@@ -19,6 +19,7 @@ export class CredentialOfferFlow extends Flow<
   public state: CredentialOfferFlowState = {
     offerSummary: [],
     selection: [],
+    selectedTypes: [],
     issued: [],
     credentialsValidity: [],
     credentialsAllValid: true,
@@ -56,8 +57,21 @@ export class CredentialOfferFlow extends Flow<
     return true
   }
 
+  private areTypesOffered(types: string[]) {
+    const { offerSummary } = this.state
+    if (!offerSummary) return false
+    return types.every(type => offerSummary.find(o => o.type == type))
+  }
+
   private async handleOfferResponse(token: CredentialOfferResponse) {
-    this.state.selection = token.selectedCredentials
+    const selectedOffers = token.selectedCredentials
+    const selectedTypes = selectedOffers.map(offer => offer.type)
+    if (!this.areTypesOffered(selectedTypes)) {
+      throw new Error('Invalid offer type in offer response')
+    }
+    this.state.selection = selectedOffers
+    this.state.selectedTypes = selectedTypes
+
     return true
   }
 
