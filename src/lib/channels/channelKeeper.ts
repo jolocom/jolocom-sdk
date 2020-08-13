@@ -56,4 +56,10 @@ export class ChannelKeeper extends Transportable<ChannelTransport, ChannelTransp
 
     return ch
   }
+
+  async findByJWT(jwt: string) {
+    const interxn = this.ctx.findInteraction(jwt)
+    if (!interxn || interxn.flow.type !== FlowType.EstablishChannel) return
+    return this.get(interxn.id)
+  }
 }
