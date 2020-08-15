@@ -5,6 +5,7 @@ import {
   CredentialOfferRenderInfo,
 } from 'jolocom-lib/js/interactionTokens/interactionTokens.types'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
+import { InternalDb } from 'local-did-resolver'
 
 import { IdentitySummary } from '../types'
 
@@ -76,6 +77,7 @@ export interface IStorage {
   get: IStorageGet
   store: IStorageStore
   delete: IStorageDelete
+  eventDB: InternalDb
 }
 
 export interface IPasswordStore {

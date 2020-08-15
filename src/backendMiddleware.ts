@@ -2,14 +2,20 @@ import { IdentityWallet } from 'jolocom-lib/js/identityWallet/identityWallet'
 import { IStorage, IPasswordStore, NaivePasswordStore } from './lib/storage'
 import { SoftwareKeyProvider, IVaultedKeyProvider } from 'jolocom-lib'
 import { Identity } from 'jolocom-lib/js/identity/identity'
+import { LocalDidMethod } from 'jolocom-lib/js/didMethods/local'
 import { BackendError, BackendMiddlewareErrorCodes } from './lib/errors/types'
 import { methodKeeper } from '../index'
 import { walletUtils } from '@jolocom/native-utils-node'
-import { authAsIdentityFromKeyProvider } from 'jolocom-lib/js/didMethods/utils'
+import {
+  authAsIdentityFromKeyProvider,
+  createIdentityFromKeyProvider,
+} from 'jolocom-lib/js/didMethods/utils'
+import { generateSecureRandomBytes } from './lib/util'
 
 export class BackendMiddleware {
   private _identityWallet!: IdentityWallet
   private _keyProvider!: SoftwareKeyProvider
+  private newIdentityPromise!: Promise<IdentityWallet>
 
   public storageLib: IStorage
   public keyChainLib: IPasswordStore
@@ -23,6 +29,9 @@ export class BackendMiddleware {
     // FIXME actually use fuelingEndpoint
     this.storageLib = config.storage
     this.keyChainLib = config.passwordStore || new NaivePasswordStore()
+    const localDidMethod = new LocalDidMethod(this.storageLib.eventDB)
+    this.didMethods.register('un', localDidMethod)
+    this.didMethods.registerDefault(localDidMethod)
   }
 
   public get identityWallet(): IdentityWallet {
@@ -58,7 +67,7 @@ export class BackendMiddleware {
     if (!encryptedWalletInfo || !encryptionPass) {
       // If either encryptedWallet or encryptionPass was missing, we throw
       // NoEntropy to signal that we cannot prepare an identityWallet instance due
-      // to lack of a seed.
+      // to lack of a wallet.
       // Note that the case of having an encryptionPass but no encryptedWallet
       // is an uncommon edge case, but may potentially happen due to errors/bugs
       // etc
@@ -132,30 +141,21 @@ export class BackendMiddleware {
   }
 
   public async createKeyProvider(encodedEntropy: string): Promise<void> {
-    // const password = (await generateSecureRandomBytes(32)).toString('base64')
-    // this._keyProvider = JolocomLib.KeyProvider.fromSeed(
-    //   Buffer.from(encodedEntropy, 'hex'),
-    //   password,
-    // )
-    // await this.keyChainLib.savePassword(password)
-  }
-
-  public async fuelKeyWithEther(): Promise<void> {
-    // const password = await this.keyChainLib.getPassword()
-    // await JolocomLib.util.fuelKeyWithEther(
-    //   this.keyProvider.getPublicKey({
-    //     encryptionPass: password,
-    //     derivationPath: JolocomLib.KeyTypes.ethereumKey,
-    //   }),
-    // )
-  }
-
-  public async createIdentity(): Promise<IdentityWallet> {
-    const password = await this.keyChainLib.getPassword()
-    this._identityWallet = await authAsIdentityFromKeyProvider(
-      this._keyProvider,
+    const password = (await generateSecureRandomBytes(32)).toString('base64')
+    this._keyProvider = await SoftwareKeyProvider.newEmptyWallet(
+      walletUtils,
+      '',
       password,
-      this.didMethods.getDefault().resolver,
+    )
+    await this.keyChainLib.savePassword(password)
+  }
+
+  public async createIdentity(encodedEntropy: string): Promise<IdentityWallet> {
+    await this.createKeyProvider(encodedEntropy)
+    this._identityWallet = await createIdentityFromKeyProvider(
+      this._keyProvider,
+      await this.keyChainLib.getPassword(),
+      this.didMethods.getDefault().registrar,
     )
 
     await this.storeIdentityData()
@@ -191,22 +191,18 @@ export class BackendMiddleware {
   }
 
   /**
-   * Returns an agent with an Identity provided by a buffer of entropy.
-   * WARNING: this registers an identity on the Jolocom DID Method
+   * Returns an agent with an New, Fresh Identity.
+   * WARNING: this registers an identity on the Registered DID Method
    *
-   * @param seed - Buffer of private entropy to generate keys with
-   * @returns An Agent with the identity corrosponding to the seed
+   * @returns An Agent
    */
-  // public async createNewIdentity(seed: Buffer): Promise<IdentityWallet> {
-  //   if (this.newIdentityPromise) return this.newIdentityPromise
-  //   return (this.newIdentityPromise = this._createNewIdentity(seed))
-  // }
+  public async createNewIdentity(): Promise<IdentityWallet> {
+    if (this.newIdentityPromise) return this.newIdentityPromise
+    return (this.newIdentityPromise = this._createNewIdentity())
+  }
 
-  // private async _createNewIdentity(seed: Buffer): Promise<IdentityWallet> {
-  // const encodedEntropy = seed.toString('hex')
-  // await this.createKeyProvider(encodedEntropy)
-  // await this.fuelKeyWithEther()
-  // await this.createIdentity()
-  // return this.identityWallet
-  // }
+  private async _createNewIdentity(): Promise<IdentityWallet> {
+    await this.createIdentity('')
+    return this.identityWallet
+  }
 }

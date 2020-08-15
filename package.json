@@ -60,7 +60,7 @@
     }
   },
   "peerDependencies": {
-    "jolocom-lib": "^4.3.0"
+    "jolocom-lib": "^4.3.5"
   },
   "dependencies": {
     "@jolocom/native-utils-node": "^0.5.6",
