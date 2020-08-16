@@ -8,6 +8,11 @@ export enum ResolutionType {
   ResolutionResponse = 'ResolutionResponse',
 }
 
+export interface ResolutionFlowState {
+  requested: string
+  resolution_result?: ResolutionResult
+}
+
 export interface ResolutionRequest {
   uri: string
 }
@@ -22,10 +27,7 @@ export const isResolutionResponse = (
 
 export class ResolutionFlow extends Flow<ResolutionRequest | ResolutionResult> {
   public type = FlowType.Resolution
-  public state: {
-    requested: string
-    resolution_result?: ResolutionResult
-  } = { requested: '' }
+  public state: ResolutionFlowState = { requested: '' }
 
   public async handleInteractionToken(
     token: ResolutionRequest | ResolutionResult,

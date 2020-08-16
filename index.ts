@@ -37,6 +37,7 @@ import { InteractionManager } from './src/lib/interactionManager/interactionMana
 import { IDidMethod } from 'jolocom-lib/js/didMethods/types'
 import { didMethods } from 'jolocom-lib/js/didMethods'
 import { InternalDb } from 'local-did-resolver'
+import { ResolutionType } from './src/lib/interactionManager/resolutionFlow'
 
 export interface IJolocomSDKConfig {
   storage: IStorage
@@ -240,6 +241,25 @@ export class JolocomSDK extends BackendMiddleware {
       auth,
       await this.keyChainLib.getPassword(),
     )
+    await this.interactionManager.start(InteractionTransportType.HTTP, token)
+    return token.encode()
+  }
+
+  /**
+   * Creates a signed, base64 encoded Resolution Request, given a URI
+   *
+   * @param uri - URI to request resolution for
+   * @returns Base64 encoded signed Resolution Request
+   */
+  public async resolutionRequestToken(uri: string): Promise<string> {
+    const token = await this.idw.create.message(
+      {
+        message: { uri },
+        typ: ResolutionType.ResolutionRequest,
+      },
+      await this.keyChainLib.getPassword(),
+    )
+
     await this.interactionManager.start(InteractionTransportType.HTTP, token)
     return token.encode()
   }
