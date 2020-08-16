@@ -4,6 +4,9 @@ import {
   Connection,
   ConnectionOptions,
 } from 'typeorm'
+import { InternalDb } from 'local-did-resolver'
+import { createDb } from 'local-did-resolver/js/db'
+
 import { JolocomSDK, NaivePasswordStore } from '@jolocom/sdk'
 import { JolocomTypeormStorage } from '@jolocom/sdk-storage-typeorm'
 
@@ -16,10 +19,11 @@ const testConnection: ConnectionOptions = {
   logging: false,
 }
 
-const getSdk = (connection: Connection) =>
+const getSdk = (connection: Connection, eDB?: InternalDb) =>
   new JolocomSDK({
     passwordStore: new NaivePasswordStore(),
     storage: new JolocomTypeormStorage(connection),
+    eventDB: eDB,
   })
 
 beforeAll(async () => {
@@ -34,16 +38,32 @@ afterAll(async () => {
 test('Create local identity', async () => {
   const agent = getSdk(await getConnection())
 
-  await agent.init({ register: true })
+  await agent.init({ registerNew: true })
 
   // TODO Continue from here
 })
 
 test('Multi identity interaction', async () => {
   const con = await getConnection()
-  const alice = getSdk(con)
-  const bob = getSdk(con)
+  const edb = {}
+  const alice = getSdk(con, createDb(edb))
+  const bob = getSdk(con, createDb(edb))
 
-  await alice.init({ register: true })
-  await bob.init({ register: true })
+  await alice.init({ registerNew: true })
+  await bob.init({ registerNew: true })
+
+  const aliceAuthRequest = await alice.authRequestToken({
+    callbackURL: 'nowhere',
+    description: 'test',
+  })
+
+  const bobInteraction = await bob.processJWT(aliceAuthRequest)
+
+  const bobResponse = await bobInteraction.createAuthenticationResponse()
+
+  const aliceInteraction = await alice.processJWT(bobResponse.encode())
+
+  expect(aliceInteraction.getMessages().map(m => m.encode())).toEqual(
+    bobInteraction.getMessages().map(m => m.encode()),
+  )
 })
