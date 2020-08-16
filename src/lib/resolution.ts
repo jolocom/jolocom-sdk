@@ -3,7 +3,7 @@ import { IDidDocumentAttrs } from 'jolocom-lib/js/identity/didDocument/types'
 export interface ResolverMetadata {
   driverId: string
   driver: string
-  retrived: Date
+  retrieved: number
 }
 
 export interface MethodMetadata<T = string[]> {

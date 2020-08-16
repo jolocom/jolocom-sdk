@@ -36,6 +36,7 @@ import {
   InteractionManager,
   InteractionTransportAPI,
 } from './interactionManager'
+
 import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
 import { CredentialOfferResponse } from 'jolocom-lib/js/interactionTokens/credentialOfferResponse'
 
@@ -48,6 +49,8 @@ import {
   DecryptionRequest,
   DecryptionResponse,
 } from './rpc'
+
+import { ResolutionType, ResolutionFlowState } from './resolutionFlow'
 
 /***
  * - initiated by InteractionManager when an interaction starts
@@ -136,6 +139,39 @@ export class Interaction {
       {
         message: { transportIdx },
         typ: EstablishChannelType.EstablishChannelResponse,
+      },
+      await this.ctx.ctx.keyChainLib.getPassword(),
+      request,
+    )
+  }
+
+  public async createResolutionResponse() {
+    const request = this.findMessageByType(
+      InteractionType.Authentication,
+    ) as JSONWebToken<Authentication>
+    const { requested } = this.getSummary().state as ResolutionFlowState
+
+    return this.ctx.ctx.identityWallet.create.message(
+      {
+        message: {
+          '@context': 'https://www.w3.org/ns/did-resolution/v1',
+          didDocument: (
+            await this.ctx.ctx.didMethods
+              .getDefault()
+              .resolver.resolve(requested)
+          ).didDocument.toJSON(),
+          resolverMetadata: {
+            driverId: this.ctx.ctx.identityWallet.did,
+            driver: 'jolocom/peer-resolution/0.1',
+            retrieved: Date.now(),
+          },
+          methodMetadata: {
+            stateProof: await this.ctx.ctx.storageLib.eventDB
+              .read(requested)
+              .catch(e => []),
+          },
+        },
+        typ: ResolutionType.ResolutionResponse,
       },
       await this.ctx.ctx.keyChainLib.getPassword(),
       request,
