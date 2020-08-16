@@ -6,30 +6,30 @@ import { LocalDidMethod } from 'jolocom-lib/js/didMethods/local'
 import { BackendError, BackendMiddlewareErrorCodes } from './lib/errors/types'
 import { methodKeeper } from '../index'
 import { walletUtils } from '@jolocom/native-utils-node'
+import { InternalDb } from 'local-did-resolver'
 import {
   authAsIdentityFromKeyProvider,
   createIdentityFromKeyProvider,
 } from 'jolocom-lib/js/didMethods/utils'
-import { generateSecureRandomBytes } from './lib/util'
 
 export class BackendMiddleware {
   private _identityWallet!: IdentityWallet
   private _keyProvider!: SoftwareKeyProvider
-  private newIdentityPromise!: Promise<IdentityWallet>
 
   public storageLib: IStorage
   public keyChainLib: IPasswordStore
   public didMethods = methodKeeper()
 
   public constructor(config: {
-    fuelingEndpoint: string
     storage: IStorage
     passwordStore?: IPasswordStore
+    eventDB?: InternalDb
   }) {
-    // FIXME actually use fuelingEndpoint
     this.storageLib = config.storage
     this.keyChainLib = config.passwordStore || new NaivePasswordStore()
-    const localDidMethod = new LocalDidMethod(this.storageLib.eventDB)
+    const localDidMethod = new LocalDidMethod(
+      config.eventDB || this.storageLib.eventDB,
+    )
     this.didMethods.register('un', localDidMethod)
     this.didMethods.registerDefault(localDidMethod)
   }
@@ -44,13 +44,16 @@ export class BackendMiddleware {
     throw new BackendError(BackendMiddlewareErrorCodes.NoKeyProvider)
   }
 
-  public async prepareIdentityWallet(): Promise<IdentityWallet> {
-    if (this._identityWallet) return this._identityWallet
+  public async loadIdentity(
+    did: string,
+    pass?: string,
+  ): Promise<IdentityWallet> {
+    if (pass) await this.keyChainLib.savePassword(pass)
 
-    const encryptedWalletInfo = await this.storageLib.get.encryptedWallet()
+    const encryptedWalletInfo = await this.storageLib.get.encryptedWallet(did)
     let encryptionPass
     try {
-      encryptionPass = await this.keyChainLib.getPassword()
+      encryptionPass = pass || (await this.keyChainLib.getPassword())
     } catch (e) {
       // This may fail if the application was uninstalled and reinstalled, as
       // the android keystore is cleared on uninstall, but the database may
@@ -60,8 +63,7 @@ export class BackendMiddleware {
 
     if (encryptedWalletInfo && !encryptionPass) {
       // if we can't decrypt the encryptedWallet, then
-      // FIXME throw a proper error
-      throw new Error('error decrypting wallet!')
+      throw new BackendError(BackendError.codes.DecryptionFailed)
     }
 
     if (!encryptedWalletInfo || !encryptionPass) {
@@ -71,7 +73,7 @@ export class BackendMiddleware {
       // Note that the case of having an encryptionPass but no encryptedWallet
       // is an uncommon edge case, but may potentially happen due to errors/bugs
       // etc
-      throw new BackendError(BackendMiddlewareErrorCodes.NoEntropy)
+      throw new BackendError(BackendMiddlewareErrorCodes.NoWallet)
     }
 
     this._keyProvider = new SoftwareKeyProvider(
@@ -88,6 +90,62 @@ export class BackendMiddleware {
 
     await this.storageLib.store.didDoc(identityWallet.didDocument)
     return (this._identityWallet = identityWallet)
+  }
+
+  public async createNewIdentity(newPass?: string): Promise<IdentityWallet> {
+    if (newPass) await this.keyChainLib.savePassword(newPass)
+    const pass = newPass || (await this.keyChainLib.getPassword())
+    this._keyProvider = await SoftwareKeyProvider.newEmptyWallet(
+      walletUtils,
+      '',
+      pass,
+    )
+    this._identityWallet = await createIdentityFromKeyProvider(
+      this._keyProvider,
+      pass,
+      this.didMethods.getDefault().registrar,
+    )
+    await this.storeIdentityData(
+      this._identityWallet.identity,
+      this._keyProvider,
+    )
+    return this._identityWallet
+  }
+
+  /**
+   * Loads an Identity if one is not already instantiated
+   *
+   * @param did - DID of Identity to be loaded from DB
+   * @param newPass - new password to be set, in case the new Wallet has a new Pass
+   * @returns An identity corrosponding to the given DID
+   */
+  public async prepareIdentityWallet(
+    did: string,
+    newPass?: string,
+  ): Promise<IdentityWallet> {
+    if (this._identityWallet) return this._identityWallet
+
+    return this.loadIdentity(did, newPass)
+  }
+
+  /**
+   * Stores a DID Document and its corrosponding Key Provider
+   *
+   * @param id - Identity being Stored
+   * @param skp - Key Provider for the Identity
+   * @returns void
+   */
+  public async storeIdentityData(
+    id: Identity,
+    skp: SoftwareKeyProvider,
+  ): Promise<void> {
+    if (id.did !== skp.id) throw new Error('Identity data inconsistant')
+    await this.storageLib.store.encryptedWallet({
+      id: skp.id,
+      encryptedWallet: skp.encryptedWallet,
+      timestamp: Date.now(),
+    })
+    await this.storageLib.store.didDoc(id.didDocument)
   }
 
   /**
@@ -140,28 +198,6 @@ export class BackendMiddleware {
     return this.initWithMnemonic(this.fromEntropyToMnemonic(entropy))
   }
 
-  public async createKeyProvider(encodedEntropy: string): Promise<void> {
-    const password = (await generateSecureRandomBytes(32)).toString('base64')
-    this._keyProvider = await SoftwareKeyProvider.newEmptyWallet(
-      walletUtils,
-      '',
-      password,
-    )
-    await this.keyChainLib.savePassword(password)
-  }
-
-  public async createIdentity(encodedEntropy: string): Promise<IdentityWallet> {
-    await this.createKeyProvider(encodedEntropy)
-    this._identityWallet = await createIdentityFromKeyProvider(
-      this._keyProvider,
-      await this.keyChainLib.getPassword(),
-      this.didMethods.getDefault().registrar,
-    )
-
-    await this.storeIdentityData()
-    return this._identityWallet
-  }
-
   public async loadIdentityFromMnemonic(mnemonic: string): Promise<Identity> {
     // const password = (await generateSecureRandomBytes(32)).toString('base64')
     // this._keyProvider = JolocomLib.KeyProvider.recoverKeyPair(
@@ -179,30 +215,5 @@ export class BackendMiddleware {
     // await this.storeIdentityData()
     // return identityWallet.identity
     throw new Error('Not Implemented')
-  }
-
-  private async storeIdentityData(): Promise<void> {
-    await this.storageLib.store.encryptedWallet({
-      id: this._keyProvider.id,
-      encryptedWallet: this._keyProvider.encryptedWallet,
-      timestamp: Date.now(),
-    })
-    await this.storageLib.store.didDoc(this._identityWallet.didDocument)
-  }
-
-  /**
-   * Returns an agent with an New, Fresh Identity.
-   * WARNING: this registers an identity on the Registered DID Method
-   *
-   * @returns An Agent
-   */
-  public async createNewIdentity(): Promise<IdentityWallet> {
-    if (this.newIdentityPromise) return this.newIdentityPromise
-    return (this.newIdentityPromise = this._createNewIdentity())
-  }
-
-  private async _createNewIdentity(): Promise<IdentityWallet> {
-    await this.createIdentity('')
-    return this.identityWallet
   }
 }

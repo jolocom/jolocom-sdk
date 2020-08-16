@@ -36,15 +36,18 @@ import { Interaction } from './src/lib/interactionManager/interaction'
 import { InteractionManager } from './src/lib/interactionManager/interactionManager'
 import { IDidMethod } from 'jolocom-lib/js/didMethods/types'
 import { didMethods } from 'jolocom-lib/js/didMethods'
+import { InternalDb } from 'local-did-resolver'
 
 export interface IJolocomSDKConfig {
   storage: IStorage
   passwordStore: IPasswordStore
+  eventDB?: InternalDb
 }
 
 export interface IJolocomSDKInitOptions {
+  loadDid?: string
   mnemonic?: string
-  register?: boolean
+  registerNew?: boolean
 }
 
 export interface JolocomPlugin {
@@ -91,6 +94,9 @@ export class JolocomSDK extends BackendMiddleware {
    *       or perhaps the BackendMiddleware becomes the more "pure" layer,
    *       and the "sdk" instance is platform specific
    *
+   * TODO: refactor BackendMiddleware to be an Agent and
+   *        JolocomSDK to be an Agent Factory
+   *
    * TODO: use the Keeper pattern
    *       so we can do sdk.identities.create()
                         sdk.interactions.create()
@@ -105,8 +111,7 @@ export class JolocomSDK extends BackendMiddleware {
   constructor(conf: IJolocomSDKConfig) {
     super({
       ...defaultConfig,
-      storage: conf.storage,
-      passwordStore: conf.passwordStore,
+      ...conf,
     })
     this.interactionManager = new InteractionManager(this)
   }
@@ -115,23 +120,36 @@ export class JolocomSDK extends BackendMiddleware {
     return this.identityWallet
   }
 
-  async init(opts: IJolocomSDKInitOptions = {}) {
-    if (opts.mnemonic) {
-      return this.loadIdentityFromMnemonic(opts.mnemonic)
-    }
+  async init({ loadDid, mnemonic, registerNew }: IJolocomSDKInitOptions = {}) {
+    if (loadDid)
+      try {
+        return await this.loadIdentity(loadDid)
+      } catch (err) {
+        if (
+          (!(err instanceof BackendError) ||
+            err.message !== BackendError.codes.NoWallet) &&
+          !registerNew
+        )
+          throw err
 
-    try {
-      return await this.prepareIdentityWallet()
-    } catch (err) {
-      if (!(err instanceof BackendError)) throw err
-
-      if (opts.register && err.message === BackendError.codes.NoEntropy) {
-        // const seed = await generateSecureRandomBytes(16)
-        // return this.createNewIdentity(seed)
+        return await this.createNewIdentity()
       }
+    else if (mnemonic)
+      try {
+        return await this.initWithMnemonic(mnemonic)
+      } catch (err) {
+        if (
+          (!(err instanceof BackendError) ||
+            err.message !== BackendError.codes.NoWallet) &&
+          !registerNew
+        )
+          throw err
 
-      throw err
-    }
+        return await this.createNewIdentity()
+      }
+    else if (registerNew) return await this.createNewIdentity()
+
+    throw new BackendError(BackendError.codes.NoEntropy)
   }
 
   async usePlugins(...plugs: JolocomPlugin[]) {
