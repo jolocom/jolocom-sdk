@@ -1,43 +1,49 @@
-import { Interaction } from './interaction'
 import { Flow } from './flow'
 import { FlowType } from './types'
 
 import { ResolutionResult } from '../resolution'
 
+export enum ResolutionType {
+  ResolutionRequest = 'ResolutionRequest',
+  ResolutionResponse = 'ResolutionResponse',
+}
+
 export interface ResolutionRequest {
   uri: string
 }
 
-export const isResolutionRequest = (t: any): t is ResolutionRequest => {
+export const isResolutionRequest = (t: any): t is ResolutionRequest =>
   t && t.uri && typeof t.uri === 'string'
-}
 
-export class ResolutionFlow extends Flow<
-  ResolutionRequest | ResolutionResponse
-> {
+export const isResolutionResponse = (
+  t: any,
+  typ: string,
+): t is ResolutionResult => typ === ResolutionType.ResolutionResponse
+
+export class ResolutionFlow extends Flow<ResolutionRequest | ResolutionResult> {
   public type = FlowType.Resolution
-  public state = {
-    requested: '',
-    resolution_result: ResolutionResult,
-  }
+  public state: {
+    requested: string
+    resolution_result?: ResolutionResult
+  } = { requested: '' }
 
   public async handleInteractionToken(
-    token: ResolutionRequest | ResolutionResponse,
+    token: ResolutionRequest | ResolutionResult,
     interactionType: string,
   ) {
     switch (interactionType) {
-      case 'ResolutionRequest':
+      case ResolutionType.ResolutionRequest:
         if (isResolutionRequest(token)) {
           this.state.requested = token.uri
           return true
         }
         return false
-      case 'ResolutionResponse':
-        if (isResolutionRequest(token)) {
-          return false
+      case ResolutionType.ResolutionResponse:
+        if (isResolutionResponse(token, interactionType)) {
+          this.state.resolution_result = token
+          return true
         }
-        this.state.resolution_result = token
-        return true
+        return false
     }
     throw new Error('Interaction type not found')
   }

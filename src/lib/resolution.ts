@@ -1,6 +1,6 @@
-type DDO = string
+import { IDidDocumentAttrs } from 'jolocom-lib/js/identity/didDocument/types'
 
-export interface ResolverMetada {
+export interface ResolverMetadata {
   driverId: string
   driver: string
   retrived: Date
@@ -12,7 +12,7 @@ export interface MethodMetadata<T = string[]> {
 // writing a guard for this is a huge pain
 export interface ResolutionResult {
   '@context': 'https://www.w3.org/ns/did-resolution/v1'
-  didDocument: DDO
+  didDocument: IDidDocumentAttrs
   resolverMetadata: ResolverMetadata
   methodMetadata: MethodMetadata
 }
