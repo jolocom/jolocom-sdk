@@ -1196,6 +1196,13 @@
     "@types/istanbul-reports" "^1.1.1"
     "@types/yargs" "^12.0.9"
 
+"@jolocom/protocol-ts@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@jolocom/protocol-ts/-/protocol-ts-0.3.0.tgz#28334bf65fdedda0f6ea90b54be4fa0a02234495"
+  integrity sha512-uEFDU0CnIBq/0AEmXQVJmwq3cdRrvWOdNQPz/WkODO9IG0MathZ6rEZX8f1gt4QMuCJ0uBcGRY5u3YoJx+gq6g==
+  dependencies:
+    cred-types-jolocom-core "^0.0.11"
+
 "@types/babel__core@^7.1.0":
   version "7.1.2"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.1.2.tgz#608c74f55928033fce18b99b213c16be4b3d114f"
@@ -1913,6 +1920,11 @@ bl@^1.0.0:
   dependencies:
     readable-stream "^2.3.5"
     safe-buffer "^5.1.1"
+
+blakejs@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/blakejs/-/blakejs-1.1.0.tgz#69df92ef953aa88ca51a32df6ab1c54a155fc7a5"
+  integrity sha1-ad+S75U6qIylGjLfarHFShVfx6U=
 
 block-stream@*:
   version "0.0.9"
@@ -2998,7 +3010,7 @@ ecc-jsbn@~0.1.1:
     jsbn "~0.1.0"
     safer-buffer "^2.1.0"
 
-eccrypto@rootstock/eccrypto#485e11f163093fb6e0d5263fa46ed5075dedfe88:
+"eccrypto@github:rootstock/eccrypto#485e11f163093fb6e0d5263fa46ed5075dedfe88":
   version "1.1.2"
   resolved "https://codeload.github.com/rootstock/eccrypto/tar.gz/485e11f163093fb6e0d5263fa46ed5075dedfe88"
   dependencies:
@@ -5255,17 +5267,17 @@ jest@^24.8.0:
     import-local "^2.0.0"
     jest-cli "^24.8.0"
 
-jolocom-lib@^4.3.0:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-4.3.0.tgz#d0b2da9b36bad2d1234ed663a187da906b49cb3e"
-  integrity sha512-k0yI9adf7ghQpl43WqnN7yEASIPCh1WytStBC6wC0y2gfeEUl9WY4E9Uy/5nBjMymdm/SVHqnWONZmN1ap3uGw==
+jolocom-lib@^4.4.0:
+  version "4.4.0"
+  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-4.4.0.tgz#38b3e472d1a48c66686f6c75092acf338e59ee28"
+  integrity sha512-76CG3yPa0Jiq83+HA8qHSBToO++iBc7jrFMmUN2D7Xwnu2QfG517xuOlVxAJ8Lq1wwuvw6JZ0Q9+d+b7IbRjIQ==
   dependencies:
+    "@jolocom/protocol-ts" "^0.3.0"
     base64url "^3.0.1"
     bip32 "^1.0.2"
     bip39 "^3.0.1"
     class-transformer "^0.1.10"
     create-hash "^1.2.0"
-    cred-types-jolocom-core "^0.0.11"
     detect-node "^2.0.4"
     eccrypto rootstock/eccrypto#485e11f163093fb6e0d5263fa46ed5075dedfe88
     ethereumjs-tx "^1.3.7"
@@ -5282,6 +5294,8 @@ jolocom-lib@^4.3.0:
     secrets.js-grempe "^1.1.0"
     sinon-chai "^3.3.0"
     tiny-secp256k1 "^1.0.1"
+    tweetnacl "^1.0.3"
+    tweetnacl-sealedbox-js "^1.2.0"
 
 jolocom-registry-contract@^0.1.7:
   version "0.1.7"
@@ -8516,10 +8530,23 @@ tunnel-agent@^0.6.0:
   dependencies:
     safe-buffer "^5.0.1"
 
+tweetnacl-sealedbox-js@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/tweetnacl-sealedbox-js/-/tweetnacl-sealedbox-js-1.2.0.tgz#37f0d49a24445d6f55a1b9e8870568529bcb233f"
+  integrity sha512-QoCr8K2hwri+ky7SUa22oSre8g88XaWi0hwwWd16pJMuDyn5gL/UyE0PyR2EOFEMJ70T2trJ9+Sv+Qa18olEmQ==
+  dependencies:
+    blakejs "^1.1.0"
+    tweetnacl "^1.0.1"
+
 tweetnacl@^0.14.3, tweetnacl@~0.14.0:
   version "0.14.5"
   resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-0.14.5.tgz#5ae68177f192d4456269d108afa93ff8743f4f64"
   integrity sha1-WuaBd/GS1EViadEIr6k/+HQ/T2Q=
+
+tweetnacl@^1.0.1, tweetnacl@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-1.0.3.tgz#ac0af71680458d8a6378d0d0d050ab1407d35596"
+  integrity sha512-6rt+RN7aOi1nGMyC4Xa5DdYiukl2UWCbcJft7YhxReBGQD7OAM8Pbxw6YMo4r2diNEA8FEmu32YOn9rhaiE5yw==
 
 type-check@~0.3.2:
   version "0.3.2"
