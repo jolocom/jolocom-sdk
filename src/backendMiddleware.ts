@@ -45,7 +45,7 @@ export class BackendMiddleware {
   }
 
   public async loadIdentity(
-    did: string,
+    did?: string,
     pass?: string,
   ): Promise<IdentityWallet> {
     if (pass) await this.keyChainLib.savePassword(pass)
@@ -120,7 +120,7 @@ export class BackendMiddleware {
    * @returns An identity corrosponding to the given DID
    */
   public async prepareIdentityWallet(
-    did: string,
+    did?: string,
     newPass?: string,
   ): Promise<IdentityWallet> {
     if (this._identityWallet) return this._identityWallet

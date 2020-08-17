@@ -149,7 +149,8 @@ export class JolocomSDK extends BackendMiddleware {
       }
     else if (registerNew) return await this.createNewIdentity()
 
-    throw new BackendError(BackendError.codes.NoEntropy)
+    // default case
+    return await this.loadIdentity()
   }
 
   async usePlugins(...plugs: JolocomPlugin[]) {

@@ -56,7 +56,7 @@ export interface IStorageGet {
   // FIXME types
   attributesByType(type: string[]): Promise<{ type: string[]; results: any[] }>
   vCredentialsByAttributeValue(attribute: string): Promise<SignedCredential[]>
-  encryptedWallet(id: string): Promise<EncryptedWalletAttributes | null>
+  encryptedWallet(id?: string): Promise<EncryptedWalletAttributes | null>
   credentialMetadata(
     credential: SignedCredential,
   ): Promise<CredentialMetadataSummary>
