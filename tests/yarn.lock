@@ -2897,10 +2897,10 @@ jolo-did-resolver@0.2.1:
     jolocom-registry-contract "0.3.0"
     node-fetch "^2.6.0"
 
-jolocom-lib@^5.0.2:
-  version "5.0.2"
-  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-5.0.2.tgz#7b3b9d9f52d59398b4f89da24861c25587e2b32a"
-  integrity sha512-zwBcb0fr1PoBJiZmyfB+BzQa6RIs3a4pxjuiMoQGLWkW1ENar9laPC9udIf+vKXKEifxdEnjssDisZo0SWs6tA==
+jolocom-lib@^5.0.3:
+  version "5.0.3"
+  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-5.0.3.tgz#b1d3ba3127290a641cb55cd223ed9c67427b13d3"
+  integrity sha512-mOUOwkvoiRIEF6nI1qpQvp7RJvEg+cudYs8zayWxzdm8CIdOc/5/la+lTDLqjleyaUb42SQG/78rDXqxtSN31g==
   dependencies:
     "@jolocom/native-utils-node" "^0.5.6"
     "@jolocom/protocol-ts" "^0.5.1"
