@@ -43,7 +43,7 @@ test('Create local identity', async () => {
   // TODO Continue from here
 })
 
-test('Multi identity interaction', async () => {
+test('Authentication interaction', async () => {
   const con = await getConnection()
   const edb = {}
   const alice = getSdk(con, createDb(edb))
@@ -59,9 +59,12 @@ test('Multi identity interaction', async () => {
 
   const bobInteraction = await bob.processJWT(aliceAuthRequest)
 
-  const bobResponse = await bobInteraction.createAuthenticationResponse()
+  const bobResponse = (
+    await bobInteraction.createAuthenticationResponse()
+  ).encode()
+  await bob.processJWT(bobResponse)
 
-  const aliceInteraction = await alice.processJWT(bobResponse.encode())
+  const aliceInteraction = await alice.processJWT(bobResponse)
 
   expect(aliceInteraction.getMessages().map(m => m.encode())).toEqual(
     bobInteraction.getMessages().map(m => m.encode()),
