@@ -475,7 +475,7 @@
   dependencies:
     cred-types-jolocom-core "^0.0.11"
 
-"@jolocom/sdk-storage-typeorm@^2.0.2":
+"@jolocom/sdk-storage-typeorm@^2.0.0":
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/@jolocom/sdk-storage-typeorm/-/sdk-storage-typeorm-2.0.2.tgz#b4f73dde51478d117b712f861d25c84c3de15942"
   integrity sha512-1g1tB70lE8b/Dj6tZyFKeQ8IGRkxL+AZr0dpzGhKETvT3F6wX57ECGTzIzQtGqFtXkgfOvThzX91d5SOlk7hxg==

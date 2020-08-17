@@ -70,3 +70,34 @@ test('Authentication interaction', async () => {
     bobInteraction.getMessages().map(m => m.encode()),
   )
 })
+
+test('Resolution interaction', async () => {
+  const con = await getConnection()
+  const edb = {}
+  const alice = getSdk(con, createDb(edb))
+  const bob = getSdk(con, createDb(edb))
+
+  await alice.init({ registerNew: true })
+  await bob.init({ registerNew: true })
+
+  const aliceResRequest = await alice.resolutionRequestToken(bob.idw.did)
+
+  const bobInteraction = await bob.processJWT(aliceResRequest)
+
+  const bobResponse = await bobInteraction.createResolutionResponse()
+  await bob.processJWT(bobResponse.encode())
+
+  const aliceInteraction = await alice.processJWT(bobResponse.encode())
+
+  expect(aliceInteraction.getMessages().map(m => m.encode())).toEqual(
+    bobInteraction.getMessages().map(m => m.encode()),
+  )
+  // @ts-ignore
+  console.log(aliceInteraction.getSummary().state.resolution_result.didDocument)
+  // @ts-ignore
+  console.log(aliceInteraction.getSummary().state.resolution_result)
+  console.log(
+    // @ts-ignore
+    aliceInteraction.getSummary().state.resolution_result.methodMetadata,
+  )
+})
