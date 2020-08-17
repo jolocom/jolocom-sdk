@@ -29,7 +29,12 @@ import {
   InteractionManager,
   InteractionTransportAPI,
 } from './interactionManager'
-import { ResolutionType, ResolutionFlowState } from './resolutionFlow'
+import {
+  ResolutionType,
+  ResolutionFlow,
+  ResolutionFlowState,
+  ResolutionRequest,
+} from './resolutionFlow'
 
 /***
  * - initiated by InteractionManager when an interaction starts
@@ -42,6 +47,7 @@ const interactionFlowForMessage = {
   [InteractionType.CredentialRequest]: CredentialRequestFlow,
   [InteractionType.Authentication]: AuthenticationFlow,
   [AuthorizationType.AuthorizationRequest]: AuthorizationFlow,
+  [ResolutionType.ResolutionRequest]: ResolutionFlow,
 }
 
 export class Interaction {
@@ -98,8 +104,8 @@ export class Interaction {
 
   public async createResolutionResponse() {
     const request = this.findMessageByType(
-      InteractionType.Authentication,
-    ) as JSONWebToken<Authentication>
+      ResolutionType.ResolutionRequest,
+    ) as JSONWebToken<ResolutionRequest>
     const { requested } = this.getSummary().state as ResolutionFlowState
 
     return this.ctx.ctx.identityWallet.create.message(
