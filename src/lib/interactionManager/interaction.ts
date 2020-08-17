@@ -45,7 +45,6 @@ import {
   DecryptionRequest,
   DecryptionResponse,
 } from './rpc'
-import { JolocomLib } from 'jolocom-lib'
 
 /***
  * - initiated by InteractionManager when an interaction starts
@@ -287,22 +286,19 @@ export class Interaction {
     const decRequest = this.findMessageByType(
       CallType.AsymDecrypt,
     ) as JSONWebToken<DecryptionRequest>
-
+    const password = await this.ctx.ctx.keyChainLib.getPassword()
     return this.ctx.ctx.identityWallet.create.message(
       {
         message: {
           callbackURL: decRequest.payload.interactionToken!.callbackURL,
           result: await this.ctx.ctx.identityWallet
-            .asymDecrypt(decRequest.payload.interactionToken!.request, {
-              derivationPath: JolocomLib.KeyTypes.jolocomIdentityKey,
-              encryptionPass: await this.ctx.ctx.keyChainLib.getPassword(),
-            })
+            .asymDecrypt(decRequest.payload.interactionToken!.request, password)
             .then(buf => buf.toString()),
           rpc: CallType.AsymDecrypt,
         },
         typ: CallType.AsymDecrypt,
       },
-      await this.ctx.ctx.keyChainLib.getPassword(),
+      password,
       decRequest,
     )
   }
