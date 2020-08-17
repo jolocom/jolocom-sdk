@@ -9,10 +9,10 @@
   "devDependencies": {
     "@jolocom/native-utils-node": "^0.5.6",
     "@jolocom/sdk": "../",
-    "@jolocom/sdk-storage-typeorm": "^2.0.0",
+    "@jolocom/sdk-storage-typeorm": "^2.0.2",
     "@types/jest": "^26.0.9",
     "jest": "^26.1.0",
-    "jolocom-lib": "^5.0.0",
+    "jolocom-lib": "^5.0.2",
     "local-did-resolver": "^0.2.2",
     "sqlite3": "^5.0.0",
     "ts-jest": "^26.1.3",
