@@ -27,7 +27,7 @@ export class CredentialRequestFlow extends Flow<
    * Given an interaction token, will fire the appropriate step in the protocol or throw
    */
 
-  public async handleInteractionToken(
+  public async onValidMessage(
     token: CredentialRequest | CredentialResponse,
     interactionType: string,
   ) {

@@ -11,7 +11,6 @@ import {
 } from './types'
 import { CredentialRequestFlow } from './credentialRequestFlow'
 import { Flow } from './flow'
-import { last } from 'ramda'
 import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credentialOfferRequest'
 import { AuthenticationFlow } from './authenticationFlow'
 import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRequest'
@@ -125,7 +124,9 @@ export class Interaction {
           methodMetadata: {
             stateProof: await this.ctx.ctx.storageLib.eventDB
               .read(requested)
-              .catch(e => []),
+              .catch(e => {
+                return []
+              }),
           },
         },
         typ: ResolutionType.ResolutionResponse,
@@ -230,25 +231,11 @@ export class Interaction {
         .resolver.resolve(token.signer.did)
     }
 
-    if (token.signer.did !== this.ctx.ctx.identityWallet.did) {
-      try {
-        await this.ctx.ctx.identityWallet.validateJWT(
-          token,
-          last(this.getMessages()),
-          this.ctx.ctx.didMethods.getDefault().resolver,
-        )
-      } catch (err) {
-        throw new AppError(ErrorCode.InvalidToken, err)
-      }
-    }
-
-    return this.flow
-      .handleInteractionToken(token.interactionToken, token.interactionType)
-      .then(res => {
-        this.interactionMessages.push(token)
-        // this.ctx.ctx.storageLib.store.interactionToken(token)
-        return res
-      })
+    return this.flow.handleInteractionToken(token).then(res => {
+      this.interactionMessages.push(token)
+      // this.ctx.ctx.storageLib.store.interactionToken(token)
+      return res
+    })
   }
 
   public getSummary(): InteractionSummary {

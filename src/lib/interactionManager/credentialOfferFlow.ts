@@ -29,7 +29,7 @@ export class CredentialOfferFlow extends Flow<
     super(ctx)
   }
 
-  public async handleInteractionToken(
+  public async onValidMessage(
     token:
       | CredentialOfferRequest
       | CredentialOfferResponse
