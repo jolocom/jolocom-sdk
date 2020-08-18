@@ -1,5 +1,6 @@
 import { Flow } from './flow'
 import { FlowType } from './types'
+import { JSONWebToken } from '../../..'
 
 import { ResolutionResult } from '../resolution'
 
@@ -30,6 +31,13 @@ export class ResolutionFlow extends Flow<ResolutionRequest | ResolutionResult> {
   public state: ResolutionFlowState = { requested: '' }
 
   public async handleInteractionToken(
+    token: JSONWebToken<ResolutionRequest | ResolutionResult>,
+  ): Promise<boolean> {
+    console.log('res')
+    return true
+  }
+
+  public async onValidMessage(
     token: ResolutionRequest | ResolutionResult,
     interactionType: string,
   ) {
