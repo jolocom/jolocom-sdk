@@ -34,6 +34,7 @@ import {
   ResolutionFlowState,
   ResolutionRequest,
 } from './resolutionFlow'
+import { last } from 'ramda'
 
 /***
  * - initiated by InteractionManager when an interaction starts
@@ -105,7 +106,9 @@ export class Interaction {
     const request = this.findMessageByType(
       ResolutionType.ResolutionRequest,
     ) as JSONWebToken<ResolutionRequest>
-    const { requested } = this.getSummary().state as ResolutionFlowState
+    const requested =
+      (this.getSummary().state as ResolutionFlowState).requested ||
+      this.ctx.ctx.idw.did
 
     return this.ctx.ctx.identityWallet.create.message(
       {
@@ -123,8 +126,8 @@ export class Interaction {
           },
           methodMetadata: {
             stateProof: await this.ctx.ctx.storageLib.eventDB
-              .read(requested.split(':')[-1])
-              .catch(e => {
+              .read(last(requested.split(':')) || '')
+              .catch(_ => {
                 return []
               }),
           },
