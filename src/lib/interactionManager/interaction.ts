@@ -123,7 +123,7 @@ export class Interaction {
           },
           methodMetadata: {
             stateProof: await this.ctx.ctx.storageLib.eventDB
-              .read(requested)
+              .read(requested.split(':')[-1])
               .catch(e => {
                 return []
               }),

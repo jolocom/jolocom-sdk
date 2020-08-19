@@ -7,7 +7,7 @@ import { AppError, ErrorCode } from '../errors'
 export interface FlowState {}
 
 export abstract class Flow<T> {
-  private history: Array<JSONWebToken<T>> = []
+  protected history: Array<JSONWebToken<T>> = []
   protected ctx: Interaction
 
   public abstract type: FlowType
