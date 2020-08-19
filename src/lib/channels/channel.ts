@@ -1,4 +1,4 @@
-import { InteractionSummary, FlowType, EstablishChannelFlowState } from '../interactionManager/types'
+import { InteractionSummary, EstablishChannelFlowState } from '../interactionManager/types'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { Interaction } from '../interactionManager/interaction'
 import { ChannelTransportAPI, ChannelKeeper } from './channelKeeper'
@@ -10,7 +10,7 @@ export interface ChannelSummary {
 }
 
 interface ChannelQuery {
-  promise: Promise<JSONWebToken<any>>
+  promise?: Promise<JSONWebToken<any>>
   resolve?: (resp: JSONWebToken<any>) => void
   reject?: (err?: Error) => void
   sendResult?: any
@@ -89,7 +89,10 @@ export class Channel {
       this.initialInteraction = interxn
       // TODO check if response valid?
 
-      if (this.authenticated) this._resolveAuthPromise(true)
+      if (this.authenticated) {
+        this._resolveAuthPromise(true)
+        return interxn
+      }
     }
 
     // TODO ~ @mnzaki
@@ -109,20 +112,20 @@ export class Channel {
     // are consenting to when they open a channel
 
     this._ensureAuthenticated()
-    let resp
-    if (interxn.flow.type === FlowType.Authentication) {
-      resp = await interxn.createAuthenticationResponse()
-    }
 
-    if (resp) {
-      this.send(resp.encode())
+    const thread = this._threads[interxn.id]
+    if (thread) {
+      // TODO implicit assumption about message response
+      const response = interxn.getMessages()[1]
+      if (response && thread.resolve) {
+        thread.response = response
+        thread.resolve(response)
+      }
+    } else {
+      // TODO should thread be added in?
+      //      note that 'thread' objects here are only useful to trigger
+      //      thread resolution promises
     }
-
-    // const token = JolocomLib.parse.interactionToken.fromJWT(jwt)
-    //const qId = token.nonce
-    //const query = this._threads[qId]
-    //query.response = token
-    //query.resolve && query.resolve(token)
 
     return interxn
   }
@@ -133,7 +136,7 @@ export class Channel {
     }
   }
 
-  public async start() {
+  public async start(onInterxnCb?: (interxn: Interaction) => Promise<void>) {
     this._ensureAuthenticated()
 
     if (!this._started) {
@@ -141,7 +144,8 @@ export class Channel {
       this._startedPromise = new Promise(async (resolve) => {
         while (this._started) {
           const msg = await this.transportAPI.receive()
-          this.processJWT(msg)
+          const interxn = await this.processJWT(msg)
+          onInterxnCb && onInterxnCb(interxn)
         }
         resolve()
       })
@@ -158,21 +162,24 @@ export class Channel {
   }
 
   public async sendQuery<T>(tokenOrJwt: JSONWebToken<T> | string) {
-    let token: JSONWebToken<T>
+    let token: JSONWebToken<T>, jwt: string
     if (typeof tokenOrJwt === 'string') {
+      jwt = tokenOrJwt
       token = JolocomLib.parse.interactionToken.fromJWT(tokenOrJwt)
     } else {
       token = tokenOrJwt
+      jwt = token.encode()
     }
     const qId = token.nonce
-    const query: ChannelQuery = this._threads[qId] = {
-      promise: new Promise((resolve, reject) => {
-        query.resolve = resolve
-        query.reject = reject
-        return this.send(token.encode())
-      })
-    }
 
+    let query: ChannelQuery = {}
+    query.promise = new Promise((resolve, reject) => {
+      query.resolve = resolve
+      query.reject = reject
+      return this.send(jwt)
+    })
+
+    this._threads[qId] = query
     this._threadIdList.push(qId)
 
     // TODO add expiry mechanism to reject and delete query from memory once tokens expire
