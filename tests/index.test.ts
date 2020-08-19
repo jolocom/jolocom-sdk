@@ -6,7 +6,7 @@ import {
 } from 'typeorm'
 
 import { InternalDb } from 'local-did-resolver'
-// import { createDb } from 'local-did-resolver/js/db'
+import { createDb } from 'local-did-resolver/js/db'
 
 import { JolocomSDK, NaivePasswordStore } from '@jolocom/sdk'
 import {
@@ -75,23 +75,33 @@ test('Authentication interaction', async () => {
 
 test('Resolution interaction', async () => {
   const con = await getConnection()
-  const alice = getSdk(con)
-  const bob = getSdk(con)
 
-  await alice.init({ registerNew: true })
-  await bob.init({ registerNew: true })
+  const sqlDB = new JolocomTypeormStorage(con)
+  const inMemDB = createDb()
 
-  const aliceResRequest = await alice.resolutionRequestToken(bob.idw.did)
+  // in this test, the service is "anchored" (the user can resolve them), and
+  // the user is "unanchored" (the service cannot resolve them initially)
+  const service = getSdk(con)
+  await service.init({ registerNew: true })
 
-  const bobInteraction = await bob.processJWT(aliceResRequest)
+  // insert the service's KEL to the user DB (make the service resolvable)
+  const serviceId = service.idw.did.split(':')[2]
+  const serviceEL = await sqlDB.eventDB.read(serviceId)
+  await inMemDB.append(serviceId, serviceEL)
 
-  const bobResponse = await bobInteraction.createResolutionResponse()
-  await bob.processJWT(bobResponse.encode())
+  const user = getSdk(con, inMemDB)
+  await user.init({ registerNew: true })
 
-  const aliceInteraction = await alice.processJWT(bobResponse.encode())
+  const serviceResRequest = await service.resolutionRequestToken()
 
-  expect(aliceInteraction.getMessages().map(m => m.encode())).toEqual(
-    bobInteraction.getMessages().map(m => m.encode()),
+  const userInteraction = await user.processJWT(serviceResRequest)
+
+  const userResponse = await userInteraction.createResolutionResponse()
+  await user.processJWT(userResponse.encode())
+
+  const serviceInteraction = await service.processJWT(userResponse.encode())
+
+  expect(serviceInteraction.getMessages().map(m => m.encode())).toEqual(
+    userInteraction.getMessages().map(m => m.encode()),
   )
-  console.log(aliceInteraction.getSummary().state)
 })

@@ -12,16 +12,18 @@ export enum ResolutionType {
 }
 
 export interface ResolutionFlowState {
-  requested: string
+  requested?: string
   resolution_result?: ResolutionResult
 }
 
 export interface ResolutionRequest {
-  uri: string
+  uri?: string
 }
 
-export const isResolutionRequest = (t: any): t is ResolutionRequest =>
-  t && t.uri && typeof t.uri === 'string'
+export const isResolutionRequest = (
+  t: any,
+  typ: string,
+): t is ResolutionRequest => typ === ResolutionType.ResolutionRequest
 
 export const isResolutionResponse = (
   t: any,
@@ -30,7 +32,7 @@ export const isResolutionResponse = (
 
 export class ResolutionFlow extends Flow<ResolutionRequest | ResolutionResult> {
   public type = FlowType.Resolution
-  public state: ResolutionFlowState = { requested: '' }
+  public state: ResolutionFlowState = {}
 
   private async validateTokenAndPush(
     token: JSONWebToken<ResolutionRequest | ResolutionResult>,
@@ -59,7 +61,7 @@ export class ResolutionFlow extends Flow<ResolutionRequest | ResolutionResult> {
     const iT = token.interactionToken
     switch (token.interactionType) {
       case ResolutionType.ResolutionRequest:
-        if (isResolutionRequest(iT)) {
+        if (isResolutionRequest(iT, token.interactionType)) {
           await this.validateTokenAndPush(token)
           this.state.requested = iT.uri
           return true
@@ -72,8 +74,7 @@ export class ResolutionFlow extends Flow<ResolutionRequest | ResolutionResult> {
             iT.methodMetadata.stateProof.length > 0
           ) {
             // cache local state
-            const id = token.issuer.split(':')[-1]
-            console.log(id)
+            const id = token.signer.did
             const cachedEL = await this.ctx.ctx.ctx.storageLib.eventDB.read(id)
 
             // update local state
