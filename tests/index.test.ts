@@ -92,6 +92,16 @@ test('Resolution interaction', async () => {
   const user = getSdk(con, inMemDB)
   await user.init({ registerNew: true })
 
+  // ensure the service is resolvable by the user
+  expect(
+    user.didMethods.getDefault().resolver.resolve(service.idw.did),
+  ).resolves.toBeTruthy()
+
+  // ensure the user is not resolvable by the service
+  expect(
+    service.didMethods.getDefault().resolver.resolve(user.idw.did),
+  ).rejects.toBeTruthy()
+
   const serviceResRequest = await service.resolutionRequestToken()
 
   const userInteraction = await user.processJWT(serviceResRequest)

@@ -60,7 +60,7 @@ export class Interaction {
 
   public participants!: {
     requester: Identity
-    responder?: Identity
+    responder?: string
   }
 
   public constructor(
@@ -226,12 +226,10 @@ export class Interaction {
         requester,
       }
       if (requester.did !== this.ctx.ctx.identityWallet.did) {
-        this.participants.responder = this.ctx.ctx.identityWallet.identity
+        this.participants.responder = this.ctx.ctx.identityWallet.did
       }
     } else if (!this.participants.responder) {
-      this.participants.responder = await this.ctx.ctx.didMethods
-        .getDefault()
-        .resolver.resolve(token.signer.did)
+      this.participants.responder = token.signer.did
     }
 
     return this.flow.handleInteractionToken(token).then(res => {
