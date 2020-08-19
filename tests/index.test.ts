@@ -4,11 +4,15 @@ import {
   Connection,
   ConnectionOptions,
 } from 'typeorm'
+
 import { InternalDb } from 'local-did-resolver'
-import { createDb } from 'local-did-resolver/js/db'
+// import { createDb } from 'local-did-resolver/js/db'
 
 import { JolocomSDK, NaivePasswordStore } from '@jolocom/sdk'
-import { JolocomTypeormStorage } from '@jolocom/sdk-storage-typeorm'
+import {
+  JolocomTypeormStorage,
+  // EventLogEntity,
+} from '@jolocom/sdk-storage-typeorm'
 
 const testConnection: ConnectionOptions = {
   type: 'sqlite',
@@ -26,30 +30,28 @@ const getSdk = (connection: Connection, eDB?: InternalDb) =>
     eventDB: eDB,
   })
 
-beforeAll(async () => {
+beforeEach(async () => {
   return await createConnection(testConnection)
 })
 
-afterAll(async () => {
+afterEach(async () => {
   let conn = await getConnection()
   return conn.close()
 })
 
 test('Create local identity', async () => {
-  const agent = getSdk(await getConnection())
+  const con = await getConnection()
+  const agent = getSdk(con)
 
   await agent.init({ registerNew: true })
-
-  // TODO Continue from here
 })
 
 test('Authentication interaction', async () => {
   const con = await getConnection()
-  const edb = {}
-  const alice = getSdk(con, createDb(edb))
-  const bob = getSdk(con, createDb(edb))
-
+  const alice = getSdk(con)
   await alice.init({ registerNew: true })
+
+  const bob = getSdk(con)
   await bob.init({ registerNew: true })
 
   const aliceAuthRequest = await alice.authRequestToken({
@@ -73,9 +75,8 @@ test('Authentication interaction', async () => {
 
 test('Resolution interaction', async () => {
   const con = await getConnection()
-  const edb = {}
-  const alice = getSdk(con, createDb(edb))
-  const bob = getSdk(con, createDb(edb))
+  const alice = getSdk(con)
+  const bob = getSdk(con)
 
   await alice.init({ registerNew: true })
   await bob.init({ registerNew: true })
@@ -92,12 +93,5 @@ test('Resolution interaction', async () => {
   expect(aliceInteraction.getMessages().map(m => m.encode())).toEqual(
     bobInteraction.getMessages().map(m => m.encode()),
   )
-  // @ts-ignore
-  console.log(aliceInteraction.getSummary().state.resolution_result.didDocument)
-  // @ts-ignore
-  console.log(aliceInteraction.getSummary().state.resolution_result)
-  console.log(
-    // @ts-ignore
-    aliceInteraction.getSummary().state.resolution_result.methodMetadata,
-  )
+  console.log(aliceInteraction.getSummary().state)
 })

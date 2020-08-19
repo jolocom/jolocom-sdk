@@ -468,6 +468,11 @@
   resolved "https://registry.yarnpkg.com/@jolocom/native-utils-node/-/native-utils-node-0.5.6.tgz#b85ad40846c3d08ee6a0dd4e953994dbae2b307b"
   integrity sha512-/QTU/eFqcWI84iBrTskzMw2dFxkOKc+AUufODFtaLdpZ+xXwfdjwr4BD6erJUo571NXP6ymTjfV0bJI/sQXAGw==
 
+"@jolocom/native-utils-node@^0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@jolocom/native-utils-node/-/native-utils-node-0.6.0.tgz#d2c3d1e7d2e92d081e7feaadbb945f8b53a49e06"
+  integrity sha512-or/AvedxuIuQdRhPV1vPMFN4cah80u7d1XKpfUH0M4jUTqdi7yXlhIBUEtA0jXbXOpmv/3VWgB96Qm300Nmbyg==
+
 "@jolocom/protocol-ts@^0.5.1":
   version "0.5.1"
   resolved "https://registry.yarnpkg.com/@jolocom/protocol-ts/-/protocol-ts-0.5.1.tgz#faa22952029b27d2115be355c4bbf409af00f9c5"
@@ -475,10 +480,10 @@
   dependencies:
     cred-types-jolocom-core "^0.0.11"
 
-"@jolocom/sdk-storage-typeorm@^2.0.0":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jolocom/sdk-storage-typeorm/-/sdk-storage-typeorm-2.0.2.tgz#b4f73dde51478d117b712f861d25c84c3de15942"
-  integrity sha512-1g1tB70lE8b/Dj6tZyFKeQ8IGRkxL+AZr0dpzGhKETvT3F6wX57ECGTzIzQtGqFtXkgfOvThzX91d5SOlk7hxg==
+"@jolocom/sdk-storage-typeorm@^2.0.8":
+  version "2.0.8"
+  resolved "https://registry.yarnpkg.com/@jolocom/sdk-storage-typeorm/-/sdk-storage-typeorm-2.0.8.tgz#645f3361eac634f3a3cad6029e950ca87c33475e"
+  integrity sha512-gvzgKlSn7CZtenySMy5jiH/c5mmWa/KdD/0HcIqshXrIZOrMVtDnw0EuwC/T7/zQumjTINmJf46xPQeHNmoUdQ==
   dependencies:
     class-transformer "^0.2.3"
     ramda "^0.27.1"
@@ -2897,12 +2902,12 @@ jolo-did-resolver@0.2.1:
     jolocom-registry-contract "0.3.0"
     node-fetch "^2.6.0"
 
-jolocom-lib@^5.0.3:
-  version "5.0.3"
-  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-5.0.3.tgz#b1d3ba3127290a641cb55cd223ed9c67427b13d3"
-  integrity sha512-mOUOwkvoiRIEF6nI1qpQvp7RJvEg+cudYs8zayWxzdm8CIdOc/5/la+lTDLqjleyaUb42SQG/78rDXqxtSN31g==
+jolocom-lib@^5.0.5:
+  version "5.0.5"
+  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-5.0.5.tgz#dd0c6d38f3ae9ba74f4362bfea5687c3f906e247"
+  integrity sha512-+Sml0mHuBmOAsxg/O67V1SHdFZ6wqt3useCc39f+XZIzLwsmCb4mJka7Yt1T9zmKVOK8qD8ZLXmZHA+7/JylJA==
   dependencies:
-    "@jolocom/native-utils-node" "^0.5.6"
+    "@jolocom/native-utils-node" "^0.6.0"
     "@jolocom/protocol-ts" "^0.5.1"
     "@jolocom/vaulted-key-provider" "^0.5.0"
     base64url "^3.0.1"
@@ -2921,7 +2926,7 @@ jolocom-lib@^5.0.3:
     json-logic-js "^1.2.2"
     jsonld "^1.6.1"
     jsontokens "^1.0.0"
-    local-did-resolver "^0.2.2"
+    local-did-resolver "^0.3.0"
     node-fetch "^2.3.0"
     qrcode "^1.3.3"
     reflect-metadata "^0.1.13"
@@ -3123,10 +3128,10 @@ lines-and-columns@^1.1.6:
   resolved "https://registry.yarnpkg.com/lines-and-columns/-/lines-and-columns-1.1.6.tgz#1c00c743b433cd0a4e80758f7b64a57440d9ff00"
   integrity sha1-HADHQ7QzzQpOgHWPe2SldEDZ/wA=
 
-local-did-resolver@^0.2.2:
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/local-did-resolver/-/local-did-resolver-0.2.2.tgz#2d496003fce724be9b636281637247e5fa48ea18"
-  integrity sha512-nxj9bavs6kHnk/aKYk8IS+CrQItWcGqlqXpeyDHIWcdayqoF4F7nkqysGXAU7M9zazC9olIpDsgoGvWQyj5fRA==
+local-did-resolver@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/local-did-resolver/-/local-did-resolver-0.3.0.tgz#b7029cfbab4ed5c9144ccd38e183b66b93230173"
+  integrity sha512-E1pxO4QWxZzKpQHOcRxBhSzJYW3vA4BrV/mRG29SE4PF7JPDPh3Xo7L/KkSvkk0pUWXIApsGSVLxoY0+WxaR0Q==
 
 locate-path@^3.0.0:
   version "3.0.0"
