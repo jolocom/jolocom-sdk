@@ -110,6 +110,14 @@ export class Interaction {
       (this.getSummary().state as ResolutionFlowState).requested ||
       this.ctx.ctx.idw.did
 
+    const stateId = last(requested.split(':')) || ''
+
+    const stateProof = await this.ctx.ctx.storageLib.eventDB
+      .read(stateId)
+      .catch(_ => {
+        return []
+      })
+
     return this.ctx.ctx.identityWallet.create.message(
       {
         message: {
@@ -124,13 +132,7 @@ export class Interaction {
             driver: 'jolocom/peer-resolution/0.1',
             retrieved: Date.now(),
           },
-          methodMetadata: {
-            stateProof: await this.ctx.ctx.storageLib.eventDB
-              .read(last(requested.split(':')) || '')
-              .catch(_ => {
-                return []
-              }),
-          },
+          methodMetadata: { stateProof },
         },
         typ: ResolutionType.ResolutionResponse,
       },
