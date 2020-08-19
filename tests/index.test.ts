@@ -6,15 +6,23 @@ import {
 } from 'typeorm'
 
 import { InternalDb } from 'local-did-resolver'
-import { createDb } from 'local-did-resolver/js/db'
+// import { createDb } from 'local-did-resolver/js/db'
 
 import { JolocomSDK, NaivePasswordStore } from '@jolocom/sdk'
-import {
-  JolocomTypeormStorage,
-  // EventLogEntity,
-} from '@jolocom/sdk-storage-typeorm'
+import { JolocomTypeormStorage } from '@jolocom/sdk-storage-typeorm'
 
-const testConnection: ConnectionOptions = {
+const testConnection1: ConnectionOptions = {
+  name: 'default',
+  type: 'sqlite',
+  database: ':memory:',
+  dropSchema: true,
+  entities: ['node_modules/@jolocom/sdk-storage-typeorm/js/src/entities/*.js'],
+  synchronize: true,
+  logging: false,
+}
+
+const testConnection2: ConnectionOptions = {
+  name: 'con2',
   type: 'sqlite',
   database: ':memory:',
   dropSchema: true,
@@ -31,7 +39,7 @@ const getSdk = (connection: Connection, eDB?: InternalDb) =>
   })
 
 beforeEach(async () => {
-  return await createConnection(testConnection)
+  return await createConnection(testConnection1)
 })
 
 afterEach(async () => {
@@ -74,22 +82,24 @@ test('Authentication interaction', async () => {
 })
 
 test('Resolution interaction', async () => {
-  const con = await getConnection()
+  const serviceCon = await getConnection()
+  const userCon = await createConnection(testConnection2)
 
-  const sqlDB = new JolocomTypeormStorage(con)
-  const inMemDB = createDb()
+  const serviceDB = new JolocomTypeormStorage(serviceCon)
+  const userDB = new JolocomTypeormStorage(userCon)
 
   // in this test, the service is "anchored" (the user can resolve them), and
   // the user is "unanchored" (the service cannot resolve them initially)
-  const service = getSdk(con)
+  const service = getSdk(serviceCon)
   await service.init({ registerNew: true })
 
   // insert the service's KEL to the user DB (make the service resolvable)
   const serviceId = service.idw.did.split(':')[2]
-  const serviceEL = await sqlDB.eventDB.read(serviceId)
-  await inMemDB.append(serviceId, serviceEL)
+  const serviceEL = await serviceDB.eventDB.read(serviceId)
 
-  const user = getSdk(con, inMemDB)
+  await userDB.eventDB.append(serviceId, serviceEL)
+
+  const user = getSdk(userCon)
   await user.init({ registerNew: true })
 
   // ensure the service is resolvable by the user
@@ -102,16 +112,21 @@ test('Resolution interaction', async () => {
     service.didMethods.getDefault().resolver.resolve(user.idw.did),
   ).rejects.toBeTruthy()
 
+  // create a resolution request
   const serviceResRequest = await service.resolutionRequestToken()
 
+  // process the services request and get the handle for the interaction
   const userInteraction = await user.processJWT(serviceResRequest)
 
+  // create a resolution response
   const userResponse = await userInteraction.createResolutionResponse()
-  await user.processJWT(userResponse.encode())
 
-  const serviceInteraction = await service.processJWT(userResponse.encode())
+  // process the resolution response, containing the state update proof of the User
+  await service.processJWT(userResponse.encode())
 
-  expect(serviceInteraction.getMessages().map(m => m.encode())).toEqual(
-    userInteraction.getMessages().map(m => m.encode()),
-  )
+  expect(
+    service.didMethods.getDefault().resolver.resolve(user.idw.did),
+  ).resolves.toBeTruthy()
+
+  await userCon.close()
 })

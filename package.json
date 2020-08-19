@@ -41,7 +41,7 @@
     "eslint-plugin-react": "^7.12.4",
     "fs-extra": "^8.1.0",
     "husky": "^3.0.5",
-    "jolocom-lib": "^5.0.5",
+    "jolocom-lib": "^5.0.7",
     "mockdate": "^2.0.2",
     "node-fetch": "^2.6.0",
     "precise-commits": "^1.0.2",
@@ -60,7 +60,7 @@
     }
   },
   "peerDependencies": {
-    "jolocom-lib": "^5.0.5"
+    "jolocom-lib": "^5.0.7"
   },
   "dependencies": {
     "@jolocom/native-utils-node": "^0.5.6",

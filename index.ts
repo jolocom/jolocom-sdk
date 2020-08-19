@@ -260,7 +260,7 @@ export class JolocomSDK extends BackendMiddleware {
   public async resolutionRequestToken(uri?: string): Promise<string> {
     const token = await this.idw.create.message(
       {
-        message: { uri },
+        message: uri ? { uri } : {},
         typ: ResolutionType.ResolutionRequest,
       },
       await this.keyChainLib.getPassword(),
