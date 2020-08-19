@@ -74,7 +74,7 @@ export class ResolutionFlow extends Flow<ResolutionRequest | ResolutionResult> {
             iT.methodMetadata.stateProof.length > 0
           ) {
             // cache local state
-            const id = token.signer.did
+            const id = last(token.signer.did.split(':')) || ''
             const cachedEL = await this.ctx.ctx.ctx.storageLib.eventDB.read(id)
 
             // update local state
