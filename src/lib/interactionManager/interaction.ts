@@ -3,6 +3,7 @@ import { InteractionType } from 'jolocom-lib/js/interactionTokens/types'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import {
   InteractionSummary,
+  InteractionRole,
   SignedCredentialWithMetadata,
   CredentialVerificationSummary,
   AuthenticationFlowState,
@@ -51,12 +52,11 @@ export class Interaction {
 
   public transportAPI: InteractionTransportAPI
 
-  public participants!: {
-    requester: Identity
-    responder?: Identity
-  }
+  public participants: {
+    [k in InteractionRole]?: Identity
+  } = {}
 
-  counterparty?: Identity
+  role?: InteractionRole
 
   public constructor(
     ctx: InteractionManager,
@@ -68,6 +68,14 @@ export class Interaction {
     this.transportAPI = transportAPI
     this.id = id
     this.flow = new interactionFlowForMessage[interactionType](this)
+  }
+
+  get counterparty(): Identity | undefined {
+    if (!this.role) return
+    const counterRole = this.role === InteractionRole.Requester
+      ? InteractionRole.Responder
+      : InteractionRole.Requester
+    return this.participants[counterRole]
   }
 
   public getMessages() {
@@ -175,20 +183,19 @@ export class Interaction {
   public async processInteractionToken<T>(
     token: JSONWebToken<T>,
   ): Promise<boolean> {
-    if (!this.participants) {
+    if (!this.participants.requester) {
       // TODO what happens if the signer isnt resolvable
-      const requester = await this.ctx.ctx.registry.resolve(token.signer.did)
-      this.participants = {
-        requester,
-      }
-      if (requester.did !== this.ctx.ctx.identityWallet.did) {
-        this.counterparty = requester
-        this.participants.responder = this.ctx.ctx.identityWallet.identity
+      this.participants.requester = await this.ctx.ctx.registry.resolve(token.signer.did)
+      if (this.participants.requester.did === this.ctx.ctx.identityWallet.did) {
+        this.role = InteractionRole.Requester
       }
     } else if (!this.participants.responder) {
-      this.counterparty = this.participants.responder = await this.ctx.ctx.registry.resolve(
+      this.participants.responder = await this.ctx.ctx.registry.resolve(
         token.signer.did,
       )
+      if (this.participants.responder.did === this.ctx.ctx.identityWallet.did) {
+        this.role = InteractionRole.Responder
+      }
     }
 
     if (token.signer.did !== this.ctx.ctx.identityWallet.did) {
@@ -214,7 +221,7 @@ export class Interaction {
 
   public getSummary(): InteractionSummary {
     return {
-      initiator: generateIdentitySummary(this.participants.requester),
+      initiator: generateIdentitySummary(this.participants.requester!),
       state: this.flow.getState(),
     }
   }
@@ -278,7 +285,7 @@ export class Interaction {
     if (!selection.length)
       throw new AppError(ErrorCode.SaveCredentialMetadataFailed)
 
-    const issuer = generateIdentitySummary(this.participants.requester)
+    const issuer = generateIdentitySummary(this.participants.requester!)
 
     return Promise.all(
       selection.map(({ type }, i) => {
@@ -296,7 +303,7 @@ export class Interaction {
 
   public storeIssuerProfile() {
     return this.ctx.ctx.storageLib.store.issuerProfile(
-      generateIdentitySummary(this.participants.requester),
+      generateIdentitySummary(this.participants.requester!)
     )
   }
 }
