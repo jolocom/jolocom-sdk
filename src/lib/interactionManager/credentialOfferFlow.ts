@@ -106,7 +106,7 @@ export class CredentialOfferFlow extends Flow<
         ...offer,
         signedCredential: cred,
         validationErrors: {
-          invalidIssuer: cred.issuer !== this.ctx.participants.requester.did,
+          invalidIssuer: cred.issuer !== this.ctx.participants.requester!.did,
           invalidSubject: cred.subject !== this.ctx.participants.responder!.did,
         },
       }
