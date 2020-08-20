@@ -1,17 +1,15 @@
 import { Interaction } from './interaction'
 import { Flow } from './flow'
-import { DecryptionFlowState, FlowType } from './types'
+import { DecryptionFlowState, FlowType, DecryptionType } from './types'
 import { isDecryptionRequest, isDecryptionResponse } from './guards'
-import { CallType, DecryptionRequest, DecryptionResponse } from './rpc'
+import { DecryptionRequest, DecryptionResponse } from './rpc'
 
 export class DecryptionFlow extends Flow<
   DecryptionRequest | DecryptionResponse
 > {
   public type = FlowType.Decrypt
-
-  // TODO remove 'rpc'
   public state: DecryptionFlowState = {
-    req: { callbackURL: '', rpc: CallType.AsymDecrypt, request: '' },
+    req: { callbackURL: '', request: '' },
   }
 
   public constructor(ctx: Interaction) {
@@ -22,13 +20,16 @@ export class DecryptionFlow extends Flow<
     token: DecryptionRequest | DecryptionResponse,
     interactionType: string,
   ) {
-    if (interactionType === CallType.AsymDecrypt) {
-      if (isDecryptionRequest(token))
-        return this.consumeDecryptionRequest(token)
-      else if (isDecryptionResponse(token))
-        return this.consumeDecryptionResponse(token)
+    switch (interactionType) {
+      case DecryptionType.DecryptionRequest:
+        if (isDecryptionRequest(token, interactionType))
+          return this.consumeDecryptionRequest(token)
+      case DecryptionType.DecryptionResponse:
+        if (isDecryptionResponse(token, interactionType))
+          return this.consumeDecryptionResponse(token)
+      default:
+        throw new Error('Interaction type not found')
     }
-    throw new Error('Interaction type not found')
   }
 
   public async consumeDecryptionRequest(token: DecryptionRequest) {
