@@ -75,7 +75,7 @@ export const methodKeeper = (defaultMethod: IDidMethod = didMethods.jolo) => {
         return false
       }
 
-      methods[name] = implementation
+      methods[methodName] = implementation
 
       return true
     },
