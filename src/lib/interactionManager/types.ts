@@ -12,7 +12,7 @@ import { EncryptionRequest, DecryptionRequest } from './rpc'
 
 export enum InteractionRole {
   Requester = 'requester',
-  Responder = 'responder'
+  Responder = 'responder',
 }
 
 // TODO define and refactor how the UI components/containers handle the InteractionSummary.
@@ -60,6 +60,16 @@ export interface EstablishChannelFlowState {
 export enum AuthorizationType {
   AuthorizationRequest = 'authorizationRequest',
   AuthorizationResponse = 'authorizationResponse',
+}
+
+export enum EncryptionType {
+  EncryptionRequest = 'encryptionRequest',
+  EncryptionResponse = 'encryptionResponse',
+}
+
+export enum DecryptionType {
+  DecryptionRequest = 'DecryptionRequest',
+  DecryptionResponse = 'DecryptionResponse',
 }
 
 export interface AuthorizationResponse {
