@@ -1196,10 +1196,10 @@
     "@types/istanbul-reports" "^1.1.1"
     "@types/yargs" "^12.0.9"
 
-"@jolocom/protocol-ts@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@jolocom/protocol-ts/-/protocol-ts-0.3.0.tgz#28334bf65fdedda0f6ea90b54be4fa0a02234495"
-  integrity sha512-uEFDU0CnIBq/0AEmXQVJmwq3cdRrvWOdNQPz/WkODO9IG0MathZ6rEZX8f1gt4QMuCJ0uBcGRY5u3YoJx+gq6g==
+"@jolocom/protocol-ts@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@jolocom/protocol-ts/-/protocol-ts-0.4.0.tgz#152c4b23b9802a78bd98fbe18847d764f51a91f0"
+  integrity sha512-meKpwdHgWgkc2sgvbFYViIJN94+HKDsSqK1Xf7TBoiHGWHoMO95AbGNwOg/bE5+FnyJAQACa0wJmSC0GOK8ECA==
   dependencies:
     cred-types-jolocom-core "^0.0.11"
 
@@ -1482,16 +1482,11 @@ acorn@7.1.0:
   integrity sha512-kL5CuoXA/dgxlBbVrflsflzQ3PAas7RYZB52NOm/6839iVYJgKMJ3cQJD+t2i5+qFa8h3MDpEOJiS64E8JLnSQ==
 
 acorn@^5.5.3:
-  version "5.7.3"
-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-5.7.3.tgz#67aa231bf8812974b85235a96771eb6bd07ea279"
-  integrity sha512-T/zvzYRfbVojPWahDsE5evJdHb3oJoQfFbsrKM7w5Zcs++Tr257tia3BmMP8XYVjp1S9RZXQMh7gao96BlqZOw==
+  version "5.7.4"
+  resolved "https://registry.yarnpkg.com/acorn/-/acorn-5.7.4.tgz#3e8d8a9947d0599a1796d10225d7432f4a4acf5e"
+  integrity sha512-1D++VG7BhrtvQpNbBzovKNc1FLGGEE/oGe7b9xJm/RFHMBeUaUGpluV9RLjZa47YFdPcDAenEYuq9pQPcMdLJg==
 
-acorn@^6.0.1:
-  version "6.1.1"
-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-6.1.1.tgz#7d25ae05bb8ad1f9b699108e1094ecd7884adc1f"
-  integrity sha512-jPTiwtOxaHNaAPg/dmrJ/beuzLRnXtB0kQPQ8JpotKJgTB6rX6c8mlf315941pyjBSaPg8NHXS9fhP4u17DpGA==
-
-acorn@^6.0.7:
+acorn@^6.0.1, acorn@^6.0.7:
   version "6.2.1"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-6.2.1.tgz#3ed8422d6dec09e6121cc7a843ca86a330a86b51"
   integrity sha512-JD0xT5FCRDNyjDda3Lrg/IxFscp9q4tiYtxE1/nOzlKCk7hIRuYjhq1kCNkbPjMRMZuFq20HNQn1I9k8Oj0E+Q==
@@ -5267,12 +5262,12 @@ jest@^24.8.0:
     import-local "^2.0.0"
     jest-cli "^24.8.0"
 
-jolocom-lib@^4.4.0:
-  version "4.4.0"
-  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-4.4.0.tgz#38b3e472d1a48c66686f6c75092acf338e59ee28"
-  integrity sha512-76CG3yPa0Jiq83+HA8qHSBToO++iBc7jrFMmUN2D7Xwnu2QfG517xuOlVxAJ8Lq1wwuvw6JZ0Q9+d+b7IbRjIQ==
+jolocom-lib@^4.4.1:
+  version "4.4.1"
+  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-4.4.1.tgz#53ecff82d970aa7bb34e744ba016e14cf52c1da8"
+  integrity sha512-cLvV9jwEs3ECDCHiWc+1EbM5wZa88wkiwK81p5s5Ap6JXgZ0hxprmhDe3C9gstYzOHaL4Zh9u6AJtsAOP6ilUw==
   dependencies:
-    "@jolocom/protocol-ts" "^0.3.0"
+    "@jolocom/protocol-ts" "^0.4.0"
     base64url "^3.0.1"
     bip32 "^1.0.2"
     bip39 "^3.0.1"
