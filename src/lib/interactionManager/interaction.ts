@@ -5,12 +5,12 @@ import {
   InteractionSummary,
   InteractionRole,
   SignedCredentialWithMetadata,
-  CredentialVerificationSummary,
   AuthenticationFlowState,
-  CredentialOfferFlowState,
   FlowType,
   EstablishChannelType,
   EstablishChannelRequest,
+  CredentialOfferFlowState,
+  CredentialVerificationSummary,
 } from './types'
 import { CredentialRequestFlow } from './credentialRequestFlow'
 import { Flow } from './flow'
@@ -34,6 +34,8 @@ import {
   InteractionManager,
   InteractionTransportAPI,
 } from './interactionManager'
+import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
+import { CredentialOfferResponse } from 'jolocom-lib/js/interactionTokens/credentialOfferResponse'
 
 /***
  * - initiated by InteractionManager when an interaction starts
@@ -188,6 +190,50 @@ export class Interaction {
       credentialOfferResponseAttr,
       await this.ctx.ctx.keyChainLib.getPassword(),
       credentialOfferRequest,
+    )
+  }
+
+  public async issueSelectedCredentials(
+    offerMap?: {
+      [k: string]: (inp?: any) => Promise<{ claim: any, metadata?: any, subject?: string }>
+    }
+  ): Promise<SignedCredential[]> {
+    const flowState = this.flow.state as CredentialOfferFlowState
+    const password = await this.ctx.ctx.keyChainLib.getPassword()
+    return Promise.all(flowState.selectedTypes.map(async (type) => {
+      const offerTypeHandler = offerMap && offerMap[type]
+      const credDesc = offerTypeHandler && await offerTypeHandler()
+
+      const metadata = credDesc && credDesc.metadata || { context: [] }
+      const subject = credDesc && credDesc.subject || this.counterparty?.did
+      if (!subject) throw new Error('no subject for credential')
+
+      return this.ctx.ctx.idw.create.signedCredential(
+        {
+          metadata,
+          claim: credDesc?.claim,
+          subject
+        },
+        password
+      )
+    }))
+  }
+
+  public async createCredentialReceiveToken(
+    customCreds?: SignedCredential[]
+  ) {
+    let creds = customCreds || await this.issueSelectedCredentials()
+
+    const request = this.findMessageByType(
+      InteractionType.CredentialOfferResponse,
+    ) as JSONWebToken<CredentialOfferResponse>
+
+    return this.ctx.ctx.identityWallet.create.interactionTokens.response.issue(
+      {
+        signedCredentials: creds.map(c => c.toJSON()),
+      },
+      await this.ctx.ctx.keyChainLib.getPassword(),
+      request,
     )
   }
 
