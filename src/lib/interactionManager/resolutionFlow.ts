@@ -1,10 +1,10 @@
 import { Flow } from './flow'
 import { FlowType } from './types'
-import { JSONWebToken } from '../../..'
 import { AppError, ErrorCode } from '../errors'
 import { last } from 'ramda'
 
 import { ResolutionResult } from '../resolution'
+import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 
 export enum ResolutionType {
   ResolutionRequest = 'ResolutionRequest',

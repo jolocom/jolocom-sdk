@@ -1,8 +1,8 @@
 import { Interaction } from './interaction'
 import { FlowType } from './types'
-import { JSONWebToken } from '../../..'
 import { last } from 'ramda'
 import { AppError, ErrorCode } from '../errors'
+import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 
 // FIXME why is this exported?
 export interface FlowState {}
