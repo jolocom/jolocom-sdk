@@ -12,6 +12,8 @@ import { ISignedCredCreationArgs } from 'jolocom-lib/js/credentials/signedCreden
 import {
   InteractionTransportType,
   AuthorizationRequest,
+  EstablishChannelRequest,
+  EstablishChannelType,
 } from './src/lib/interactionManager/types'
 import { BackendError } from './src/lib/errors/types'
 
@@ -38,6 +40,8 @@ import { IDidMethod } from 'jolocom-lib/js/didMethods/types'
 import { didMethods } from 'jolocom-lib/js/didMethods'
 import { InternalDb } from 'local-did-resolver'
 import { ResolutionType } from './src/lib/interactionManager/resolutionFlow'
+import { ChannelKeeper } from './src/lib/channels'
+import { CallType } from './src/lib/interactionManager/rpc'
 
 export interface IJolocomSDKConfig {
   storage: IStorage
@@ -89,6 +93,7 @@ export const methodKeeper = (defaultMethod: IDidMethod = didMethods.jolo) => {
 
 export class JolocomSDK extends BackendMiddleware {
   public interactionManager: InteractionManager
+  public channels = new ChannelKeeper(this)
 
   /**
    * FIXME merge the backendMiddleware code in here instead of extending??
@@ -287,6 +292,27 @@ export class JolocomSDK extends BackendMiddleware {
   }
 
   /**
+   * Creates a signed, base64 encoded JWT for an EstablishChannelRequest interaction token
+   *
+   * @param request - EstablishChannelRequest Attributes
+   * @returns Base64 encoded signed EstablishChannelRequest
+   */
+  public async establishChannelRequestToken(
+    request: EstablishChannelRequest,
+  ): Promise<string> {
+    const token = await this.idw.create.message(
+      {
+        message: request,
+        typ: EstablishChannelType.EstablishChannelRequest
+      },
+      await this.keyChainLib.getPassword(),
+    )
+
+    await this.interactionManager.start(InteractionTransportType.HTTP, token)
+    return token.encode()
+  }
+
+  /**
    * Creates a signed, base64 encoded Credential Request, given a set of requirements
    *
    * @param request - Credential Request Attributes
@@ -340,6 +366,52 @@ export class JolocomSDK extends BackendMiddleware {
       await this.keyChainLib.getPassword(),
       JolocomLib.parse.interactionToken.fromJWT(selection),
     )
+
+    return token.encode()
+  }
+
+  public async rpcDecRequest(req: {
+    toDecrypt: Buffer
+    callbackURL: string
+  }): Promise<string> {
+    const token = await this.idw.create.message(
+      {
+        message: {
+          callbackURL: req.callbackURL,
+          rpc: CallType.AsymDecrypt,
+          request: req.toDecrypt.toString('base64'),
+        },
+        typ: CallType.AsymDecrypt,
+      },
+      await this.keyChainLib.getPassword(),
+    )
+
+    await this.interactionManager.start(InteractionTransportType.HTTP, token)
+
+    return token.encode()
+  }
+
+  public async rpcEncRequest(req: {
+    toEncrypt: Buffer
+    target: string
+    callbackURL: string
+  }): Promise<string> {
+    const token = await this.idw.create.message(
+      {
+        message: {
+          callbackURL: req.callbackURL,
+          rpc: CallType.AsymEncrypt,
+          request: {
+            data: req.toEncrypt.toString('base64'),
+            target: req.target,
+          },
+        },
+        typ: CallType.AsymEncrypt,
+      },
+      await this.keyChainLib.getPassword(),
+    )
+
+    await this.interactionManager.start(InteractionTransportType.HTTP, token)
 
     return token.encode()
   }

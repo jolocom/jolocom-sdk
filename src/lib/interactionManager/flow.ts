@@ -4,6 +4,7 @@ import { JSONWebToken } from '../../..'
 import { last } from 'ramda'
 import { AppError, ErrorCode } from '../errors'
 
+// FIXME why is this exported?
 export interface FlowState {}
 
 export abstract class Flow<T> {

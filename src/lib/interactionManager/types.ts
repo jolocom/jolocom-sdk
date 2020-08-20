@@ -3,10 +3,17 @@ import {
   CredentialOfferResponseSelection,
 } from 'jolocom-lib/js/interactionTokens/interactionTokens.types'
 import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
-import { IdentitySummary } from '../types'
-import { FlowState } from './flow'
 import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRequest'
 import { CredentialResponse } from 'jolocom-lib/js/interactionTokens/credentialResponse'
+import { ChannelTransport } from '../channels'
+import { IdentitySummary } from '../types'
+import { FlowState } from './flow'
+import { EncryptionRequest, DecryptionRequest } from './rpc'
+
+export enum InteractionRole {
+  Requester = 'requester',
+  Responder = 'responder'
+}
 
 // TODO define and refactor how the UI components/containers handle the InteractionSummary.
 export interface InteractionSummary {
@@ -28,6 +35,27 @@ export enum FlowType {
   CredentialOffer = 'CredentialOffer',
   Authorization = 'Authorization',
   Resolution = 'Resolution',
+  EstablishChannel = 'EstablishChannel',
+  Encrypt = 'Encrypt',
+  Decrypt = 'Decrypt',
+}
+
+export enum EstablishChannelType {
+  EstablishChannelRequest = 'EstablishChannelRequest',
+  EstablishChannelResponse = 'EstablishChannelResponse',
+}
+export interface EstablishChannelRequest {
+  description: string
+  transports: ChannelTransport[]
+}
+export interface EstablishChannelResponse {
+  transportIdx: number
+}
+export interface EstablishChannelFlowState {
+  description: string
+  established: boolean
+  transports?: ChannelTransport[]
+  transport?: ChannelTransport
 }
 
 export enum AuthorizationType {
@@ -63,9 +91,18 @@ export interface CredentialRequestFlowState extends FlowState {
 export interface CredentialOfferFlowState extends FlowState {
   offerSummary: CredentialOffer[]
   selection: CredentialOfferResponseSelection[]
+  selectedTypes: string[]
   issued: SignedCredential[]
   credentialsValidity: boolean[]
   credentialsAllValid: boolean
+}
+
+export interface EncryptionFlowState extends FlowState {
+  req: EncryptionRequest
+}
+
+export interface DecryptionFlowState extends FlowState {
+  req: DecryptionRequest
 }
 
 export interface CredentialTypeSummary {

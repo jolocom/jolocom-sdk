@@ -3,11 +3,14 @@ import { InteractionType } from 'jolocom-lib/js/interactionTokens/types'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import {
   InteractionSummary,
+  InteractionRole,
   SignedCredentialWithMetadata,
-  CredentialVerificationSummary,
   AuthenticationFlowState,
-  CredentialOfferFlowState,
   FlowType,
+  EstablishChannelType,
+  EstablishChannelRequest,
+  CredentialOfferFlowState,
+  CredentialVerificationSummary,
 } from './types'
 import { CredentialRequestFlow } from './credentialRequestFlow'
 import { Flow } from './flow'
@@ -17,17 +20,20 @@ import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRe
 import { AppError, ErrorCode } from '../errors'
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { Identity } from 'jolocom-lib/js/identity/identity'
-import { generateIdentitySummary } from '../../utils/generateIdentitySummary'
+
 import {
   AuthorizationType,
   AuthorizationRequest,
   AuthorizationFlowState,
 } from './types'
 import { AuthorizationFlow } from './authorizationFlow'
+import { EstablishChannelFlow } from './establishChannelFlow'
+
 import {
   InteractionManager,
   InteractionTransportAPI,
 } from './interactionManager'
+
 import {
   ResolutionType,
   ResolutionFlow,
@@ -35,6 +41,20 @@ import {
   ResolutionRequest,
 } from './resolutionFlow'
 import { last } from 'ramda'
+
+import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
+import { CredentialOfferResponse } from 'jolocom-lib/js/interactionTokens/credentialOfferResponse'
+
+import { EncryptionFlow } from './encryptionFlow'
+import { DecryptionFlow } from './decryptionFlow'
+import { generateIdentitySummary } from '../../utils/generateIdentitySummary'
+import {
+  CallType,
+  EncryptionRequest,
+  EncryptionResponse,
+  DecryptionRequest,
+  DecryptionResponse,
+} from './rpc'
 
 /***
  * - initiated by InteractionManager when an interaction starts
@@ -48,6 +68,9 @@ const interactionFlowForMessage = {
   [InteractionType.Authentication]: AuthenticationFlow,
   [AuthorizationType.AuthorizationRequest]: AuthorizationFlow,
   [ResolutionType.ResolutionRequest]: ResolutionFlow,
+  [EstablishChannelType.EstablishChannelRequest]: EstablishChannelFlow,
+  [CallType.AsymEncrypt]: EncryptionFlow,
+  [CallType.AsymDecrypt]: DecryptionFlow,
 }
 
 export class Interaction {
@@ -58,10 +81,11 @@ export class Interaction {
 
   public transportAPI: InteractionTransportAPI
 
-  public participants!: {
-    requester: Identity
-    responder?: string
-  }
+  public participants: {
+    [k in InteractionRole]?: Identity
+  } = {}
+
+  role?: InteractionRole
 
   public constructor(
     ctx: InteractionManager,
@@ -73,6 +97,14 @@ export class Interaction {
     this.transportAPI = transportAPI
     this.id = id
     this.flow = new interactionFlowForMessage[interactionType](this)
+  }
+
+  get counterparty(): Identity | undefined {
+    if (!this.role) return
+    const counterRole = this.role === InteractionRole.Requester
+      ? InteractionRole.Responder
+      : InteractionRole.Requester
+    return this.participants[counterRole]
   }
 
   public getMessages() {
@@ -114,7 +146,7 @@ export class Interaction {
 
     const stateProof = await this.ctx.ctx.storageLib.eventDB
       .read(stateId)
-      .catch(_ => {
+      .catch((_: any) => {
         return []
       })
 
@@ -135,6 +167,21 @@ export class Interaction {
           methodMetadata: { stateProof },
         },
         typ: ResolutionType.ResolutionResponse,
+      },
+      await this.ctx.ctx.keyChainLib.getPassword(),
+      request,
+    )
+  }
+
+  public async createEstablishChannelResponse(transportIdx: number) {
+    const request = this.findMessageByType(
+      EstablishChannelType.EstablishChannelRequest
+    ) as JSONWebToken<EstablishChannelRequest>
+
+    return this.ctx.ctx.identityWallet.create.message(
+      {
+        message: { transportIdx },
+        typ: EstablishChannelType.EstablishChannelResponse
       },
       await this.ctx.ctx.keyChainLib.getPassword(),
       request,
@@ -207,6 +254,50 @@ export class Interaction {
     )
   }
 
+  public async issueSelectedCredentials(
+    offerMap?: {
+      [k: string]: (inp?: any) => Promise<{ claim: any, metadata?: any, subject?: string }>
+    }
+  ): Promise<SignedCredential[]> {
+    const flowState = this.flow.state as CredentialOfferFlowState
+    const password = await this.ctx.ctx.keyChainLib.getPassword()
+    return Promise.all(flowState.selectedTypes.map(async (type) => {
+      const offerTypeHandler = offerMap && offerMap[type]
+      const credDesc = offerTypeHandler && await offerTypeHandler()
+
+      const metadata = credDesc && credDesc.metadata || { context: [] }
+      const subject = credDesc && credDesc.subject || this.counterparty?.did
+      if (!subject) throw new Error('no subject for credential')
+
+      return this.ctx.ctx.idw.create.signedCredential(
+        {
+          metadata,
+          claim: credDesc?.claim,
+          subject
+        },
+        password
+      )
+    }))
+  }
+
+  public async createCredentialReceiveToken(
+    customCreds?: SignedCredential[]
+  ) {
+    let creds = customCreds || await this.issueSelectedCredentials()
+
+    const request = this.findMessageByType(
+      InteractionType.CredentialOfferResponse,
+    ) as JSONWebToken<CredentialOfferResponse>
+
+    return this.ctx.ctx.identityWallet.create.interactionTokens.response.issue(
+      {
+        signedCredentials: creds.map(c => c.toJSON()),
+      },
+      await this.ctx.ctx.keyChainLib.getPassword(),
+      request,
+    )
+  }
+
   /**
    * Validate an interaction token and process it to update the interaction
    * state (via the associated InteractionFlow)
@@ -219,19 +310,30 @@ export class Interaction {
   public async processInteractionToken<T>(
     token: JSONWebToken<T>,
   ): Promise<boolean> {
-    if (!this.participants) {
-      // TODO what happens if the signer isnt resolvable
-      const requester = await this.ctx.ctx.didMethods
-        .getDefault()
-        .resolver.resolve(token.signer.did)
-      this.participants = {
-        requester,
-      }
-      if (requester.did !== this.ctx.ctx.identityWallet.did) {
-        this.participants.responder = this.ctx.ctx.identityWallet.did
+    if (!this.participants.requester) {
+      try {
+        const requester = await this.ctx.ctx.didMethods
+          .getDefault()
+          .resolver.resolve(token.signer.did)
+        this.participants.requester = requester
+        if (requester.did === this.ctx.ctx.identityWallet.did) {
+          this.role = InteractionRole.Requester
+        }
+      } catch(err) {
+        console.error('error resolving requester', err)
       }
     } else if (!this.participants.responder) {
-      this.participants.responder = token.signer.did
+      try {
+        const responder = await this.ctx.ctx.didMethods
+          .getDefault()
+          .resolver.resolve(token.signer.did)
+        this.participants.responder = responder
+        if (responder.did === this.ctx.ctx.identityWallet.did) {
+          this.role = InteractionRole.Responder
+        }
+      } catch (err) {
+        console.error('error resolving responder', err)
+      }
     }
 
     return this.flow.handleInteractionToken(token).then(res => {
@@ -241,9 +343,60 @@ export class Interaction {
     })
   }
 
+  public async createEncResponseToken(): Promise<
+    JSONWebToken<EncryptionResponse>
+  > {
+    const encRequest = this.findMessageByType(
+      CallType.AsymEncrypt,
+    ) as JSONWebToken<EncryptionRequest>
+
+    return this.ctx.ctx.identityWallet.create.message(
+      {
+        message: {
+          callbackURL: encRequest.payload.interactionToken!.callbackURL,
+          // @ts-ignore
+          result: await this.ctx.ctx.identityWallet.asymEncryptToDidKey(
+            Buffer.from(
+              encRequest.payload.interactionToken!.request.data,
+              'base64',
+            ),
+            encRequest.payload.interactionToken!.request.target,
+          ),
+          rpc: CallType.AsymEncrypt,
+        },
+        typ: CallType.AsymEncrypt,
+      },
+      await this.ctx.ctx.keyChainLib.getPassword(),
+      encRequest,
+    )
+  }
+
+  public async createDecResponseToken(): Promise<
+    JSONWebToken<DecryptionResponse>
+  > {
+    const decRequest = this.findMessageByType(
+      CallType.AsymDecrypt,
+    ) as JSONWebToken<DecryptionRequest>
+    const password = await this.ctx.ctx.keyChainLib.getPassword()
+    return this.ctx.ctx.identityWallet.create.message(
+      {
+        message: {
+          callbackURL: decRequest.payload.interactionToken!.callbackURL,
+          result: await this.ctx.ctx.identityWallet
+            .asymDecrypt(decRequest.payload.interactionToken!.request, password)
+            .then(buf => buf.toString()),
+          rpc: CallType.AsymDecrypt,
+        },
+        typ: CallType.AsymDecrypt,
+      },
+      password,
+      decRequest,
+    )
+  }
+
   public getSummary(): InteractionSummary {
     return {
-      initiator: generateIdentitySummary(this.participants.requester),
+      initiator: generateIdentitySummary(this.participants.requester!),
       state: this.flow.getState(),
     }
   }
@@ -271,6 +424,7 @@ export class Interaction {
    *   the server only holds the status code right now)
    *   If we're linking, the return value is a promise, as per {@see http://reactnative.dev/docs/linking.html#openurl}
    */
+
   public async send<T>(token: JSONWebToken<T>) {
     // @ts-ignore - CredentialReceive has no callbackURL, needs fix on the lib for JWTEncodable.
     const { callbackURL } = token.interactionToken
@@ -307,9 +461,9 @@ export class Interaction {
     if (!selection.length)
       throw new AppError(ErrorCode.SaveCredentialMetadataFailed)
 
-    const issuer = generateIdentitySummary(this.participants.requester)
+    const issuer = generateIdentitySummary(this.participants.requester!)
 
-    Promise.all(
+    return Promise.all(
       selection.map(({ type }, i) => {
         const metadata = offerSummary.find(metadata => metadata.type === type)
 
@@ -324,8 +478,8 @@ export class Interaction {
   }
 
   public storeIssuerProfile() {
-    this.ctx.ctx.storageLib.store.issuerProfile(
-      generateIdentitySummary(this.participants.requester),
+    return this.ctx.ctx.storageLib.store.issuerProfile(
+      generateIdentitySummary(this.participants.requester!)
     )
   }
 }
