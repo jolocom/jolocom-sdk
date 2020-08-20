@@ -18,7 +18,7 @@ export class DecryptionFlow extends Flow<
     super(ctx)
   }
 
-  public handleInteractionToken(
+  public onValidMessage(
     token: DecryptionRequest | DecryptionResponse,
     interactionType: string,
   ) {

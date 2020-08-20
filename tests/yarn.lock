@@ -463,15 +463,10 @@
     "@types/yargs" "^15.0.0"
     chalk "^4.0.0"
 
-"@jolocom/native-utils-node@^0.5.6":
-  version "0.5.6"
-  resolved "https://registry.yarnpkg.com/@jolocom/native-utils-node/-/native-utils-node-0.5.6.tgz#b85ad40846c3d08ee6a0dd4e953994dbae2b307b"
-  integrity sha512-/QTU/eFqcWI84iBrTskzMw2dFxkOKc+AUufODFtaLdpZ+xXwfdjwr4BD6erJUo571NXP6ymTjfV0bJI/sQXAGw==
-
-"@jolocom/native-utils-node@^0.6.0":
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/@jolocom/native-utils-node/-/native-utils-node-0.6.0.tgz#d2c3d1e7d2e92d081e7feaadbb945f8b53a49e06"
-  integrity sha512-or/AvedxuIuQdRhPV1vPMFN4cah80u7d1XKpfUH0M4jUTqdi7yXlhIBUEtA0jXbXOpmv/3VWgB96Qm300Nmbyg==
+"@jolocom/native-utils-node@^0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@jolocom/native-utils-node/-/native-utils-node-0.7.0.tgz#4ff1edf6439911bad61e89a460f5fe7ee4f0f42d"
+  integrity sha512-sSLGjMePT14XpSGK9iJWECJVCBuXPuS2BH/cokm3LvvPOR856DZTFGyvcz0MIu7UFIJSAIVNe8rATKXo25aEdA==
 
 "@jolocom/protocol-ts@^0.5.1":
   version "0.5.1"
@@ -489,16 +484,16 @@
     ramda "^0.27.1"
 
 "@jolocom/sdk@../":
-  version "0.13.0"
+  version "0.16.1"
   dependencies:
-    "@jolocom/native-utils-node" "^0.5.6"
+    "@jolocom/native-utils-node" "^0.7.0"
     form-data "^3.0.0"
     ramda "^0.26.1"
 
-"@jolocom/vaulted-key-provider@^0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@jolocom/vaulted-key-provider/-/vaulted-key-provider-0.5.0.tgz#ba0b2137e926f15486d6f52ea722d885918cfed4"
-  integrity sha512-oD1w3SY2CZdPYauC+1VVQM0I6q7m8C5DM/GCAorwc4oBXQWHY59Nf/bhAA/PuUuGNns7rM/SX6tbPqyCNh+OZg==
+"@jolocom/vaulted-key-provider@^0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@jolocom/vaulted-key-provider/-/vaulted-key-provider-0.6.0.tgz#56e67e2393a6b82deb1eea849b2d78798b2bdd10"
+  integrity sha512-w3pse8rlmwfp3/5aoiu1kuLbXIFxhYFIgaIojsPcOANHhxZIY5hf1LFvgyat/92ekmegEhUxpDPIySE5V85EsQ==
   dependencies:
     rfc4648 "^1.4.0"
 
@@ -2902,14 +2897,14 @@ jolo-did-resolver@0.2.1:
     jolocom-registry-contract "0.3.0"
     node-fetch "^2.6.0"
 
-jolocom-lib@^5.0.7:
-  version "5.0.7"
-  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-5.0.7.tgz#5f623fc021267b9bf4a72c995708ae8d197edac0"
-  integrity sha512-qVvVIjJsh35DFqkYWkYOtrPhKT0S5UaRDCZ5o3abDihilwnzaAHSPFAQ5JKW6n4PgtwOFv4RUDpRa9yvJ38P1A==
+jolocom-lib@^5.0.9:
+  version "5.0.9"
+  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-5.0.9.tgz#f9357b8c72ccc63a9e0af7fa9bc291105b2b2ee3"
+  integrity sha512-K5wpyCf1GGnmVLX6+ZN+pKoMHVKs0DWMMtuK3h/CQ8DGKE6mwPBRvd8dvPUcR3vKe16vj/GGV2mMJgN5YQSrOg==
   dependencies:
-    "@jolocom/native-utils-node" "^0.6.0"
+    "@jolocom/native-utils-node" "^0.7.0"
     "@jolocom/protocol-ts" "^0.5.1"
-    "@jolocom/vaulted-key-provider" "^0.5.0"
+    "@jolocom/vaulted-key-provider" "^0.6.0"
     base64url "^3.0.1"
     bip32 "^1.0.2"
     bip39 "^3.0.1"

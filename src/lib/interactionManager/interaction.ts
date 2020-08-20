@@ -101,9 +101,10 @@ export class Interaction {
 
   get counterparty(): Identity | undefined {
     if (!this.role) return
-    const counterRole = this.role === InteractionRole.Requester
-      ? InteractionRole.Responder
-      : InteractionRole.Requester
+    const counterRole =
+      this.role === InteractionRole.Requester
+        ? InteractionRole.Responder
+        : InteractionRole.Requester
     return this.participants[counterRole]
   }
 
@@ -175,13 +176,13 @@ export class Interaction {
 
   public async createEstablishChannelResponse(transportIdx: number) {
     const request = this.findMessageByType(
-      EstablishChannelType.EstablishChannelRequest
+      EstablishChannelType.EstablishChannelRequest,
     ) as JSONWebToken<EstablishChannelRequest>
 
     return this.ctx.ctx.identityWallet.create.message(
       {
         message: { transportIdx },
-        typ: EstablishChannelType.EstablishChannelResponse
+        typ: EstablishChannelType.EstablishChannelResponse,
       },
       await this.ctx.ctx.keyChainLib.getPassword(),
       request,
@@ -254,36 +255,36 @@ export class Interaction {
     )
   }
 
-  public async issueSelectedCredentials(
-    offerMap?: {
-      [k: string]: (inp?: any) => Promise<{ claim: any, metadata?: any, subject?: string }>
-    }
-  ): Promise<SignedCredential[]> {
+  public async issueSelectedCredentials(offerMap?: {
+    [k: string]: (
+      inp?: any,
+    ) => Promise<{ claim: any; metadata?: any; subject?: string }>
+  }): Promise<SignedCredential[]> {
     const flowState = this.flow.state as CredentialOfferFlowState
     const password = await this.ctx.ctx.keyChainLib.getPassword()
-    return Promise.all(flowState.selectedTypes.map(async (type) => {
-      const offerTypeHandler = offerMap && offerMap[type]
-      const credDesc = offerTypeHandler && await offerTypeHandler()
+    return Promise.all(
+      flowState.selectedTypes.map(async type => {
+        const offerTypeHandler = offerMap && offerMap[type]
+        const credDesc = offerTypeHandler && (await offerTypeHandler())
 
-      const metadata = credDesc && credDesc.metadata || { context: [] }
-      const subject = credDesc && credDesc.subject || this.counterparty?.did
-      if (!subject) throw new Error('no subject for credential')
+        const metadata = (credDesc && credDesc.metadata) || { context: [] }
+        const subject = (credDesc && credDesc.subject) || this.counterparty?.did
+        if (!subject) throw new Error('no subject for credential')
 
-      return this.ctx.ctx.idw.create.signedCredential(
-        {
-          metadata,
-          claim: credDesc?.claim,
-          subject
-        },
-        password
-      )
-    }))
+        return this.ctx.ctx.idw.create.signedCredential(
+          {
+            metadata,
+            claim: credDesc?.claim,
+            subject,
+          },
+          password,
+        )
+      }),
+    )
   }
 
-  public async createCredentialReceiveToken(
-    customCreds?: SignedCredential[]
-  ) {
-    let creds = customCreds || await this.issueSelectedCredentials()
+  public async createCredentialReceiveToken(customCreds?: SignedCredential[]) {
+    let creds = customCreds || (await this.issueSelectedCredentials())
 
     const request = this.findMessageByType(
       InteractionType.CredentialOfferResponse,
@@ -319,7 +320,7 @@ export class Interaction {
         if (requester.did === this.ctx.ctx.identityWallet.did) {
           this.role = InteractionRole.Requester
         }
-      } catch(err) {
+      } catch (err) {
         console.error('error resolving requester', err)
       }
     } else if (!this.participants.responder) {
@@ -350,18 +351,21 @@ export class Interaction {
       CallType.AsymEncrypt,
     ) as JSONWebToken<EncryptionRequest>
 
+    const result = await this.ctx.ctx.identityWallet
+      .asymEncryptToDidKey(
+        Buffer.from(
+          encRequest.payload.interactionToken!.request.data,
+          'base64',
+        ),
+        encRequest.payload.interactionToken!.request.target,
+      )
+      .then(b => b.toString('base64'))
+
     return this.ctx.ctx.identityWallet.create.message(
       {
         message: {
           callbackURL: encRequest.payload.interactionToken!.callbackURL,
-          // @ts-ignore
-          result: await this.ctx.ctx.identityWallet.asymEncryptToDidKey(
-            Buffer.from(
-              encRequest.payload.interactionToken!.request.data,
-              'base64',
-            ),
-            encRequest.payload.interactionToken!.request.target,
-          ),
+          result,
           rpc: CallType.AsymEncrypt,
         },
         typ: CallType.AsymEncrypt,
@@ -479,7 +483,7 @@ export class Interaction {
 
   public storeIssuerProfile() {
     return this.ctx.ctx.storageLib.store.issuerProfile(
-      generateIdentitySummary(this.participants.requester!)
+      generateIdentitySummary(this.participants.requester!),
     )
   }
 }
