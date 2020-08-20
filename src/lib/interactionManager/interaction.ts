@@ -7,6 +7,8 @@ import {
   SignedCredentialWithMetadata,
   AuthenticationFlowState,
   FlowType,
+  EstablishChannelType,
+  EstablishChannelRequest,
   CredentialOfferFlowState,
   CredentialVerificationSummary,
 } from './types'
@@ -26,6 +28,8 @@ import {
   AuthorizationFlowState,
 } from './types'
 import { AuthorizationFlow } from './authorizationFlow'
+import { EstablishChannelFlow } from './establishChannelFlow'
+
 import {
   InteractionManager,
   InteractionTransportAPI,
@@ -44,6 +48,7 @@ const interactionFlowForMessage = {
   [InteractionType.CredentialRequest]: CredentialRequestFlow,
   [InteractionType.Authentication]: AuthenticationFlow,
   [AuthorizationType.AuthorizationRequest]: AuthorizationFlow,
+  [EstablishChannelType.EstablishChannelRequest]: EstablishChannelFlow,
 }
 
 export class Interaction {
@@ -101,6 +106,21 @@ export class Interaction {
       {
         description,
         callbackURL: request.interactionToken.callbackURL,
+      },
+      await this.ctx.ctx.keyChainLib.getPassword(),
+      request,
+    )
+  }
+
+  public async createEstablishChannelResponse(transportIdx: number) {
+    const request = this.findMessageByType(
+      EstablishChannelType.EstablishChannelRequest
+    ) as JSONWebToken<EstablishChannelRequest>
+
+    return this.ctx.ctx.identityWallet.create.message(
+      {
+        message: { transportIdx },
+        typ: EstablishChannelType.EstablishChannelResponse
       },
       await this.ctx.ctx.keyChainLib.getPassword(),
       request,

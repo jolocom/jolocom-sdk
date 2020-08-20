@@ -45,7 +45,7 @@
     "fs-extra": "^8.1.0",
     "husky": "^3.0.5",
     "jest": "^24.8.0",
-    "jolocom-lib": "^4.3.0",
+    "jolocom-lib": "^4.4.1",
     "mockdate": "^2.0.2",
     "node-fetch": "^2.6.0",
     "precise-commits": "^1.0.2",
@@ -65,7 +65,7 @@
     }
   },
   "peerDependencies": {
-    "jolocom-lib": "^4.3.0"
+    "jolocom-lib": "^4.4.1"
   },
   "dependencies": {
     "form-data": "^3.0.0",
