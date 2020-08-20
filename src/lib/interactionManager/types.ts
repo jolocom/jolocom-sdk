@@ -8,6 +8,11 @@ import { FlowState } from './flow'
 import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRequest'
 import { CredentialResponse } from 'jolocom-lib/js/interactionTokens/credentialResponse'
 
+export enum InteractionRole {
+  Requester = 'requester',
+  Responder = 'responder'
+}
+
 // TODO define and refactor how the UI components/containers handle the InteractionSummary.
 export interface InteractionSummary {
   initiator: IdentitySummary
