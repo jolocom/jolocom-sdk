@@ -1,8 +1,8 @@
 import { Interaction } from './interaction'
 import { Flow } from './flow'
-import { EncryptionFlowState, FlowType } from './types'
+import { EncryptionFlowState, FlowType, EncryptionType } from './types'
 import { isEncryptionRequest, isEncryptionResponse } from './guards'
-import { CallType, EncryptionRequest, EncryptionResponse } from './rpc'
+import { EncryptionRequest, EncryptionResponse } from './rpc'
 
 export class EncryptionFlow extends Flow<
   EncryptionRequest | EncryptionResponse
@@ -11,7 +11,6 @@ export class EncryptionFlow extends Flow<
   public state: EncryptionFlowState = {
     req: {
       callbackURL: '',
-      rpc: CallType.AsymEncrypt,
       request: { target: '', data: '' },
     },
   }
@@ -24,13 +23,16 @@ export class EncryptionFlow extends Flow<
     token: EncryptionRequest | EncryptionResponse,
     interactionType: string,
   ) {
-    if (interactionType === CallType.AsymEncrypt) {
-      if (isEncryptionRequest(token))
-        return this.consumeEncryptionRequest(token)
-      else if (isEncryptionResponse(token))
-        return this.consumeEncryptionResponse(token)
+    switch (interactionType) {
+      case EncryptionType.EncryptionRequest:
+        if (isEncryptionRequest(token, interactionType))
+          return this.consumeEncryptionRequest(token)
+      case EncryptionType.EncryptionResponse:
+        if (isEncryptionResponse(token, interactionType))
+          return this.consumeEncryptionResponse(token)
+      default:
+        throw new Error('Interaction type not found')
     }
-    throw new Error('Interaction type not found')
   }
 
   public async consumeEncryptionRequest(token: EncryptionRequest) {

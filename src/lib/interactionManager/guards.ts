@@ -11,6 +11,8 @@ import {
   EstablishChannelResponse,
   EstablishChannelRequest,
   EstablishChannelType,
+  EncryptionType,
+  DecryptionType,
 } from './types'
 
 import {
@@ -18,10 +20,6 @@ import {
   EncryptionResponse,
   DecryptionRequest,
   DecryptionResponse,
-  CallType,
-  Call,
-  Result,
-  RPC,
 } from './rpc'
 
 export const isCredentialRequest = (token: any): token is CredentialRequest =>
@@ -48,54 +46,60 @@ export const isAuthorizationRequest = (
   token: any,
   type: AuthorizationType,
 ): token is AuthorizationRequest =>
-  type === AuthorizationType.AuthorizationRequest
+  type === AuthorizationType.AuthorizationRequest &&
+  !!token.description &&
+  !!token.callbackURL
 
 export const isAuthorizationResponse = (
   token: any,
   type: AuthorizationType,
 ): token is AuthorizationResponse =>
-  type === AuthorizationType.AuthorizationResponse
+  type === AuthorizationType.AuthorizationResponse &&
+  !!token.description &&
+  !token.callbackURL
 
 export const isEstablishChannelRequest = (
   token: any,
-  type: EstablishChannelType
+  type: EstablishChannelType,
 ): token is EstablishChannelRequest =>
-  type === EstablishChannelType.EstablishChannelRequest
+  type === EstablishChannelType.EstablishChannelRequest &&
+  !!token.description &&
+  !!token.transports
 
 export const isEstablishChannelResponse = (
   token: any,
-  type: EstablishChannelType
+  type: EstablishChannelType,
 ): token is EstablishChannelResponse =>
-  type === EstablishChannelType.EstablishChannelResponse
+  type === EstablishChannelType.EstablishChannelResponse && !!token.transportIdx
 
-const isRPC = <T extends RPC>(token: any): token is T =>
-  typeof token.rpc === 'string'
+const isRPCRequest = (token: any) => !!token.callbackURL && !!token.request
+const isRPCResponse = (token: any) => !token.callbackURL && !!token.result
 
-const isRPCCall = <T>(token: any): token is Call<T> =>
-  isRPC<Call<T>>(token) &&
-  typeof token.callbackURL === 'string' &&
-  !!token.request
-
-const isRPCResult = <T>(token: any): token is Result<T> =>
-  isRPC<Result<T>>(token) && !!token.result
-
-export const isEncryptionRequest = (token: any): token is EncryptionRequest =>
-  isRPCCall<{ target: string; data: string }>(token) &&
-  token.rpc === CallType.AsymEncrypt &&
+export const isEncryptionRequest = (
+  token: any,
+  type: EncryptionType,
+): token is EncryptionRequest =>
+  type === EncryptionType.EncryptionRequest &&
+  isRPCRequest(token) &&
   typeof token.request.target === 'string' &&
   typeof token.request.data === 'string'
 
-export const isEncryptionResponse = (token: any): token is EncryptionResponse =>
-  isRPCResult<string>(token) &&
-  token.rpc === CallType.AsymEncrypt &&
-  typeof token.result === 'string'
+export const isEncryptionResponse = (
+  token: any,
+  type: EncryptionType,
+): token is EncryptionResponse =>
+  type === EncryptionType.EncryptionResponse && isRPCResponse(token)
 
-export const isDecryptionRequest = (token: any): token is DecryptionRequest =>
-  isRPCCall<string>(token) &&
-  token.rpc === CallType.AsymDecrypt &&
+export const isDecryptionRequest = (
+  token: any,
+  type: DecryptionType,
+): token is DecryptionRequest =>
+  type === DecryptionType.DecryptionRequest &&
+  isRPCRequest(token) &&
   typeof token.request === 'string'
 
-export const isDecryptionResponse = (token: any): token is DecryptionResponse =>
-  isRPCResult<string>(token) &&
-  token.rpc === CallType.AsymDecrypt &&
-  typeof token.result === 'string'
+export const isDecryptionResponse = (
+  token: any,
+  type: DecryptionType,
+): token is DecryptionResponse =>
+  type === DecryptionType.DecryptionResponse && isRPCResponse(token)

@@ -14,6 +14,8 @@ import {
   AuthorizationRequest,
   EstablishChannelRequest,
   EstablishChannelType,
+  DecryptionType,
+  EncryptionType,
 } from './src/lib/interactionManager/types'
 import { generateSecureRandomBytes } from './src/lib/util'
 import { BackendError } from './src/lib/errors/types'
@@ -38,8 +40,6 @@ import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { Interaction } from './src/lib/interactionManager/interaction'
 import { InteractionManager } from './src/lib/interactionManager/interactionManager'
 import { ChannelKeeper } from './src/lib/channels'
-
-import { CallType } from './src/lib/interactionManager/rpc'
 
 export interface IJolocomSDKConfig {
   storage: IStorage
@@ -79,7 +79,7 @@ export class JolocomSDK extends BackendMiddleware {
     super({
       ...defaultConfig,
       storage: conf.storage,
-      passwordStore: conf.passwordStore
+      passwordStore: conf.passwordStore,
     })
     this.interactionManager = new InteractionManager(this)
   }
@@ -235,7 +235,7 @@ export class JolocomSDK extends BackendMiddleware {
     const token = await this.idw.create.message(
       {
         message: request,
-        typ: EstablishChannelType.EstablishChannelRequest
+        typ: EstablishChannelType.EstablishChannelRequest,
       },
       await this.keyChainLib.getPassword(),
     )
@@ -310,10 +310,9 @@ export class JolocomSDK extends BackendMiddleware {
       {
         message: {
           callbackURL: req.callbackURL,
-          rpc: CallType.AsymDecrypt,
           request: req.toDecrypt.toString('base64'),
         },
-        typ: CallType.AsymDecrypt,
+        typ: DecryptionType.DecryptionRequest,
       },
       await this.keyChainLib.getPassword(),
     )
@@ -332,13 +331,12 @@ export class JolocomSDK extends BackendMiddleware {
       {
         message: {
           callbackURL: req.callbackURL,
-          rpc: CallType.AsymEncrypt,
           request: {
             data: req.toEncrypt.toString('base64'),
             target: req.target,
           },
         },
-        typ: CallType.AsymEncrypt,
+        typ: EncryptionType.EncryptionRequest,
       },
       await this.keyChainLib.getPassword(),
     )
