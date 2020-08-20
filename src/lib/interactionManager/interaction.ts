@@ -314,13 +314,16 @@ export class Interaction {
   ): Promise<boolean> {
     if (!this.participants.requester) {
       // TODO what happens if the signer isnt resolvable
-      const requester = this.participants.requester =
-        await this.ctx.ctx.didMethods.getDefault()
-          .resolver.resolve(token.signer.did)
+      try {
+        const requester = this.participants.requester =
+          await this.ctx.ctx.didMethods.getDefault()
+            .resolver.resolve(token.signer.did)
       
-      if (requester.did === this.ctx.ctx.identityWallet.did) {
-        this.participants.responder = this.ctx.ctx.identityWallet.identity
-        this.role = InteractionRole.Requester
+        if (requester.did === this.ctx.ctx.identityWallet.did) {
+          this.role = InteractionRole.Requester
+        }
+      } catch (err) {
+        console.error('error resolving requester', err)
       }
     } else if (!this.participants.responder) {
       const responder = this.participants.responder =
@@ -345,18 +348,22 @@ export class Interaction {
       EncryptionType.EncryptionRequest,
     ) as JSONWebToken<EncryptionRequest>
 
+    const result = await this.ctx.ctx.identityWallet
+      .asymEncryptToDidKey(
+        Buffer.from(
+          encRequest.payload.interactionToken!.request.data,
+          'base64',
+        ),
+        encRequest.payload.interactionToken!.request.target,
+      )
+      .then(b => b.toString('base64'))
+
     return this.ctx.ctx.identityWallet.create.message(
       {
         message: {
           callbackURL: encRequest.payload.interactionToken!.callbackURL,
           // @ts-ignore
-          result: await this.ctx.ctx.identityWallet.asymEncryptToDidKey(
-            Buffer.from(
-              encRequest.payload.interactionToken!.request.data,
-              'base64',
-            ),
-            encRequest.payload.interactionToken!.request.target,
-          ),
+          result
         },
         typ: EncryptionType.EncryptionResponse,
       },

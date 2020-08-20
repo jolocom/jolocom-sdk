@@ -19,7 +19,7 @@ export class EncryptionFlow extends Flow<
     super(ctx)
   }
 
-  public handleInteractionToken(
+  public onValidMessage(
     token: EncryptionRequest | EncryptionResponse,
     interactionType: string,
   ) {
