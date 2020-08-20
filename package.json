@@ -63,7 +63,6 @@
     "jolocom-lib": "^5.0.9"
   },
   "dependencies": {
-    "@jolocom/native-utils-node": "^0.7.0",
     "form-data": "^3.0.0",
     "ramda": "^0.26.1"
   },
