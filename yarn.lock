@@ -1196,10 +1196,10 @@
     "@types/istanbul-reports" "^1.1.1"
     "@types/yargs" "^12.0.9"
 
-"@jolocom/protocol-ts@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@jolocom/protocol-ts/-/protocol-ts-0.3.0.tgz#28334bf65fdedda0f6ea90b54be4fa0a02234495"
-  integrity sha512-uEFDU0CnIBq/0AEmXQVJmwq3cdRrvWOdNQPz/WkODO9IG0MathZ6rEZX8f1gt4QMuCJ0uBcGRY5u3YoJx+gq6g==
+"@jolocom/protocol-ts@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@jolocom/protocol-ts/-/protocol-ts-0.4.0.tgz#152c4b23b9802a78bd98fbe18847d764f51a91f0"
+  integrity sha512-meKpwdHgWgkc2sgvbFYViIJN94+HKDsSqK1Xf7TBoiHGWHoMO95AbGNwOg/bE5+FnyJAQACa0wJmSC0GOK8ECA==
   dependencies:
     cred-types-jolocom-core "^0.0.11"
 
@@ -3005,9 +3005,8 @@ ecc-jsbn@~0.1.1:
     jsbn "~0.1.0"
     safer-buffer "^2.1.0"
 
-eccrypto@rootstock/eccrypto#485e11f163093fb6e0d5263fa46ed5075dedfe88:
+"eccrypto@github:rootstock/eccrypto#485e11f163093fb6e0d5263fa46ed5075dedfe88":
   version "1.1.2"
-  uid "485e11f163093fb6e0d5263fa46ed5075dedfe88"
   resolved "https://codeload.github.com/rootstock/eccrypto/tar.gz/485e11f163093fb6e0d5263fa46ed5075dedfe88"
   dependencies:
     acorn "7.1.0"
@@ -5263,12 +5262,12 @@ jest@^24.8.0:
     import-local "^2.0.0"
     jest-cli "^24.8.0"
 
-jolocom-lib@^4.4.0:
-  version "4.4.0"
-  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-4.4.0.tgz#38b3e472d1a48c66686f6c75092acf338e59ee28"
-  integrity sha512-76CG3yPa0Jiq83+HA8qHSBToO++iBc7jrFMmUN2D7Xwnu2QfG517xuOlVxAJ8Lq1wwuvw6JZ0Q9+d+b7IbRjIQ==
+jolocom-lib@^4.4.1:
+  version "4.4.1"
+  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-4.4.1.tgz#53ecff82d970aa7bb34e744ba016e14cf52c1da8"
+  integrity sha512-cLvV9jwEs3ECDCHiWc+1EbM5wZa88wkiwK81p5s5Ap6JXgZ0hxprmhDe3C9gstYzOHaL4Zh9u6AJtsAOP6ilUw==
   dependencies:
-    "@jolocom/protocol-ts" "^0.3.0"
+    "@jolocom/protocol-ts" "^0.4.0"
     base64url "^3.0.1"
     bip32 "^1.0.2"
     bip39 "^3.0.1"
