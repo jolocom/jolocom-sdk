@@ -975,10 +975,23 @@
     resolve-from "^5.0.0"
     resolve-global "^1.0.0"
 
-"@jolocom/native-utils-node@^0.7.0":
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/@jolocom/native-utils-node/-/native-utils-node-0.7.0.tgz#4ff1edf6439911bad61e89a460f5fe7ee4f0f42d"
-  integrity sha512-sSLGjMePT14XpSGK9iJWECJVCBuXPuS2BH/cokm3LvvPOR856DZTFGyvcz0MIu7UFIJSAIVNe8rATKXo25aEdA==
+"@jolocom/native-core-node-darwin-x64@^0.7.8":
+  version "0.7.8"
+  resolved "https://registry.yarnpkg.com/@jolocom/native-core-node-darwin-x64/-/native-core-node-darwin-x64-0.7.8.tgz#6f40e1a2713dee2de35bef028be733ffff68c7e0"
+  integrity sha512-/upoLqlpRzkmfPharsqufEGWyGQ/sSFUopltjFxni1VD2V2TPwQPy3fbWmjbECyUvbPB/N4iSKGzQUxvJMCIIQ==
+
+"@jolocom/native-core-node-linux-x64@^0.7.8":
+  version "0.7.4"
+  resolved "https://registry.yarnpkg.com/@jolocom/native-core-node-linux-x64/-/native-core-node-linux-x64-0.7.4.tgz#d88ce5aac4c71e2f81ea6f64b86df57da70f1862"
+  integrity sha512-ePWfB4G8CD3iaEVaR/xZeVtyk6SF/aPcNEqoNN+f6Obq3NcbYYG2NvLZGImnW44l3VBFJN3lKk1kpymWvC+Bzw==
+
+"@jolocom/native-core-node@^0.7.9":
+  version "0.7.9"
+  resolved "https://registry.yarnpkg.com/@jolocom/native-core-node/-/native-core-node-0.7.9.tgz#fc9428abf44c7e1e8dbd0137b407ac7bd5702f22"
+  integrity sha512-zMA6an5tBmWwBUwVT8lENpxRuwblQAdN2EjoPiIpbTjPtLB+xS8pojb2/QvorWdcQVF3WsEF5HODCCTdQ35Slw==
+  optionalDependencies:
+    "@jolocom/native-core-node-darwin-x64" "^0.7.8"
+    "@jolocom/native-core-node-linux-x64" "^0.7.8"
 
 "@jolocom/protocol-ts@^0.5.1":
   version "0.5.1"
@@ -3315,12 +3328,12 @@ jolo-did-resolver@0.2.1:
     jolocom-registry-contract "0.3.0"
     node-fetch "^2.6.0"
 
-jolocom-lib@^5.0.9:
-  version "5.0.9"
-  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-5.0.9.tgz#f9357b8c72ccc63a9e0af7fa9bc291105b2b2ee3"
-  integrity sha512-K5wpyCf1GGnmVLX6+ZN+pKoMHVKs0DWMMtuK3h/CQ8DGKE6mwPBRvd8dvPUcR3vKe16vj/GGV2mMJgN5YQSrOg==
+jolocom-lib@^5.0.12:
+  version "5.0.12"
+  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-5.0.12.tgz#1ec1916cebdf939631b8caef78a0b2e95aa158b0"
+  integrity sha512-Kj37Qz3q7/PYlzskXenkhyIqw5p5qZXEs31Z4UuirlHWm95b35ZCJ6U1saB/CVaouuyCZ62Kre53c3qD5Y6hAw==
   dependencies:
-    "@jolocom/native-utils-node" "^0.7.0"
+    "@jolocom/native-core-node" "^0.7.9"
     "@jolocom/protocol-ts" "^0.5.1"
     "@jolocom/vaulted-key-provider" "^0.6.0"
     base64url "^3.0.1"
