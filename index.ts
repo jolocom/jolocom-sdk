@@ -43,6 +43,7 @@ import { IDidMethod } from 'jolocom-lib/js/didMethods/types'
 import { didMethods } from 'jolocom-lib/js/didMethods'
 import { InternalDb } from 'local-did-resolver'
 import { ResolutionType } from './src/lib/interactionManager/resolutionFlow'
+import { generateSecureRandomBytes } from 'src/lib/util'
 
 export interface IJolocomSDKConfig {
   storage: IStorage
@@ -51,9 +52,9 @@ export interface IJolocomSDKConfig {
 }
 
 export interface IJolocomSDKInitOptions {
-  loadDid?: string
+  storedDid?: string
   mnemonic?: string
-  registerNew?: boolean
+  auto?: boolean
 }
 
 export interface JolocomPlugin {
@@ -127,19 +128,33 @@ export class JolocomSDK extends BackendMiddleware {
     return this.identityWallet
   }
 
-  async init({ loadDid, mnemonic, registerNew }: IJolocomSDKInitOptions = {}) {
-    if (loadDid)
+  async init({ storedDid, mnemonic, auto }: IJolocomSDKInitOptions = { auto: true }) {
+    let pass
+    try {
+      pass = await this.keyChainLib.getPassword()
+    } catch (err) {
+      console.warn('WARNING KeyChain.getPassword() failed', err)
+    }
+
+    if (!pass && auto) {
+      console.warn('Generating a random password')
+      pass = (await generateSecureRandomBytes(32)).toString('base64')
+      await this.keyChainLib.savePassword(pass)
+    }
+
+    if (!pass)
+      throw new BackendError(BackendError.codes.NoWallet)
+
+    if (storedDid)
       try {
-        return await this.loadIdentity(loadDid)
+        return await this.loadIdentity(storedDid)
       } catch (err) {
         if (
           (!(err instanceof BackendError) ||
             err.message !== BackendError.codes.NoWallet) &&
-          !registerNew
+          !auto
         )
           throw err
-
-        return await this.createNewIdentity()
       }
     else if (mnemonic)
       try {
@@ -148,16 +163,14 @@ export class JolocomSDK extends BackendMiddleware {
         if (
           (!(err instanceof BackendError) ||
             err.message !== BackendError.codes.NoWallet) &&
-          !registerNew
+          !auto
         )
           throw err
-
-        return await this.createNewIdentity()
       }
-    else if (registerNew) return await this.createNewIdentity()
 
-    // default case
-    return await this.loadIdentity()
+    if (auto) return await this.createNewIdentity()
+
+    throw new BackendError(BackendError.codes.NoWallet)
   }
 
   async usePlugins(...plugs: JolocomPlugin[]) {
