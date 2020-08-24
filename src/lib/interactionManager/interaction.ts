@@ -172,9 +172,7 @@ export class Interaction {
         message: {
           '@context': 'https://www.w3.org/ns/did-resolution/v1',
           didDocument: (
-            await this.ctx.ctx.didMethods
-              .getDefault()
-              .resolver.resolve(requested)
+            await this.ctx.ctx.resolve(requested)
           ).didDocument.toJSON(),
           resolverMetadata: {
             driverId: this.ctx.ctx.identityWallet.did,
@@ -315,10 +313,8 @@ export class Interaction {
     if (!this.participants.requester) {
       // TODO what happens if the signer isnt resolvable
       try {
-        const requester = this.participants.requester =
-          await this.ctx.ctx.didMethods.getDefault()
-            .resolver.resolve(token.signer.did)
-      
+        const requester = await this.ctx.ctx.resolve(token.signer.did)
+        this.participants.requester = requester
         if (requester.did === this.ctx.ctx.identityWallet.did) {
           this.role = InteractionRole.Requester
         }
@@ -326,11 +322,14 @@ export class Interaction {
         console.error('error resolving requester', err)
       }
     } else if (!this.participants.responder) {
-      const responder = this.participants.responder =
-        await this.ctx.ctx.didMethods.getDefault()
-          .resolver.resolve(token.signer.did)
-      if (responder.did === this.ctx.ctx.identityWallet.did) {
-        this.role = InteractionRole.Responder
+      try {
+        const responder = await this.ctx.ctx.resolve(token.signer.did)
+        this.participants.responder = responder
+        if (responder.did === this.ctx.ctx.identityWallet.did) {
+          this.role = InteractionRole.Responder
+        }
+      } catch (err) {
+        console.error('error resolving responder', err)
       }
     }
 

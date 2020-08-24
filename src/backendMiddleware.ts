@@ -4,7 +4,7 @@ import { SoftwareKeyProvider, IVaultedKeyProvider } from 'jolocom-lib'
 import { Identity } from 'jolocom-lib/js/identity/identity'
 import { LocalDidMethod } from 'jolocom-lib/js/didMethods/local'
 import { BackendError, BackendMiddlewareErrorCodes } from './lib/errors/types'
-import { methodKeeper } from '../index'
+import { DidMethodKeeper } from './didMethodKeeper'
 import { walletUtils } from '@jolocom/native-core'
 import { InternalDb } from 'local-did-resolver'
 import {
@@ -19,7 +19,7 @@ export class BackendMiddleware {
 
   public storageLib: IStorage
   public keyChainLib: IPasswordStore
-  public didMethods = methodKeeper()
+  public didMethods = new DidMethodKeeper()
   public resolver: IResolver
 
   public constructor(config: {
@@ -45,10 +45,7 @@ export class BackendMiddleware {
    * @returns Identity the resolved identity
    */
   resolve(did: string) {
-    const methodName = did.split(':')[1]
-    if (!methodName) throw new Error('could not parse DID: ' + did)
-    const method = this.didMethods.find(methodName)
-    return method.resolver.resolve(did)
+    return this.didMethods.getForDid(did).resolver.resolve(did)
   }
 
   public get identityWallet(): IdentityWallet {

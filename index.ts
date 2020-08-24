@@ -39,8 +39,6 @@ import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { Interaction } from './src/lib/interactionManager/interaction'
 import { InteractionManager } from './src/lib/interactionManager/interactionManager'
 import { ChannelKeeper } from './src/lib/channels'
-import { IDidMethod } from 'jolocom-lib/js/didMethods/types'
-import { didMethods } from 'jolocom-lib/js/didMethods'
 import { InternalDb } from 'local-did-resolver'
 import { ResolutionType } from './src/lib/interactionManager/resolutionFlow'
 import { generateSecureRandomBytes } from 'src/lib/util'
@@ -59,40 +57,6 @@ export interface IJolocomSDKInitOptions {
 
 export interface JolocomPlugin {
   register(sdk: JolocomSDK): Promise<void>
-}
-
-// TODO move to backendMiddleware?
-// Decide if default should be configurable or not
-export const methodKeeper = (defaultMethod: IDidMethod = didMethods.jolo) => {
-  const methods: { [k: string]: IDidMethod } = {
-    [defaultMethod.prefix]: defaultMethod,
-  }
-
-  let defaultDidMethod = defaultMethod
-
-  return {
-    register: (methodName: string, implementation: IDidMethod) => {
-      if (methods[methodName]) {
-        return false
-      }
-
-      methods[methodName] = implementation
-
-      return true
-    },
-
-    find: (methodName: string) => {
-      const method = methods[methodName]
-      if (!method) throw new Error('no did method "' + methodName + '" registered!')
-      return method
-    },
-
-    registerDefault: (implementation: IDidMethod) => {
-      defaultDidMethod = implementation
-    },
-
-    getDefault: () => defaultDidMethod,
-  }
 }
 
 export class JolocomSDK extends BackendMiddleware {
@@ -179,8 +143,8 @@ export class JolocomSDK extends BackendMiddleware {
   }
 
   setDefaultDidMethod(methodName: string) {
-    const method = this.didMethods.find(methodName)
-    this.didMethods.registerDefault(method)
+    const method = this.didMethods.get(methodName)
+    this.didMethods.setDefault(method)
   }
 
   /**
