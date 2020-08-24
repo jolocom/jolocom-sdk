@@ -179,7 +179,6 @@ export class JolocomSDK extends BackendMiddleware {
 
   setDefaultDidMethod(methodName: string) {
     const method = this.didMethods.find(methodName)
-    if (!method) throw new Error('no did method "' + methodName + '" registered!')
     this.didMethods.registerDefault(method)
   }
 

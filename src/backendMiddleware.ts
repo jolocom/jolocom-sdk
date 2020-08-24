@@ -11,6 +11,7 @@ import {
   authAsIdentityFromKeyProvider,
   createIdentityFromKeyProvider,
 } from 'jolocom-lib/js/didMethods/utils'
+import { IResolver } from 'jolocom-lib/js/didMethods/types'
 
 export class BackendMiddleware {
   private _identityWallet!: IdentityWallet
@@ -19,6 +20,7 @@ export class BackendMiddleware {
   public storageLib: IStorage
   public keyChainLib: IPasswordStore
   public didMethods = methodKeeper()
+  public resolver: IResolver
 
   public constructor(config: {
     storage: IStorage
@@ -31,6 +33,22 @@ export class BackendMiddleware {
       config.eventDB || this.storageLib.eventDB,
     )
     this.didMethods.register('jun', localDidMethod)
+    // FIXME the prefix bit is required just to match IResolver
+    // but does anything need it at that level?
+    this.resolver = { prefix: '', resolve: this.resolve.bind(this) }
+  }
+
+  /**
+   * Resolve a DID string such as 'did:jolo:123456789abcdef0' to an Identity
+   *
+   * @param did string the did to resolve
+   * @returns Identity the resolved identity
+   */
+  resolve(did: string) {
+    const methodName = did.split(':')[1]
+    if (!methodName) throw new Error('could not parse DID: ' + did)
+    const method = this.didMethods.find(methodName)
+    return method.resolver.resolve(did)
   }
 
   public get identityWallet(): IdentityWallet {
@@ -84,7 +102,7 @@ export class BackendMiddleware {
     const identityWallet = await authAsIdentityFromKeyProvider(
       this._keyProvider,
       encryptionPass,
-      this.didMethods.getDefault().resolver,
+      this.resolver
     )
 
     await this.storageLib.store.didDoc(identityWallet.didDocument)
@@ -116,7 +134,7 @@ export class BackendMiddleware {
    *
    * @param did - DID of Identity to be loaded from DB
    * @param newPass - new password to be set, in case the new Wallet has a new Pass
-   * @returns An identity corrosponding to the given DID
+   * @returns Identity An identity corrosponding to the given DID
    */
   public async prepareIdentityWallet(
     did?: string,
