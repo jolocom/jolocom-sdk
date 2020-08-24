@@ -175,6 +175,12 @@ export class JolocomSDK extends BackendMiddleware {
     await Promise.all(promises)
   }
 
+  setDefaultDidMethod(methodName: string) {
+    const method = this.didMethods.find(methodName)
+    if (!method) throw new Error('no did method "' + methodName + '" registered!')
+    this.didMethods.registerDefault(method)
+  }
+
   /**
    * Handles a recieved interaction token
    *
