@@ -82,7 +82,9 @@ export const methodKeeper = (defaultMethod: IDidMethod = didMethods.jolo) => {
     },
 
     find: (methodName: string) => {
-      return methods[methodName]
+      const method = methods[methodName]
+      if (!method) throw new Error('no did method "' + methodName + '" registered!')
+      return method
     },
 
     registerDefault: (implementation: IDidMethod) => {
