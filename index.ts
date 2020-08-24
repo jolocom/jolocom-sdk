@@ -129,34 +129,7 @@ export class JolocomSDK extends BackendMiddleware {
   }
 
   async init({ storedDid, mnemonic, auto }: IJolocomSDKInitOptions = { auto: true }) {
-    let pass
-    try {
-      pass = await this.keyChainLib.getPassword()
-    } catch (err) {
-      console.warn('WARNING KeyChain.getPassword() failed', err)
-    }
-
-    if (!pass && auto) {
-      console.warn('Generating a random password')
-      pass = (await generateSecureRandomBytes(32)).toString('base64')
-      await this.keyChainLib.savePassword(pass)
-    }
-
-    if (!pass)
-      throw new BackendError(BackendError.codes.NoWallet)
-
-    if (storedDid)
-      try {
-        return await this.loadIdentity(storedDid)
-      } catch (err) {
-        if (
-          (!(err instanceof BackendError) ||
-            err.message !== BackendError.codes.NoWallet) &&
-          !auto
-        )
-          throw err
-      }
-    else if (mnemonic)
+    if (mnemonic)
       try {
         return await this.initWithMnemonic(mnemonic)
       } catch (err) {
@@ -168,7 +141,32 @@ export class JolocomSDK extends BackendMiddleware {
           throw err
       }
 
-    if (auto) return await this.createNewIdentity()
+    let pass
+    try {
+      pass = await this.keyChainLib.getPassword()
+    } catch (err) {
+      console.warn('WARNING KeyChain.getPassword() failed', err)
+    }
+
+    if (!pass) {
+      if (!auto)
+        throw new BackendError(BackendError.codes.NoWallet)
+
+      console.warn('Generating a random password')
+      pass = (await generateSecureRandomBytes(32)).toString('base64')
+      return this.createNewIdentity(pass)
+    }
+
+    try {
+      return await this.loadIdentity(storedDid)
+    } catch (err) {
+      if (
+        (!(err instanceof BackendError) ||
+          err.message !== BackendError.codes.NoWallet) &&
+        !auto
+      )
+        throw err
+    }
 
     throw new BackendError(BackendError.codes.NoWallet)
   }
