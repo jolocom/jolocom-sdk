@@ -6,7 +6,7 @@ import { LocalDidMethod } from 'jolocom-lib/js/didMethods/local'
 import { BackendError, BackendMiddlewareErrorCodes } from './lib/errors/types'
 import { DidMethodKeeper } from './didMethodKeeper'
 import { walletUtils } from '@jolocom/native-core'
-import { InternalDb } from 'local-did-resolver'
+import { InternalDb } from 'local-resolver-registrar/js/db'
 import {
   authAsIdentityFromKeyProvider,
   createIdentityFromKeyProvider,
@@ -99,7 +99,7 @@ export class BackendMiddleware {
     const identityWallet = await authAsIdentityFromKeyProvider(
       this._keyProvider,
       encryptionPass,
-      this.resolver
+      this.resolver,
     )
 
     await this.storageLib.store.didDoc(identityWallet.didDocument)

@@ -11,7 +11,7 @@
     "@jolocom/sdk-storage-typeorm": "^2.0.8",
     "@types/jest": "^26.0.9",
     "jest": "^26.1.0",
-    "jolocom-lib": "^5.0.26",
+    "jolocom-lib": "^5.0.27",
     "local-did-resolver": "^0.3.0",
     "sqlite3": "^5.0.0",
     "ts-jest": "^26.1.3",

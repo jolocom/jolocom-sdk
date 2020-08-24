@@ -335,7 +335,7 @@ export class Interaction {
 
     return this.flow.handleInteractionToken(token).then(res => {
       this.interactionMessages.push(token)
-      // this.ctx.ctx.storageLib.store.interactionToken(token)
+      this.ctx.ctx.storageLib.store.interactionToken(token)
       return res
     })
   }
