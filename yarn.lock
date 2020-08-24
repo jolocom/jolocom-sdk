@@ -1330,9 +1330,9 @@
   integrity sha512-9uIkpog+LEBxZws1nqPJhkXoxtCz1xtiwKZdqGDpEpLMqda4mXmlUOlfklg+8u3mNrYsJR4lkaU86OMr2tc39g==
 
 "@jolocom/native-core-node-linux-x64@^1.0.0-rc5":
-  version "1.0.0-rc3"
-  resolved "https://registry.yarnpkg.com/@jolocom/native-core-node-linux-x64/-/native-core-node-linux-x64-1.0.0-rc3.tgz#b41a3f9662d1525563eea64d874c15050188fcda"
-  integrity sha512-RJLgRlmRliRLDzNItnCLIHbbp/K7LsysJpFSX6HqTR15KA7Rfk6mKKkHvlWD26bmItrzvatL8KXVigRpctaVqA==
+  version "1.0.0-rc7"
+  resolved "https://registry.yarnpkg.com/@jolocom/native-core-node-linux-x64/-/native-core-node-linux-x64-1.0.0-rc7.tgz#5c5003ca8e86534142b4c2d3fcfd324b4a35aa39"
+  integrity sha512-F65jB498Jieu9G6PAw0uj6+tfNdtV4SM6QN4+eJ878aEvkvitpnA0YDMS/YLDqqx0Q9cwOU4/NxF9ASuFfYeow==
 
 "@jolocom/native-core@^0.7.19":
   version "0.7.19"

@@ -129,8 +129,13 @@ export class JolocomSDK extends BackendMiddleware {
         (!(err instanceof BackendError) ||
           err.message !== BackendError.codes.NoWallet) &&
         !auto
-      )
+      ) 
         throw err
+      else {
+        console.warn('Generating a random password')
+        pass = (await generateSecureRandomBytes(32)).toString('base64')
+        return this.createNewIdentity(pass)
+      }
     }
 
     throw new BackendError(BackendError.codes.NoWallet)

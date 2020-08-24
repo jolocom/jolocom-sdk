@@ -51,16 +51,16 @@ test('Create local identity', async () => {
   const con = await getConnection()
   const agent = getSdk(con)
 
-  await agent.init({ registerNew: true })
+  await agent.init()
 })
 
 test('Authentication interaction', async () => {
   const con = await getConnection()
   const alice = getSdk(con)
-  await alice.init({ registerNew: true })
+  await alice.init()
 
   const bob = getSdk(con)
-  await bob.init({ registerNew: true })
+  await bob.createNewIdentity()
 
   const aliceAuthRequest = await alice.authRequestToken({
     callbackURL: 'nowhere',
@@ -88,10 +88,10 @@ test('Resolution interaction', async () => {
   const serviceDB = new JolocomTypeormStorage(serviceCon)
   const userDB = new JolocomTypeormStorage(userCon)
 
-  // in this test, the service is "anchored" (the user can resolve them), and
+  // in this test, the service is "anchored" (the user can always resolve them), and
   // the user is "unanchored" (the service cannot resolve them initially)
   const service = getSdk(serviceCon)
-  await service.init({ registerNew: true })
+  await service.init()
 
   // insert the service's KEL to the user DB (make the service resolvable)
   const serviceId = service.idw.did.split(':')[2]
@@ -100,7 +100,7 @@ test('Resolution interaction', async () => {
   await userDB.eventDB.append(serviceId, serviceEL)
 
   const user = getSdk(userCon)
-  await user.init({ registerNew: true })
+  await user.init()
 
   // ensure the service is resolvable by the user
   expect(
