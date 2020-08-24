@@ -30,8 +30,7 @@ export class BackendMiddleware {
     const localDidMethod = new LocalDidMethod(
       config.eventDB || this.storageLib.eventDB,
     )
-    this.didMethods.register('un', localDidMethod)
-    this.didMethods.registerDefault(localDidMethod)
+    this.didMethods.register('jun', localDidMethod)
   }
 
   public get identityWallet(): IdentityWallet {
