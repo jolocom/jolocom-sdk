@@ -36,7 +36,7 @@ export { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { Interaction } from './src/lib/interactionManager/interaction'
 import { InteractionManager } from './src/lib/interactionManager/interactionManager'
-import { InternalDb } from 'local-did-resolver'
+import { InternalDb } from 'local-resolver-registrar/js/db'
 import { ResolutionType } from './src/lib/interactionManager/resolutionFlow'
 import { ChannelKeeper } from './src/lib/channels'
 import { CallType } from './src/lib/interactionManager/rpc'
@@ -93,7 +93,9 @@ export class JolocomSDK extends BackendMiddleware {
     return this.identityWallet
   }
 
-  async init({ storedDid, mnemonic, auto }: IJolocomSDKInitOptions = { auto: true }) {
+  async init(
+    { storedDid, mnemonic, auto }: IJolocomSDKInitOptions = { auto: true },
+  ) {
     if (mnemonic)
       try {
         return await this.initWithMnemonic(mnemonic)
@@ -114,8 +116,7 @@ export class JolocomSDK extends BackendMiddleware {
     }
 
     if (!pass) {
-      if (!auto)
-        throw new BackendError(BackendError.codes.NoWallet)
+      if (!auto) throw new BackendError(BackendError.codes.NoWallet)
 
       console.warn('Generating a random password')
       pass = (await generateSecureRandomBytes(32)).toString('base64')
@@ -129,7 +130,7 @@ export class JolocomSDK extends BackendMiddleware {
         (!(err instanceof BackendError) ||
           err.message !== BackendError.codes.NoWallet) &&
         !auto
-      ) 
+      )
         throw err
       else {
         console.warn('Generating a random password')
@@ -290,7 +291,7 @@ export class JolocomSDK extends BackendMiddleware {
     const token = await this.idw.create.message(
       {
         message: request,
-        typ: EstablishChannelType.EstablishChannelRequest
+        typ: EstablishChannelType.EstablishChannelRequest,
       },
       await this.keyChainLib.getPassword(),
     )

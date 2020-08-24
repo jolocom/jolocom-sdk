@@ -50,6 +50,8 @@ afterEach(async () => {
 test('Create local identity', async () => {
   const con = await getConnection()
   const agent = getSdk(con)
+  agent.didMethods.setDefault(agent.didMethods.get('jun'))
+
 
   await agent.init()
 })
@@ -57,9 +59,11 @@ test('Create local identity', async () => {
 test('Authentication interaction', async () => {
   const con = await getConnection()
   const alice = getSdk(con)
+  alice.didMethods.setDefault(alice.didMethods.get('jun'))
   await alice.init()
 
   const bob = getSdk(con)
+  bob.didMethods.setDefault(bob.didMethods.get('jun'))
   await bob.createNewIdentity()
 
   const aliceAuthRequest = await alice.authRequestToken({
@@ -91,6 +95,7 @@ test('Resolution interaction', async () => {
   // in this test, the service is "anchored" (the user can always resolve them), and
   // the user is "unanchored" (the service cannot resolve them initially)
   const service = getSdk(serviceCon)
+  service.didMethods.setDefault(service.didMethods.get('jun'))
   await service.init()
 
   // insert the service's KEL to the user DB (make the service resolvable)
@@ -100,16 +105,17 @@ test('Resolution interaction', async () => {
   await userDB.eventDB.append(serviceId, serviceEL)
 
   const user = getSdk(userCon)
+  user.didMethods.setDefault(user.didMethods.get('jun'))
   await user.init()
 
   // ensure the service is resolvable by the user
   expect(
-    user.didMethods.getDefault().resolver.resolve(service.idw.did),
+    user.resolve(service.idw.did),
   ).resolves.toBeTruthy()
 
   // ensure the user is not resolvable by the service
   expect(
-    service.didMethods.getDefault().resolver.resolve(user.idw.did),
+    service.resolve(user.idw.did),
   ).rejects.toBeTruthy()
 
   // create a resolution request
