@@ -156,9 +156,7 @@ export class Interaction {
         message: {
           '@context': 'https://www.w3.org/ns/did-resolution/v1',
           didDocument: (
-            await this.ctx.ctx.didMethods
-              .getDefault()
-              .resolver.resolve(requested)
+            await this.ctx.ctx.resolve(requested)
           ).didDocument.toJSON(),
           resolverMetadata: {
             driverId: this.ctx.ctx.identityWallet.did,
@@ -313,9 +311,7 @@ export class Interaction {
   ): Promise<boolean> {
     if (!this.participants.requester) {
       try {
-        const requester = await this.ctx.ctx.didMethods
-          .getDefault()
-          .resolver.resolve(token.signer.did)
+        const requester = await this.ctx.ctx.resolve(token.signer.did)
         this.participants.requester = requester
         if (requester.did === this.ctx.ctx.identityWallet.did) {
           this.role = InteractionRole.Requester
@@ -325,9 +321,7 @@ export class Interaction {
       }
     } else if (!this.participants.responder) {
       try {
-        const responder = await this.ctx.ctx.didMethods
-          .getDefault()
-          .resolver.resolve(token.signer.did)
+        const responder = await this.ctx.ctx.resolve(token.signer.did)
         this.participants.responder = responder
         if (responder.did === this.ctx.ctx.identityWallet.did) {
           this.role = InteractionRole.Responder

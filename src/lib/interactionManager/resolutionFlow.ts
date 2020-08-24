@@ -41,7 +41,7 @@ export class ResolutionFlow extends Flow<ResolutionRequest | ResolutionResult> {
       await this.ctx.ctx.ctx.identityWallet.validateJWT(
         token,
         last(this.history),
-        this.ctx.ctx.ctx.didMethods.getDefault().resolver,
+        this.ctx.ctx.ctx.resolver,
       )
       this.history.push(token)
       return true
@@ -79,7 +79,7 @@ export class ResolutionFlow extends Flow<ResolutionRequest | ResolutionResult> {
 
             // update local state
             await this.ctx.ctx.ctx.didMethods
-              .getDefault()
+              .getForDid(iT.didDocument.id)
               .registrar.encounter(iT.methodMetadata.stateProof)
 
             // verify
