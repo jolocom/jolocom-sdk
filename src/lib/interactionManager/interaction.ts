@@ -354,6 +354,7 @@ export class Interaction {
           'base64',
         ),
         encRequest.payload.interactionToken!.request.target,
+        this.ctx.ctx.resolver
       )
       .then(b => b.toString('base64'))
 
