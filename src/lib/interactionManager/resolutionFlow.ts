@@ -18,6 +18,7 @@ export interface ResolutionFlowState {
 
 export interface ResolutionRequest {
   uri?: string
+  callbackURL?: string
 }
 
 export const isResolutionRequest = (
