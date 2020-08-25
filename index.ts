@@ -245,10 +245,10 @@ export class JolocomSDK extends BackendMiddleware {
    * @param uri - URI to request resolution for
    * @returns Base64 encoded signed Resolution Request
    */
-  public async resolutionRequestToken(uri?: string): Promise<string> {
+  public async resolutionRequestToken(req: { uri?: string, callbackURL?: string }): Promise<string> {
     const token = await this.idw.create.message(
       {
-        message: uri ? { uri } : {},
+        message: req,
         typ: ResolutionType.ResolutionRequest,
       },
       await this.keyChainLib.getPassword(),
