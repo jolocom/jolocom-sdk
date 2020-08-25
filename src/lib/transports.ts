@@ -4,7 +4,11 @@ interface ITransportDesc {
   type: string
 }
 
-export class Transportable<TransportDesc extends ITransportDesc, TransportAPI> {
+interface ITransportAPI {
+  desc?: ITransportDesc
+}
+
+export class Transportable<TransportDesc extends ITransportDesc, TransportAPI extends ITransportAPI> {
   private _transportHandlers: {
     [type: string]: (config: any) => TransportAPI
   } = {}
@@ -16,6 +20,8 @@ export class Transportable<TransportDesc extends ITransportDesc, TransportAPI> {
   public async createTransport(transport: TransportDesc): Promise<TransportAPI> {
     const transportHandler = this._transportHandlers[transport.type]
     if (!transportHandler) throw new AppError(ErrorCode.TransportNotSupported)
-    return transportHandler(transport)
+    const transportAPI = await transportHandler(transport)
+    transportAPI.desc = transport
+    return transportAPI
   }
 }
