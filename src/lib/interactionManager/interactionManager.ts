@@ -14,6 +14,7 @@ export interface InteractionTransportAPI {
   send: (jwt: JSONWebToken<any>) => Promise<any>
   receive?: () => Promise<JSONWebToken<any>>
   ready?: Promise<void>
+  desc?: InteractionTransport
 }
 
 // TODO move out to environment specific plugins
