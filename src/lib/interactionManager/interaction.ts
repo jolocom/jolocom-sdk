@@ -392,13 +392,15 @@ export class Interaction {
       CallType.AsymDecrypt,
     ) as JSONWebToken<DecryptionRequest>
     const password = await this.ctx.ctx.keyChainLib.getPassword()
+    const data = Buffer.from(decRequest.payload.interactionToken!.request, 'base64')
+    const result = await this.ctx.ctx.identityWallet
+      .asymDecrypt(data, password)
+
     return this.ctx.ctx.identityWallet.create.message(
       {
         message: {
           callbackURL: decRequest.payload.interactionToken!.callbackURL,
-          result: await this.ctx.ctx.identityWallet
-            .asymDecrypt(decRequest.payload.interactionToken!.request, password)
-            .then(buf => buf.toString()),
+          result: result.toString('base64'),
           rpc: CallType.AsymDecrypt,
         },
         typ: CallType.AsymDecrypt,
