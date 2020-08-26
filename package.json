@@ -1,6 +1,6 @@
 {
   "name": "@jolocom/sdk",
-  "version": "0.18.14",
+  "version": "0.18.15",
   "main": "js/index.js",
   "files": [
     "js/"
@@ -41,7 +41,7 @@
     "eslint-plugin-react": "^7.12.4",
     "fs-extra": "^8.1.0",
     "husky": "^3.0.5",
-    "jolocom-lib": "^5.0.35",
+    "jolocom-lib": "^5.0.36",
     "mockdate": "^2.0.2",
     "node-fetch": "^2.6.0",
     "precise-commits": "^1.0.2",
