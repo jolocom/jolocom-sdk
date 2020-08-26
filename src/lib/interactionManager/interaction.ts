@@ -346,24 +346,38 @@ export class Interaction {
     const encRequest = this.findMessageByType(
       EncryptionType.EncryptionRequest,
     ) as JSONWebToken<EncryptionRequest>
+    const msg = encRequest.payload.interactionToken!.request
 
-    const result = await this.ctx.ctx.identityWallet
-      .asymEncryptToDidKey(
-        Buffer.from(
-          encRequest.payload.interactionToken!.request.data,
-          'base64',
-        ),
-        encRequest.payload.interactionToken!.request.target,
+    const data = Buffer.from(
+      encRequest.payload.interactionToken!.request.data,
+      'base64',
+    )
+
+    const targetParts = msg.target.split('#')
+    let result
+    if (targetParts.length == 2) {
+      // it includes a keyRef
+      result = await this.ctx.ctx.identityWallet.asymEncryptToDidKey(
+        data,
+        msg.target,
         this.ctx.ctx.resolver
       )
-      .then(b => b.toString('base64'))
+    } else if (targetParts.length == 1) {
+      // it does not include a keyRef
+      result = await this.ctx.ctx.identityWallet.asymEncryptToDid(
+        data,
+        msg.target,
+        this.ctx.ctx.resolver
+      )
+    } else {
+      throw new Error('bad encryption target: ' + msg.target)
+    }
 
     return this.ctx.ctx.identityWallet.create.message(
       {
         message: {
           callbackURL: encRequest.payload.interactionToken!.callbackURL,
-          // @ts-ignore
-          result
+          result: result.toString('base64'),
         },
         typ: EncryptionType.EncryptionResponse,
       },
