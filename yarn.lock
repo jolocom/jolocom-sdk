@@ -2039,10 +2039,10 @@ class-transformer@^0.1.9:
   resolved "https://registry.yarnpkg.com/class-transformer/-/class-transformer-0.1.10.tgz#350f168ebb4c1f87edb18b98dd973681fc20fff7"
   integrity sha512-QiNdUxEvTBiUtc0KiapGVHhgaqGQVEhOfL9UEBnb9xRfcwmDJT5ijIDwcwJUTwXaT/kGvZZB4JCGsiuR5adX6g==
 
-class-transformer@^0.2.3:
-  version "0.2.3"
-  resolved "https://registry.yarnpkg.com/class-transformer/-/class-transformer-0.2.3.tgz#598c92ca71dcca73f91ccb875d74a3847ccfa32d"
-  integrity sha512-qsP+0xoavpOlJHuYsQJsN58HXSl8Jvveo+T37rEvCEeRfMWoytAyR0Ua/YsFgpM6AZYZ/og2PJwArwzJl1aXtQ==
+class-transformer@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/class-transformer/-/class-transformer-0.3.1.tgz#ee681a5439ff2230fc57f5056412d3befa70d597"
+  integrity sha512-cKFwohpJbuMovS8xVLmn8N2AUbAuc8pVo4zEfsUVo8qgECOogns1WVk/FkOZoxhOPTyTYFckuoH+13FO+MQ8GA==
 
 class-utils@^0.3.5:
   version "0.3.6"
@@ -3697,10 +3697,10 @@ isstream@~0.1.2:
   resolved "https://registry.yarnpkg.com/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
   integrity sha1-R+Y/evVa+m+S4VAOaQ64uFKcCZo=
 
-jolocom-lib@^5.0.32:
-  version "5.0.32"
-  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-5.0.32.tgz#5ac383949818f700279032cf3d099c7304502ac8"
-  integrity sha512-15qsvMIJoFR8s3Bt/EDu7m/Kcj1ydEodUCrAyTIkvHTgeeWxPFqy1enlDTk1XNszrcL+5BarCKfdl89Ql+ebmA==
+jolocom-lib@^5.0.35:
+  version "5.0.35"
+  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-5.0.35.tgz#f541c7204aab54c1535b108c4ebce0b42b22b3d4"
+  integrity sha512-KGAhJL/AoLBBxlu5esIHU8QEuyx3GJjZCJOvrj0s821udaJQKj1TyIpPahFvdaHQ0fyvOGU9Mraj8+m3XoUNvA==
   dependencies:
     "@jolocom/jolo-did-registrar" "^1.0.0-rc5"
     "@jolocom/jolo-did-resolver" "^1.0.0-rc5"
@@ -3710,7 +3710,7 @@ jolocom-lib@^5.0.32:
     base64url "^3.0.1"
     bip32 "^1.0.2"
     bip39 "^3.0.1"
-    class-transformer "^0.2.3"
+    class-transformer "^0.3.1"
     create-hash "^1.2.0"
     detect-node "^2.0.4"
     did-resolver "2.0.0"
