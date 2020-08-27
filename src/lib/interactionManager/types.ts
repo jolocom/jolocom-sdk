@@ -38,6 +38,7 @@ export enum FlowType {
   Encrypt = 'Encrypt',
   Decrypt = 'Decrypt',
   Resolution = 'Resolution',
+  Sign = 'Sign',
 }
 
 export enum EstablishChannelType {
@@ -109,10 +110,12 @@ export interface CredentialOfferFlowState extends FlowState {
 
 export interface EncryptionFlowState extends FlowState {
   req: EncryptionRequest
+  encryptedData?: Buffer
 }
 
 export interface DecryptionFlowState extends FlowState {
   req: DecryptionRequest
+  decryptedData?: Buffer
 }
 
 export interface CredentialTypeSummary {
