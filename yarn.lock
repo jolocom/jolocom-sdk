@@ -3626,10 +3626,10 @@ isstream@~0.1.2:
   resolved "https://registry.yarnpkg.com/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
   integrity sha1-R+Y/evVa+m+S4VAOaQ64uFKcCZo=
 
-jolocom-lib@^5.0.37:
-  version "5.0.37"
-  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-5.0.37.tgz#db970bdbd4626a9682686e1e8ac9649c3f0f34cf"
-  integrity sha512-3/r/DiKyZ4MIp4RJmcssQECy7E7hlyQC8OF53ssQyjWFkKc8BypunjxnAJtIPGz8fLvm2iTkY5bZxYhVeIqaRg==
+jolocom-lib@^5.1.0-rc0:
+  version "5.1.0-rc0"
+  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-5.1.0-rc0.tgz#19b003f4bda4689514facac590459e9e30dc117f"
+  integrity sha512-2gPOQiYsD8k6AvfIpVSo7UuCN30w64lQgURW5Cybst6nGqjpsvm1PJQxi93PIW0zbkPAdODhBlsNOiIWLkza+A==
   dependencies:
     "@jolocom/jolo-did-registrar" "^1.0.0-rc5"
     "@jolocom/jolo-did-resolver" "^1.0.0-rc5"
