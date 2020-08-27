@@ -812,23 +812,23 @@
     detect-node "^2.0.4"
     node-fetch "^2.6.0"
 
-"@jolocom/native-core-node-darwin-x64@^1.0.0-rc10":
-  version "1.0.0-rc10"
-  resolved "https://registry.yarnpkg.com/@jolocom/native-core-node-darwin-x64/-/native-core-node-darwin-x64-1.0.0-rc10.tgz#94104107dcd2439afda6f8a96b17999db0a60e52"
-  integrity sha512-0RieFBbH1eSvC9T+sAey0muDLp6qBpqErJC6W0mAKKy5FDgtgDaY1dGxyZYsHoUePGvtmG8vp8hgkKGdU+0rvg==
+"@jolocom/native-core-node-darwin-x64@^1.0.0-rc12":
+  version "1.0.0-rc9"
+  resolved "https://registry.yarnpkg.com/@jolocom/native-core-node-darwin-x64/-/native-core-node-darwin-x64-1.0.0-rc9.tgz#b29e28afae4269bff96ac440c553ede677813341"
+  integrity sha512-eN1q87MMySfuDM9ONicKr4uWO6Cq26eTH5+r3UcIPJ0HRCc3zv/wuw74LjXcGEQjFYLrztNZXVEp+HGW73qAKg==
 
-"@jolocom/native-core-node-linux-x64@^1.0.0-rc10":
-  version "1.0.0-rc10"
-  resolved "https://registry.yarnpkg.com/@jolocom/native-core-node-linux-x64/-/native-core-node-linux-x64-1.0.0-rc10.tgz#d1a03855d90b2857d71b3baa0556ec388086b551"
-  integrity sha512-Km4Zzui8X4d0v3laQ18/5aNUIB8wgnvm3ZMgpj4Sp8jkR40UxeLouQaejSNSzGfUhJismcKPYniFu560e1Fb8A==
+"@jolocom/native-core-node-linux-x64@^1.0.0-rc12":
+  version "1.0.0-rc12"
+  resolved "https://registry.yarnpkg.com/@jolocom/native-core-node-linux-x64/-/native-core-node-linux-x64-1.0.0-rc12.tgz#fb0052e9fe45ebbbe9efb60f01079ddb90613982"
+  integrity sha512-AOSxkfuiqTnFgMKND+lE4qVZfwKSnzm/jQLxiWMzCiVoI3D+B3Qwisk7vuDf3mxyZUYex2tWa1Vf/Xw4rwTEIA==
 
-"@jolocom/native-core@^0.7.25":
-  version "0.7.25"
-  resolved "https://registry.yarnpkg.com/@jolocom/native-core/-/native-core-0.7.25.tgz#05cd7af50f61ab19c8c289f410c15fafc756c8fd"
-  integrity sha512-aMbJLhWlz2L61y5l0hhIwVfzOenHUrOoej27nyoZI4uksrbnYkBG4EL3ln3jk+4ewo432JjYSTwT5m7YlL/qKw==
+"@jolocom/native-core@^0.7.27":
+  version "0.7.27"
+  resolved "https://registry.yarnpkg.com/@jolocom/native-core/-/native-core-0.7.27.tgz#4e8cd49914740eaf4974194924821f3b804c2eee"
+  integrity sha512-9d3ZdX2Zu0AmUviFcxmz3UUy9oW/IAHC4pEjDwH+tvyFhUDkulUtVV9jSvIF5gMGEFntApDmjaumejgceZPvrQ==
   optionalDependencies:
-    "@jolocom/native-core-node-darwin-x64" "^1.0.0-rc10"
-    "@jolocom/native-core-node-linux-x64" "^1.0.0-rc10"
+    "@jolocom/native-core-node-darwin-x64" "^1.0.0-rc12"
+    "@jolocom/native-core-node-linux-x64" "^1.0.0-rc12"
 
 "@jolocom/protocol-ts@^0.5.1":
   version "0.5.1"
@@ -853,7 +853,7 @@
     ramda "^0.27.1"
 
 "@jolocom/sdk@../":
-  version "0.18.9"
+  version "0.18.15"
   dependencies:
     form-data "^3.0.0"
     ramda "^0.26.1"
@@ -1588,6 +1588,11 @@ class-transformer@^0.2.3:
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/class-transformer/-/class-transformer-0.2.3.tgz#598c92ca71dcca73f91ccb875d74a3847ccfa32d"
   integrity sha512-qsP+0xoavpOlJHuYsQJsN58HXSl8Jvveo+T37rEvCEeRfMWoytAyR0Ua/YsFgpM6AZYZ/og2PJwArwzJl1aXtQ==
+
+class-transformer@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/class-transformer/-/class-transformer-0.3.1.tgz#ee681a5439ff2230fc57f5056412d3befa70d597"
+  integrity sha512-cKFwohpJbuMovS8xVLmn8N2AUbAuc8pVo4zEfsUVo8qgECOogns1WVk/FkOZoxhOPTyTYFckuoH+13FO+MQ8GA==
 
 class-utils@^0.3.5:
   version "0.3.6"
@@ -3235,20 +3240,20 @@ jest@^26.1.0:
     import-local "^3.0.2"
     jest-cli "^26.1.0"
 
-jolocom-lib@^5.0.31:
-  version "5.0.32"
-  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-5.0.32.tgz#5ac383949818f700279032cf3d099c7304502ac8"
-  integrity sha512-15qsvMIJoFR8s3Bt/EDu7m/Kcj1ydEodUCrAyTIkvHTgeeWxPFqy1enlDTk1XNszrcL+5BarCKfdl89Ql+ebmA==
+jolocom-lib@^5.0.37:
+  version "5.0.37"
+  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-5.0.37.tgz#db970bdbd4626a9682686e1e8ac9649c3f0f34cf"
+  integrity sha512-3/r/DiKyZ4MIp4RJmcssQECy7E7hlyQC8OF53ssQyjWFkKc8BypunjxnAJtIPGz8fLvm2iTkY5bZxYhVeIqaRg==
   dependencies:
     "@jolocom/jolo-did-registrar" "^1.0.0-rc5"
     "@jolocom/jolo-did-resolver" "^1.0.0-rc5"
-    "@jolocom/native-core" "^0.7.25"
+    "@jolocom/native-core" "^0.7.27"
     "@jolocom/protocol-ts" "^0.5.1"
     "@jolocom/vaulted-key-provider" "^0.7.4"
     base64url "^3.0.1"
     bip32 "^1.0.2"
     bip39 "^3.0.1"
-    class-transformer "^0.2.3"
+    class-transformer "^0.3.1"
     create-hash "^1.2.0"
     detect-node "^2.0.4"
     did-resolver "2.0.0"
