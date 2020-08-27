@@ -47,6 +47,7 @@ import { CredentialOfferResponse } from 'jolocom-lib/js/interactionTokens/creden
 
 import { EncryptionFlow } from './encryptionFlow'
 import { DecryptionFlow } from './decryptionFlow'
+import { SigningFlow } from './signingFlow'
 import { generateIdentitySummary } from '../../utils/generateIdentitySummary'
 import {
   CallType,
@@ -54,6 +55,8 @@ import {
   EncryptionResponse,
   DecryptionRequest,
   DecryptionResponse,
+  SigningRequest,
+  SigningResponse,
 } from './rpc'
 
 /***
@@ -71,6 +74,7 @@ const interactionFlowForMessage = {
   [EstablishChannelType.EstablishChannelRequest]: EstablishChannelFlow,
   [CallType.AsymEncrypt]: EncryptionFlow,
   [CallType.AsymDecrypt]: DecryptionFlow,
+  [CallType.Sign]: SigningFlow,
 }
 
 export class Interaction {
@@ -358,14 +362,14 @@ export class Interaction {
       result = await this.ctx.ctx.identityWallet.asymEncryptToDidKey(
         data,
         msg.target,
-        this.ctx.ctx.resolver
+        this.ctx.ctx.resolver,
       )
     } else if (targetParts.length == 1) {
       // it does not include a keyRef
       result = await this.ctx.ctx.identityWallet.asymEncryptToDid(
         data,
         msg.target,
-        this.ctx.ctx.resolver
+        this.ctx.ctx.resolver,
       )
     } else {
       throw new Error('bad encryption target: ' + msg.target)
@@ -392,9 +396,11 @@ export class Interaction {
       CallType.AsymDecrypt,
     ) as JSONWebToken<DecryptionRequest>
     const password = await this.ctx.ctx.keyChainLib.getPassword()
-    const data = Buffer.from(decRequest.payload.interactionToken!.request, 'base64')
-    const result = await this.ctx.ctx.identityWallet
-      .asymDecrypt(data, password)
+    const data = Buffer.from(
+      decRequest.payload.interactionToken!.request,
+      'base64',
+    )
+    const result = await this.ctx.ctx.identityWallet.asymDecrypt(data, password)
 
     return this.ctx.ctx.identityWallet.create.message(
       {
@@ -407,6 +413,34 @@ export class Interaction {
       },
       password,
       decRequest,
+    )
+  }
+
+  public async createSigningResponseToken(): Promise<
+    JSONWebToken<SigningResponse>
+  > {
+    const sigRequest = this.findMessageByType(CallType.Sign) as JSONWebToken<
+      SigningRequest
+    >
+    const pass = await this.ctx.ctx.keyChainLib.getPassword()
+    return this.ctx.ctx.identityWallet.create.message(
+      {
+        message: {
+          callbackURL: sigRequest.payload.interactionToken!.callbackURL,
+          result: (
+            await this.ctx.ctx.identityWallet.sign(
+              Buffer.from(
+                sigRequest.payload.interactionToken!.request,
+                'base64',
+              ),
+              pass,
+            )
+          ).toString('base64'),
+        },
+        typ: CallType.Sign,
+      },
+      pass,
+      sigRequest,
     )
   }
 

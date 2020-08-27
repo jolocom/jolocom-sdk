@@ -244,7 +244,9 @@ export class JolocomSDK extends BackendMiddleware {
    * @param uri - URI to request resolution for
    * @returns Base64 encoded signed Resolution Request
    */
-  public async resolutionRequestToken(req: { uri?: string, callbackURL?: string }): Promise<string> {
+  public async resolutionRequestToken(
+    req: { uri?: string; callbackURL?: string } = {},
+  ): Promise<string> {
     const token = await this.idw.create.message(
       {
         message: req,
@@ -395,6 +397,27 @@ export class JolocomSDK extends BackendMiddleware {
           },
         },
         typ: CallType.AsymEncrypt,
+      },
+      await this.keyChainLib.getPassword(),
+    )
+
+    await this.interactionManager.start(InteractionTransportType.HTTP, token)
+
+    return token.encode()
+  }
+
+  public async signingRequest(req: {
+    toSign: Buffer
+    callbackURL: string
+  }): Promise<string> {
+    const token = await this.idw.create.message(
+      {
+        message: {
+          callbackURL: req.callbackURL,
+          rpc: CallType.Sign,
+          request: req.toSign.toString('base64'),
+        },
+        typ: CallType.Sign,
       },
       await this.keyChainLib.getPassword(),
     )
