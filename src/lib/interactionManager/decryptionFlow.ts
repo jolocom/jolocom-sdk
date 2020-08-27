@@ -11,7 +11,7 @@ export class DecryptionFlow extends Flow<
 
   // TODO remove 'rpc'
   public state: DecryptionFlowState = {
-    req: { callbackURL: '', rpc: CallType.AsymDecrypt, request: '' },
+    req: { callbackURL: '', request: '' },
   }
 
   public constructor(ctx: Interaction) {
@@ -38,6 +38,7 @@ export class DecryptionFlow extends Flow<
   }
 
   public async consumeDecryptionResponse(token: DecryptionResponse) {
+    this.state.decryptedData = Buffer.from(token.result, 'base64')
     return true
   }
 }

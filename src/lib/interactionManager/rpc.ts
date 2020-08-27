@@ -1,33 +1,26 @@
 export enum CallType {
   AsymEncrypt = 'asymEncrypt',
   AsymDecrypt = 'asymDecrypt',
+  Sign = 'sign',
 }
 
-export type RPC = {
-  rpc: CallType
-}
-
-export type Call<T> = RPC & {
+export type Call<T> = {
   request: T
   callbackURL: string
 }
 
-export type Result<T> = RPC & {
+export type Result<T> = {
   result: T
 }
 
-export type DecryptionRequest = Call<string> & {
-  rpc: CallType.AsymDecrypt
-}
+export type DecryptionRequest = Call<string>
 
-export type DecryptionResponse = Result<string> & {
-  rpc: CallType.AsymDecrypt
-}
+export type DecryptionResponse = Result<string>
 
-export type EncryptionRequest = Call<{ target: string; data: string }> & {
-  rpc: CallType.AsymEncrypt
-}
+export type EncryptionRequest = Call<{ target: string; data: string }>
 
-export type EncryptionResponse = Result<string> & {
-  rpc: CallType.AsymEncrypt
-}
+export type EncryptionResponse = Result<string>
+
+export type SigningRequest = Call<string>
+
+export type SigningResponse = Result<string>
