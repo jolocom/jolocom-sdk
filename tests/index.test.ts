@@ -184,7 +184,7 @@ test('Decryption Request interaction', async () => {
 
   const data = Buffer.from("hello there")
 
-  const encryptedData = await service.idw.asymEncryptToDidKey(data, user.idw.publicKeyMetadata.encryptionKeyId, service.resolver)
+  const encryptedData = await service.idw.asymEncryptToDid(data, user.idw.publicKeyMetadata.encryptionKeyId, service.resolver)
 
   const decReq = await service.rpcDecRequest({ toDecrypt: encryptedData, callbackURL: "nowhere" })
 
@@ -192,11 +192,9 @@ test('Decryption Request interaction', async () => {
 
   const decryptionResponse = await userDecInteraction.createDecResponseToken();
 
-  console.log(decryptionResponse.toJSON())
+  await service.processJWT(decryptionResponse.encode())
 
-  const serviceDecInteraction = await service.processJWT(decryptionResponse.encode())
-
-  console.log(serviceDecInteraction.getSummary().state)
+  expect(Buffer.from(decryptionResponse.interactionToken.result, 'base64')).toEqual(data)
   
   await userCon.close()
 }, 40000)
