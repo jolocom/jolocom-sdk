@@ -1,11 +1,30 @@
+# Jolocom SDK
+
 [![npm package jolocom-sdk](https://img.shields.io/npm/v/jolocom-sdk?style=flat-square)](https://www.npmjs.com/package/jolocom-sdk)
 [![chat on gitter](https://img.shields.io/gitter/room/jolocom/jolocom-sdk?style=flat-square)](https://gitter.im/jolocom/jolocom-sdk)
-
 
 [Jolocom](https://jolocom.io) Software Development Kit - Facilitating applications to manage and
 interact with digital identities.
 
 Interested in our vision? Take a look at our [whitepaper](https://jolocom.io/wp-content/uploads/2019/12/Jolocom-Whitepaper-v2.1-A-Decentralized-Open-Source-Solution-for-Digital-Identity-and-Access-Management.pdf)
+
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+
+**Table of Contents**
+
+- [Jolocom SDK](#jolocom-sdk)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+    - [In another project](#in-another-project)
+    - [Running a debug version for development](#running-a-debug-version-for-development)
+  - [Testing](#testing)
+  - [Usage](#usage)
+    - [Authentication](#authentication)
+    - [Credential Request](#credential-request)
+    - [Credential Issance](#credential-issance)
+  - [Code Style and Formatting](#code-style-and-formatting)
+
+<!-- markdown-toc end -->
 
 ## Prerequisites
 
@@ -46,6 +65,83 @@ To run unit tests, with watch and testing coverage display enabled:
 ```bash
 yarn test --watch --coverage
 ```
+
+## Usage
+
+The SDK provides an interface to the SSI ecosystem via Agents and Interactions. It is designed to streamline the creation, validation, authentication and processing of signed messages in order to facilitate different protocols enacted between Agents. Messages created by Agents are secured by the security mechanism of their chosen [DID Method](https://w3c.github.io/did-core/).
+
+### Authentication
+
+An authentication flow is a simple protocol where one party requests that another party authenticate themselves:
+
+```typescript
+// Hello Alice!
+const alice = new JolocomSDK(optionsForAlice)
+await alice.init()
+
+// Hello Bob!
+const bob = new JolocomSDK(optionsForBob)
+await bob.init()
+
+// Alice would like to know that Bob is indeed Bob
+// so she asks him!
+const authRequest = await alice.authRequest({
+  callbackURL: myCallbackURL,
+  description: 'are you bob?',
+})
+
+// Bob hears her ask
+const bobsInteraction = await bob.processJWT(authRequest)
+
+// and decides to respond to her question
+const bobsAuthResponse = await bobsInteraction.createAuthenticationResponse()
+
+// Alice hears his answer, and knows that he is indeed Bob!
+const alicesInteraction = await alice.processJWT(bobsAuthResponse.encode())
+```
+
+### Credential Request
+
+A Credential Request is a message requesting a set of [Verifiable Credentials](https://www.w3.org/TR/vc-data-model/), each of which may have a set of requirements:
+
+```typescript
+// Hello Alice!
+const alice = new JolocomSDK(optionsForAlice)
+await alice.init()
+
+// Hello Bob!
+const bob = new JolocomSDK(optionsForBob)
+await bob.init()
+
+// Alice would like to know Bob's name, and that he is older than 18 years
+// so she asks him!
+const authRequest = await alice.credRequestToken({
+  callbackURL: myCallbackURL,
+  credentialRequirements: [
+    {
+      type: ['Name'],
+      constraints: [],
+    },
+    {
+      type: ['Age'],
+      constraints: [constraintFunctions.greater('age', '18')],
+    },
+  ],
+})
+
+// Bob hears her ask
+const bobsInteraction = await bob.processJWT(authRequest)
+
+// and decides to respond to her question
+const bobsAuthResponse = await bobsInteraction.createCredentialResponse([
+  ...bobsCredentials,
+])
+
+// Alice hears his answer, and knows that he is indeed over 18, and that his name is Bob!
+const alicesInteraction = await alice.processJWT(bobsAuthResponse.encode())
+```
+
+### Credential Issance
 
 ## Code Style and Formatting
 
