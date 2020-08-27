@@ -10,7 +10,7 @@ import { InternalDb } from 'local-did-resolver'
 
 import { verifySignatureWithIdentity } from 'jolocom-lib/js/utils/validation'
 import { JolocomSDK, NaivePasswordStore } from '@jolocom/sdk'
-import { SigningFlowState } from "@jolocom/sdk/js/src/lib/interactionManager/signingFlow"
+import { SigningFlowState } from '@jolocom/sdk/js/src/lib/interactionManager/signingFlow'
 import { JolocomTypeormStorage } from '@jolocom/sdk-storage-typeorm'
 
 const testConnection1: ConnectionOptions = {
@@ -53,7 +53,6 @@ test('Create local identity', async () => {
   const con = await getConnection()
   const agent = getSdk(con)
   agent.didMethods.setDefault(agent.didMethods.get('jun'))
-
 
   await agent.init()
 })
@@ -111,14 +110,10 @@ test('Resolution interaction', async () => {
   await user.init()
 
   // ensure the service is resolvable by the user
-  expect(
-    user.resolve(service.idw.did),
-  ).resolves.toBeTruthy()
+  expect(user.resolve(service.idw.did)).resolves.toBeTruthy()
 
   // ensure the user is not resolvable by the service
-  expect(
-    service.resolve(user.idw.did),
-  ).rejects.toBeTruthy()
+  expect(service.resolve(user.idw.did)).rejects.toBeTruthy()
 
   // create a resolution request
   const serviceResRequest = await service.resolutionRequestToken()
@@ -132,9 +127,7 @@ test('Resolution interaction', async () => {
   // process the resolution response, containing the state update proof of the User
   await service.processJWT(userResponse.encode())
 
-  expect(
-    service.resolve(user.idw.did),
-  ).resolves.toBeTruthy()
+  expect(service.resolve(user.idw.did)).resolves.toBeTruthy()
 
   await userCon.close()
 })
@@ -163,14 +156,10 @@ test('Decryption Request interaction', async () => {
   await user.init()
 
   // ensure the service is resolvable by the user
-  expect(
-    user.resolve(service.idw.did),
-  ).resolves.toBeTruthy()
+  expect(user.resolve(service.idw.did)).resolves.toBeTruthy()
 
   // ensure the user is not resolvable by the service
-  expect(
-    service.resolve(user.idw.did),
-  ).rejects.toBeTruthy()
+  expect(service.resolve(user.idw.did)).rejects.toBeTruthy()
 
   // create a resolution request
   const serviceResRequest = await service.resolutionRequestToken()
@@ -184,20 +173,29 @@ test('Decryption Request interaction', async () => {
   // process the resolution response, containing the state update proof of the User
   await service.processJWT(userResponse.encode())
 
-  const data = Buffer.from("hello there")
+  const data = Buffer.from('hello there')
 
-  const encryptedData = await service.idw.asymEncryptToDid(data, user.idw.publicKeyMetadata.encryptionKeyId, service.resolver)
+  const encryptedData = await service.idw.asymEncryptToDid(
+    data,
+    user.idw.publicKeyMetadata.encryptionKeyId,
+    service.resolver,
+  )
 
-  const decReq = await service.rpcDecRequest({ toDecrypt: encryptedData, callbackURL: "nowhere" })
+  const decReq = await service.rpcDecRequest({
+    toDecrypt: encryptedData,
+    callbackURL: 'nowhere',
+  })
 
-  const userDecInteraction = await user.processJWT(decReq);
+  const userDecInteraction = await user.processJWT(decReq)
 
-  const decryptionResponse = await userDecInteraction.createDecResponseToken();
+  const decryptionResponse = await userDecInteraction.createDecResponseToken()
 
   await service.processJWT(decryptionResponse.encode())
 
-  expect(Buffer.from(decryptionResponse.interactionToken.result, 'base64')).toEqual(data)
-  
+  expect(
+    Buffer.from(decryptionResponse.interactionToken.result, 'base64'),
+  ).toEqual(data)
+
   await userCon.close()
 }, 40000)
 
@@ -225,14 +223,10 @@ test('Signing Request interaction', async () => {
   await user.init()
 
   // ensure the service is resolvable by the user
-  expect(
-    user.resolve(service.idw.did),
-  ).resolves.toBeTruthy()
+  expect(user.resolve(service.idw.did)).resolves.toBeTruthy()
 
   // ensure the user is not resolvable by the service
-  expect(
-    service.resolve(user.idw.did),
-  ).rejects.toBeTruthy()
+  expect(service.resolve(user.idw.did)).rejects.toBeTruthy()
 
   // create a resolution request
   const serviceResRequest = await service.resolutionRequestToken()
@@ -246,13 +240,16 @@ test('Signing Request interaction', async () => {
   // process the resolution response, containing the state update proof of the User
   await service.processJWT(userResponse.encode())
 
-  const data = Buffer.from("hello there")
+  const data = Buffer.from('hello there')
 
-  const signReq = await service.signingRequest({ toSign: data, callbackURL: "nowhere" })
+  const signReq = await service.signingRequest({
+    toSign: data,
+    callbackURL: 'nowhere',
+  })
 
-  const userSignInteraction = await user.processJWT(signReq);
+  const userSignInteraction = await user.processJWT(signReq)
 
-  const signResponse = await userSignInteraction.createSigningResponseToken();
+  const signResponse = await userSignInteraction.createSigningResponseToken()
 
   const serviceSigInt = await service.processJWT(signResponse.encode())
 
@@ -260,7 +257,14 @@ test('Signing Request interaction', async () => {
   // @ts-ignore
   expect(state.signature).toBeDefined()
 
-  expect(verifySignatureWithIdentity(data, state.signature!, user.idw.publicKeyMetadata.signingKeyId, user.idw.identity)).resolves.toBeTruthy()
-  
+  expect(
+    verifySignatureWithIdentity(
+      data,
+      state.signature!,
+      user.idw.publicKeyMetadata.signingKeyId,
+      user.idw.identity,
+    ),
+  ).resolves.toBeTruthy()
+
   await userCon.close()
 }, 40000)
