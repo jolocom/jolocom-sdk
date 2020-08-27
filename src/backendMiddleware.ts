@@ -44,8 +44,12 @@ export class BackendMiddleware {
    * @param did string the did to resolve
    * @returns Identity the resolved identity
    */
-  resolve(did: string) {
-    return this.didMethods.getForDid(did).resolver.resolve(did)
+  public async resolve(did: string): Promise<Identity> {
+    return this.storageLib.get.didDoc(did).then(ddo => Identity.fromDidDocument({didDocument: ddo})).catch(async _ => {
+      const resolved = await this.didMethods.getForDid(did).resolver.resolve(did)
+      await this.storageLib.store.didDoc(resolved.didDocument).catch(_ => {})
+      return resolved
+    })
   }
 
   public get identityWallet(): IdentityWallet {
