@@ -398,7 +398,7 @@ export class Interaction {
     ) as JSONWebToken<DecryptionRequest>
     const password = await this.ctx.ctx.keyChainLib.getPassword()
     const data = Buffer.from(
-      decRequest.payload.interactionToken!.request,
+      decRequest.payload.interactionToken!.request.data,
       'base64',
     )
     const result = await this.ctx.ctx.identityWallet.asymDecrypt(data, password)
@@ -430,7 +430,7 @@ export class Interaction {
           result: (
             await this.ctx.ctx.identityWallet.sign(
               Buffer.from(
-                sigRequest.payload.interactionToken!.request,
+                sigRequest.payload.interactionToken!.request.data,
                 'base64',
               ),
               pass,

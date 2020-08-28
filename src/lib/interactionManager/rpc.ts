@@ -1,13 +1,18 @@
-export type RPCRequest<T> = {
+type RequestMessage<T> = {
   request: T
   callbackURL: string
 }
 
-export type RPCResponse<T> = {
+type ResponseMessage<T> = {
   result: T
 }
 
-export type DecryptionRequest = RPCRequest<string>
-export type DecryptionResponse = RPCResponse<string>
-export type EncryptionRequest = RPCRequest<{ target: string; data: string }>
-export type EncryptionResponse = RPCResponse<string>
+type Base64String = string
+type DidDocKeyId = string
+
+export type DecryptionRequest = RequestMessage<{ target: DidDocKeyId, data: Base64String }>
+export type DecryptionResponse = ResponseMessage<Base64String>
+export type EncryptionRequest = RequestMessage<{ target: DidDocKeyId; data: Base64String }>
+export type EncryptionResponse = ResponseMessage<Base64String>
+export type SigningRequest = RequestMessage<{ target: DidDocKeyId; data: Base64String }>
+export type SigningResponse = ResponseMessage<Base64String>
