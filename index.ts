@@ -235,7 +235,7 @@ export class JolocomSDK extends BackendMiddleware {
    * @returns Base64 encoded signed Resolution Request
    */
   public async resolutionRequestToken(
-    req: { uri?: string; callbackURL?: string } = {},
+    req: { description?: string, uri?: string; callbackURL?: string } = {},
   ): Promise<string> {
     const token = await this.idw.create.message(
       {
