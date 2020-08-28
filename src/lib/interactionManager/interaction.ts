@@ -1,10 +1,12 @@
 import { CredentialOfferFlow } from './credentialOfferFlow'
-import { InteractionType } from 'jolocom-lib/js/interactionTokens/types'
+import {
+  InteractionType,
+  CredentialOfferResponseSelection,
+} from 'jolocom-lib/js/interactionTokens/types'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import {
   InteractionSummary,
   InteractionRole,
-  SignedCredentialWithMetadata,
   AuthenticationFlowState,
   FlowType,
   EstablishChannelType,
@@ -238,7 +240,7 @@ export class Interaction {
   }
 
   public async createCredentialOfferResponseToken(
-    selectedOffering: SignedCredentialWithMetadata[],
+    selectedOffering: CredentialOfferResponseSelection[],
   ) {
     const credentialOfferRequest = this.findMessageByType(
       InteractionType.CredentialOfferRequest,
@@ -246,9 +248,7 @@ export class Interaction {
 
     const credentialOfferResponseAttr = {
       callbackURL: credentialOfferRequest.interactionToken.callbackURL,
-      selectedCredentials: selectedOffering.map(offer => ({
-        type: offer.type,
-      })),
+      selectedCredentials: selectedOffering,
     }
 
     return this.ctx.ctx.identityWallet.create.interactionTokens.response.offer(

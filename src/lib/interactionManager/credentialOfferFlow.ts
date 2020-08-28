@@ -91,8 +91,18 @@ export class CredentialOfferFlow extends Flow<
       }
     })
 
-    const validArr = (this.state.credentialsValidity = await JolocomLib.util.validateDigestables(
-      signedCredentials,
+    const validArr = (this.state.credentialsValidity = await Promise.all(
+      signedCredentials.map(async cred => {
+        try {
+          JolocomLib.parseAndValidate.signedCredential(
+            cred.toJSON(),
+            await this.ctx.ctx.ctx.resolve(cred.issuer),
+          )
+        } catch (e) {
+          return false
+        }
+        return true
+      }),
     ))
     this.state.credentialsAllValid = validArr.every(v => v)
     return true
