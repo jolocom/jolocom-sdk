@@ -60,18 +60,23 @@ export interface EstablishChannelFlowState {
 }
 
 export enum AuthorizationType {
-  AuthorizationRequest = 'authorizationRequest',
-  AuthorizationResponse = 'authorizationResponse',
+  AuthorizationRequest = 'AuthorizationRequest',
+  AuthorizationResponse = 'AuthorizationResponse',
 }
 
 export enum EncryptionType {
-  EncryptionRequest = 'encryptionRequest',
-  EncryptionResponse = 'encryptionResponse',
+  EncryptionRequest = 'EncryptionRequest',
+  EncryptionResponse = 'EncryptionResponse',
 }
 
 export enum DecryptionType {
   DecryptionRequest = 'DecryptionRequest',
   DecryptionResponse = 'DecryptionResponse',
+}
+
+export enum SigningType {
+  SigningRequest =  'SigningRequest',
+  SigningResponse = 'SigningResponse',
 }
 
 export interface AuthorizationResponse {
