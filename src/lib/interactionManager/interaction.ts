@@ -15,6 +15,12 @@ import {
   CredentialVerificationSummary,
   EncryptionType,
   DecryptionType,
+  EncryptionRequest,
+  EncryptionResponse,
+  DecryptionRequest,
+  DecryptionResponse,
+  SigningRequest,
+  SigningResponse,
 } from './types'
 import { CredentialRequestFlow } from './credentialRequestFlow'
 import { Flow } from './flow'
@@ -45,14 +51,6 @@ import { EncryptionFlow } from './encryptionFlow'
 import { DecryptionFlow } from './decryptionFlow'
 import { SigningFlow } from './signingFlow'
 import { generateIdentitySummary } from '../../utils/generateIdentitySummary'
-import {
-  EncryptionRequest,
-  EncryptionResponse,
-  DecryptionRequest,
-  DecryptionResponse,
-  SigningRequest,
-  SigningResponse,
-} from './rpc'
 
 import {
   ResolutionType,

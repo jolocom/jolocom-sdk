@@ -8,7 +8,6 @@ import { CredentialResponse } from 'jolocom-lib/js/interactionTokens/credentialR
 import { ChannelTransport } from '../channels'
 import { IdentitySummary } from '../types'
 import { FlowState } from './flow'
-import { EncryptionRequest, DecryptionRequest } from './rpc'
 
 export enum InteractionRole {
   Requester = 'requester',
@@ -113,16 +112,6 @@ export interface CredentialOfferFlowState extends FlowState {
   credentialsAllValid: boolean
 }
 
-export interface EncryptionFlowState extends FlowState {
-  req: EncryptionRequest
-  encryptedData?: Buffer
-}
-
-export interface DecryptionFlowState extends FlowState {
-  req: DecryptionRequest
-  decryptedData?: Buffer
-}
-
 export interface CredentialTypeSummary {
   type: string
   values: string[]
@@ -157,3 +146,22 @@ type ValidationErrorMap = {
 export interface SignedCredentialWithMetadata extends CredentialOffer {
   signedCredential?: SignedCredential
 }
+
+type RequestMessage<T> = {
+  request: T
+  callbackURL: string
+}
+
+type ResponseMessage<T> = {
+  result: T
+}
+
+type Base64String = string
+type DidDocKeyId = string
+
+export type DecryptionRequest = RequestMessage<{ target: DidDocKeyId, data: Base64String }>
+export type DecryptionResponse = ResponseMessage<Base64String>
+export type EncryptionRequest = RequestMessage<{ target: DidDocKeyId; data: Base64String }>
+export type EncryptionResponse = ResponseMessage<Base64String>
+export type SigningRequest = RequestMessage<{ target: DidDocKeyId; data: Base64String }>
+export type SigningResponse = ResponseMessage<Base64String>
