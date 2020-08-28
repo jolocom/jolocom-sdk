@@ -1,3 +1,4 @@
+require('@jolocom/native-core')
 module.exports = {
   preset: 'ts-jest',
   globals: {
@@ -5,6 +6,6 @@ module.exports = {
     },
   },
   moduleFileExtensions: ['ts', 'node', 'js', 'json'],
-  testMatch: ['./**/*.ts'],
+  testMatch: ['**/tests/*.test.ts'],
   testPathIgnorePatterns: ['/node_modules/.*']
 }

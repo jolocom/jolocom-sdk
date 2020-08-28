@@ -9,8 +9,8 @@ import { InternalDb } from 'local-did-resolver'
 // import { createDb } from 'local-did-resolver/js/db'
 
 import { verifySignatureWithIdentity } from 'jolocom-lib/js/utils/validation'
-import { JolocomSDK, NaivePasswordStore } from '@jolocom/sdk'
-import { SigningFlowState } from '@jolocom/sdk/js/src/lib/interactionManager/signingFlow'
+import { JolocomSDK, NaivePasswordStore } from '../'
+import { SigningFlowState } from '../src/lib/interactionManager/signingFlow'
 import { JolocomTypeormStorage } from '@jolocom/sdk-storage-typeorm'
 import { claimsMetadata } from 'jolocom-lib'
 
@@ -93,7 +93,7 @@ test('Authentication interaction', async () => {
 test('Credential Issuance interaction', async () => {
   const aliceCon = getConnection()
   const bobCon = getConnection('con2')
-  
+
   const alice = getSdk(aliceCon)
   alice.didMethods.setDefault(alice.didMethods.get('jun'))
   await alice.init()
@@ -101,7 +101,7 @@ test('Credential Issuance interaction', async () => {
   const bob = getSdk(bobCon)
   bob.didMethods.setDefault(bob.didMethods.get('jun'))
   await bob.createNewIdentity()
-  
+
   // making them mutually resolvable
   const aliceId = alice.idw.did.split(':')[2]
   const aliceEL = await alice.storageLib.eventDB.read(aliceId)
@@ -122,7 +122,7 @@ test('Credential Issuance interaction', async () => {
     callbackURL: 'nowhere',
     offeredCredentials: [
       {
-        type: claimsMetadata.name.type[1],                      
+        type: claimsMetadata.name.type[1],
       },
     ],
   })
