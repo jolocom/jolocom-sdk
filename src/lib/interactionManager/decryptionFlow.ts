@@ -1,16 +1,18 @@
 import { Interaction } from './interaction'
-import { Flow } from './flow'
-import { DecryptionFlowState, FlowType, DecryptionType } from './types'
+import { Flow, FlowState } from './flow'
+import { DecryptionRequest, DecryptionResponse, FlowType, DecryptionType } from './types'
 import { isDecryptionRequest, isDecryptionResponse } from './guards'
-import { DecryptionRequest, DecryptionResponse } from './rpc'
+
+export interface DecryptionFlowState extends FlowState {
+  request?: DecryptionRequest
+  decryptedData?: Buffer
+}
 
 export class DecryptionFlow extends Flow<
   DecryptionRequest | DecryptionResponse
 > {
   public type = FlowType.Decrypt
-  public state: DecryptionFlowState = {
-    req: { callbackURL: '', request: '' },
-  }
+  public state: DecryptionFlowState = {}
 
   public constructor(ctx: Interaction) {
     super(ctx)
@@ -33,8 +35,8 @@ export class DecryptionFlow extends Flow<
   }
 
   public async consumeDecryptionRequest(token: DecryptionRequest) {
-    if (!this.state.req.request) this.state.req.request = token.request
-
+    if (this.state.request) return false // FIXME throw
+    this.state.request = token
     return true
   }
 

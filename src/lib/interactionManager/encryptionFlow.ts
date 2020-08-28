@@ -1,19 +1,18 @@
 import { Interaction } from './interaction'
-import { Flow } from './flow'
-import { EncryptionFlowState, FlowType, EncryptionType } from './types'
+import { Flow, FlowState } from './flow'
+import { EncryptionRequest, EncryptionResponse, FlowType, EncryptionType } from './types'
 import { isEncryptionRequest, isEncryptionResponse } from './guards'
-import { EncryptionRequest, EncryptionResponse } from './rpc'
+
+export interface EncryptionFlowState extends FlowState {
+  request?: EncryptionRequest
+  encryptedData?: Buffer
+}
 
 export class EncryptionFlow extends Flow<
   EncryptionRequest | EncryptionResponse
 > {
   public type = FlowType.Encrypt
-  public state: EncryptionFlowState = {
-    req: {
-      callbackURL: '',
-      request: { target: '', data: '' },
-    },
-  }
+  public state: EncryptionFlowState = {}
 
   public constructor(ctx: Interaction) {
     super(ctx)
@@ -36,8 +35,8 @@ export class EncryptionFlow extends Flow<
   }
 
   public async consumeEncryptionRequest(token: EncryptionRequest) {
-    if (!this.state.req.request) this.state.req.request = token.request
-
+    if (this.state.request) return false // FIXME throw
+    this.state.request = token
     return true
   }
 
