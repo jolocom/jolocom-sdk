@@ -143,6 +143,57 @@ const alicesInteraction = await alice.processJWT(bobsAuthResponse.encode())
 
 ### Credential Issance
 
+A Credential Issuance is a process of issuing a set of [Verifiable Credentials](https://www.w3.org/TR/vc-data-model/), potentially based on a set of required credentials:
+
+```typescript
+// Hello Alice!
+const alice = new JolocomSDK(optionsForAlice)
+await alice.init()
+
+// Hello Bob!
+const bob = new JolocomSDK(optionsForBob)
+await bob.init()
+
+// Alice would like to give bob a Happy Birthday credential
+// so she offers him one!
+const credOffer = await alice.credOfferToken({
+  callbackURL: myCallbackURL,
+  offeredCredentials: [{
+    type: 'HappyBirthdayCredential',
+  }],
+})
+
+// Bob hears her ask
+const bobsInteraction = await bob.processJWT(credOffer)
+
+// and decides to accept the birthday card
+const bobsAuthResponse = await bobsInteraction.createCredentialOfferResponseToken([
+  {type: 'HappyBirthdayCredential'}
+])
+
+// Alice hears his answer
+const alicesInteraction = await alice.processJWT(bobsAuthResponse.encode())
+
+// Creates an issuance token with a new credential
+const alicesIssuence = await alicesInteraction.createCredentialReceiveToken([
+  await alice.signedCredential({
+    metadata: {
+      type: ['Credential', 'HappyBirthdayCredential'],
+      name: 'Birthday Card',
+      context: [{
+        HappyBirthdayCredential: 'https://identity.jolocom.com/terms/HappyBirthdayCredential',
+        schema: 'https://schema.org/',
+      }]
+    },
+    subject: bob.idw.did,
+    claim: {},
+  }),
+])
+
+// And responds with the newly issued Birthday Card credential
+const bobReceives = await bob.processJWT(alicesIssuence.encode())
+```
+
 ## Code Style and Formatting
 
 - We use [ESLint](https://eslint.org/) and [Prettier](https://prettier.io/) to keep a consistent style across the codebase.
