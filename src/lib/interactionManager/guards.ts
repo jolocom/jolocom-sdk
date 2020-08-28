@@ -13,6 +13,7 @@ import {
   EstablishChannelType,
   EncryptionType,
   DecryptionType,
+  SigningType
 } from './types'
 
 import {
@@ -20,6 +21,8 @@ import {
   EncryptionResponse,
   DecryptionRequest,
   DecryptionResponse,
+  SigningRequest,
+  SigningResponse,
 } from './rpc'
 
 export const isCredentialRequest = (token: any): token is CredentialRequest =>
@@ -103,3 +106,10 @@ export const isDecryptionResponse = (
   type: DecryptionType,
 ): token is DecryptionResponse =>
   type === DecryptionType.DecryptionResponse && isRPCResponse(token)
+
+
+export const isSigningRequest = (token: any, type: SigningType): token is SigningRequest =>
+  type === SigningType.SigningRequest && isRPCRequest(token)
+
+export const isSigningResponse = (token: any, type: SigningType): token is SigningResponse =>
+  type === SigningType.SigningResponse && isRPCResponse(token)

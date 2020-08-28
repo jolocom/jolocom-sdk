@@ -17,6 +17,7 @@ export interface ChannelTransportAPI {
   receive: () => Promise<string>
   stop: () => void
   ready: Promise<void>
+  desc?: ChannelTransport
 }
 
 export class ChannelKeeper extends Transportable<ChannelTransport, ChannelTransportAPI> {

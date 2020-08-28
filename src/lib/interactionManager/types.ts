@@ -34,9 +34,11 @@ export enum FlowType {
   CredentialShare = 'CredentialShare',
   CredentialOffer = 'CredentialOffer',
   Authorization = 'Authorization',
+  Resolution = 'Resolution',
   EstablishChannel = 'EstablishChannel',
   Encrypt = 'Encrypt',
   Decrypt = 'Decrypt',
+  Sign = 'Sign',
 }
 
 export enum EstablishChannelType {
@@ -108,10 +110,12 @@ export interface CredentialOfferFlowState extends FlowState {
 
 export interface EncryptionFlowState extends FlowState {
   req: EncryptionRequest
+  encryptedData?: Buffer
 }
 
 export interface DecryptionFlowState extends FlowState {
   req: DecryptionRequest
+  decryptedData?: Buffer
 }
 
 export interface CredentialTypeSummary {

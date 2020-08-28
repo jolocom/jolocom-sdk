@@ -19,7 +19,7 @@ export class EncryptionFlow extends Flow<
     super(ctx)
   }
 
-  public handleInteractionToken(
+  public onValidMessage(
     token: EncryptionRequest | EncryptionResponse,
     interactionType: string,
   ) {
@@ -42,6 +42,7 @@ export class EncryptionFlow extends Flow<
   }
 
   public async consumeEncryptionResponse(token: EncryptionResponse) {
+    this.state.encryptedData = Buffer.from(token.result, "base64")
     return true
   }
 }

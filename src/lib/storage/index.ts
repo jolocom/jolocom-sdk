@@ -5,18 +5,18 @@ import {
   CredentialOfferRenderInfo,
 } from 'jolocom-lib/js/interactionTokens/interactionTokens.types'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
+import { InternalDb } from 'local-resolver-registrar/js/db'
 
 import { IdentitySummary } from '../types'
 
-import { PersonaEntity } from './entities'
-
-export interface PersonaAttributes {
-  did: string
-  controllingKeyPath: string
-}
-
 export interface EncryptedSeedAttributes {
   encryptedEntropy: string
+  timestamp: number
+}
+
+export interface EncryptedWalletAttributes {
+  id: string
+  encryptedWallet: string
   timestamp: number
 }
 
@@ -39,9 +39,8 @@ export interface CredentialMetadata {
 
 export interface IStorageStore {
   setting(key: string, value: any): Promise<void>
-  persona(args: PersonaAttributes): Promise<void>
   verifiableCredential(vCred: SignedCredential): Promise<void>
-  encryptedSeed(args: EncryptedSeedAttributes): Promise<void>
+  encryptedWallet(args: EncryptedWalletAttributes): Promise<void>
   credentialMetadata(
     credentialMetadata: CredentialMetadataSummary,
   ): Promise<void>
@@ -53,12 +52,11 @@ export interface IStorageStore {
 export interface IStorageGet {
   settingsObject(): Promise<{ [key: string]: any }>
   setting(key: string): Promise<any>
-  persona(query?: object): Promise<PersonaEntity[]>
   verifiableCredential(query?: object): Promise<SignedCredential[]>
   // FIXME types
   attributesByType(type: string[]): Promise<{ type: string[]; results: any[] }>
   vCredentialsByAttributeValue(attribute: string): Promise<SignedCredential[]>
-  encryptedSeed(): Promise<string | null>
+  encryptedWallet(id?: string): Promise<EncryptedWalletAttributes | null>
   credentialMetadata(
     credential: SignedCredential,
   ): Promise<CredentialMetadataSummary>
@@ -79,6 +77,7 @@ export interface IStorage {
   get: IStorageGet
   store: IStorageStore
   delete: IStorageDelete
+  eventDB: InternalDb
 }
 
 export interface IPasswordStore {

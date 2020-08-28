@@ -16,8 +16,8 @@ import {
   EstablishChannelType,
   DecryptionType,
   EncryptionType,
+  SigningType
 } from './src/lib/interactionManager/types'
-import { generateSecureRandomBytes } from './src/lib/util'
 import { BackendError } from './src/lib/errors/types'
 
 export {
@@ -39,16 +39,21 @@ export { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { Interaction } from './src/lib/interactionManager/interaction'
 import { InteractionManager } from './src/lib/interactionManager/interactionManager'
+import { InternalDb } from 'local-resolver-registrar/js/db'
+import { ResolutionType } from './src/lib/interactionManager/resolutionFlow'
 import { ChannelKeeper } from './src/lib/channels'
+import { generateSecureRandomBytes } from 'src/lib/util'
 
 export interface IJolocomSDKConfig {
   storage: IStorage
   passwordStore: IPasswordStore
+  eventDB?: InternalDb
 }
 
 export interface IJolocomSDKInitOptions {
+  storedDid?: string
   mnemonic?: string
-  dontAutoRegister?: boolean
+  auto?: boolean
 }
 
 export interface JolocomPlugin {
@@ -64,6 +69,9 @@ export class JolocomSDK extends BackendMiddleware {
    *       or perhaps the BackendMiddleware becomes the more "pure" layer,
    *       and the "sdk" instance is platform specific
    *
+   * TODO: refactor BackendMiddleware to be an Agent and
+   *        JolocomSDK to be an Agent Factory
+   *
    * TODO: use the Keeper pattern
    *       so we can do sdk.identities.create()
                         sdk.interactions.create()
@@ -78,8 +86,7 @@ export class JolocomSDK extends BackendMiddleware {
   constructor(conf: IJolocomSDKConfig) {
     super({
       ...defaultConfig,
-      storage: conf.storage,
-      passwordStore: conf.passwordStore,
+      ...conf,
     })
     this.interactionManager = new InteractionManager(this)
   }
@@ -88,31 +95,63 @@ export class JolocomSDK extends BackendMiddleware {
     return this.identityWallet
   }
 
-  async init(opts: IJolocomSDKInitOptions = {}) {
-    if (opts.mnemonic) {
-      return this.loadIdentityFromMnemonic(opts.mnemonic)
+  async init(
+    { storedDid, mnemonic, auto }: IJolocomSDKInitOptions = { auto: true },
+  ) {
+    if (mnemonic)
+      try {
+        return await this.initWithMnemonic(mnemonic)
+      } catch (err) {
+        if (
+          (!(err instanceof BackendError) ||
+            err.message !== BackendError.codes.NoWallet) &&
+          !auto
+        )
+          throw err
+      }
+
+    let pass
+    try {
+      pass = await this.keyChainLib.getPassword()
+    } catch (err) {
+      console.warn('WARNING KeyChain.getPassword() failed', err)
+    }
+
+    if (!pass) {
+      if (!auto) throw new BackendError(BackendError.codes.NoWallet)
+
+      console.warn('Generating a random password')
+      pass = (await generateSecureRandomBytes(32)).toString('base64')
+      return this.createNewIdentity(pass)
     }
 
     try {
-      return await this.prepareIdentityWallet()
+      return await this.loadIdentity(storedDid)
     } catch (err) {
-      if (!(err instanceof BackendError)) throw err
-
       if (
-        !opts.dontAutoRegister &&
-        err.message === BackendError.codes.NoEntropy
-      ) {
-        const seed = await generateSecureRandomBytes(16)
-        return this.createNewIdentity(seed)
+        (!(err instanceof BackendError) ||
+          err.message !== BackendError.codes.NoWallet) &&
+        !auto
+      )
+        throw err
+      else {
+        console.warn('Generating a random password')
+        pass = (await generateSecureRandomBytes(32)).toString('base64')
+        return this.createNewIdentity(pass)
       }
-
-      throw err
     }
+
+    throw new BackendError(BackendError.codes.NoWallet)
   }
 
   async usePlugins(...plugs: JolocomPlugin[]) {
     const promises = plugs.map(p => p.register(this))
     await Promise.all(promises)
+  }
+
+  setDefaultDidMethod(methodName: string) {
+    const method = this.didMethods.get(methodName)
+    this.didMethods.setDefault(method)
   }
 
   /**
@@ -197,6 +236,27 @@ export class JolocomSDK extends BackendMiddleware {
       auth,
       await this.keyChainLib.getPassword(),
     )
+    await this.interactionManager.start(InteractionTransportType.HTTP, token)
+    return token.encode()
+  }
+
+  /**
+   * Creates a signed, base64 encoded Resolution Request, given a URI
+   *
+   * @param uri - URI to request resolution for
+   * @returns Base64 encoded signed Resolution Request
+   */
+  public async resolutionRequestToken(
+    req: { uri?: string; callbackURL?: string } = {},
+  ): Promise<string> {
+    const token = await this.idw.create.message(
+      {
+        message: req,
+        typ: ResolutionType.ResolutionRequest,
+      },
+      await this.keyChainLib.getPassword(),
+    )
+
     await this.interactionManager.start(InteractionTransportType.HTTP, token)
     return token.encode()
   }
@@ -337,6 +397,26 @@ export class JolocomSDK extends BackendMiddleware {
           },
         },
         typ: EncryptionType.EncryptionRequest,
+      },
+      await this.keyChainLib.getPassword(),
+    )
+
+    await this.interactionManager.start(InteractionTransportType.HTTP, token)
+
+    return token.encode()
+  }
+
+  public async signingRequest(req: {
+    toSign: Buffer
+    callbackURL: string
+  }): Promise<string> {
+    const token = await this.idw.create.message(
+      {
+        message: {
+          callbackURL: req.callbackURL,
+          request: req.toSign.toString('base64'),
+        },
+        typ: SigningType.SigningRequest,
       },
       await this.keyChainLib.getPassword(),
     )

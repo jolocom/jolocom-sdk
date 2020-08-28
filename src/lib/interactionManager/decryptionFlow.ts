@@ -16,7 +16,7 @@ export class DecryptionFlow extends Flow<
     super(ctx)
   }
 
-  public handleInteractionToken(
+  public onValidMessage(
     token: DecryptionRequest | DecryptionResponse,
     interactionType: string,
   ) {
@@ -39,6 +39,7 @@ export class DecryptionFlow extends Flow<
   }
 
   public async consumeDecryptionResponse(token: DecryptionResponse) {
+    this.state.decryptedData = Buffer.from(token.result, 'base64')
     return true
   }
 }

@@ -36,7 +36,7 @@ export const CryptoJS = {
 export default CryptoJS
 
 import { randomBytes, createDecipheriv, createHash } from 'crypto'
-import { JolocomLib } from 'jolocom-lib'
+// import { JolocomLib } from 'jolocom-lib'
 
 /**
  * This function emulates CryptoJS.format.OpenSSL.parse (cipher-core.js)
@@ -167,8 +167,9 @@ export function reencryptWithJolocomLib(
     password,
   ).toString()
   const seed = Buffer.from(encodedSeed, 'hex')
-  const keyProvider = JolocomLib.KeyProvider.fromSeed(seed, password)
+  // const keyProvider = JolocomLib.KeyProvider.fromSeed(seed, password)
   // TODO remove this ts-ignore once encryptedSeed is public
   // @ts-ignore
-  return keyProvider.encryptedSeed.toString('hex')
+  // return keyProvider.encryptedSeed.toString('hex')
+  return seed.toString('hex')
 }
