@@ -12,6 +12,7 @@ import { verifySignatureWithIdentity } from 'jolocom-lib/js/utils/validation'
 import { JolocomSDK, NaivePasswordStore } from '@jolocom/sdk'
 import { SigningFlowState } from '@jolocom/sdk/js/src/lib/interactionManager/signingFlow'
 import { JolocomTypeormStorage } from '@jolocom/sdk-storage-typeorm'
+import { claimsMetadata } from 'jolocom-lib'
 
 const testConnection1: ConnectionOptions = {
   name: 'default',
@@ -41,16 +42,19 @@ const getSdk = (connection: Connection, eDB?: InternalDb) =>
   })
 
 beforeEach(async () => {
-  return await createConnection(testConnection1)
+  await createConnection(testConnection1)
+  await createConnection(testConnection2)
 })
 
 afterEach(async () => {
-  let conn = await getConnection()
-  return conn.close()
+  let conn1 = getConnection()
+  await conn1.close()
+  let conn2 = getConnection('con2')
+  return conn2.close()
 })
 
 test('Create local identity', async () => {
-  const con = await getConnection()
+  const con = getConnection()
   const agent = getSdk(con)
   agent.didMethods.setDefault(agent.didMethods.get('jun'))
 
@@ -58,7 +62,7 @@ test('Create local identity', async () => {
 })
 
 test('Authentication interaction', async () => {
-  const con = await getConnection()
+  const con = getConnection()
   const alice = getSdk(con)
   alice.didMethods.setDefault(alice.didMethods.get('jun'))
   await alice.init()
@@ -86,9 +90,74 @@ test('Authentication interaction', async () => {
   )
 })
 
+test('Credential Issuance interaction', async () => {
+  const aliceCon = getConnection()
+  const bobCon = getConnection('con2')
+  
+  const alice = getSdk(aliceCon)
+  alice.didMethods.setDefault(alice.didMethods.get('jun'))
+  await alice.init()
+
+  const bob = getSdk(bobCon)
+  bob.didMethods.setDefault(bob.didMethods.get('jun'))
+  await bob.createNewIdentity()
+  
+  // making them mutually resolvable
+  const aliceId = alice.idw.did.split(':')[2]
+  const aliceEL = await alice.storageLib.eventDB.read(aliceId)
+  await bob.storageLib.eventDB.append(aliceId, aliceEL)
+
+  const bobId = alice.idw.did.split(':')[2]
+  const bobEL = await bob.storageLib.eventDB.read(bobId)
+  console.log(bobEL)
+  await alice.storageLib.eventDB.append(bobId, bobEL)
+
+  // ensure bob is resolvable by alice
+  expect(alice.resolve(bob.idw.did)).resolves.toBeTruthy()
+
+  // ensure alice is resolvable by bob
+  expect(bob.resolve(alice.idw.did)).resolves.toBeTruthy()
+
+  const aliceCredOffer = await alice.credOfferToken({
+    callbackURL: 'nowhere',
+    offeredCredentials: [
+      {
+        type: claimsMetadata.name.type[1],                      
+      },
+    ],
+  })
+
+  const bobInteraction = await bob.processJWT(aliceCredOffer)
+
+  const bobResponse = (
+    await bobInteraction.createCredentialOfferResponseToken([
+      { type: claimsMetadata.name.type[1] },
+    ])
+  ).encode()
+  await bob.processJWT(bobResponse)
+
+  const aliceInteraction = await alice.processJWT(bobResponse)
+
+  const aliceIssuance = await aliceInteraction.createCredentialReceiveToken([
+    await alice.signedCredential({
+      metadata: claimsMetadata.name,
+      subject: bob.idw.did,
+      claim: {
+        givenName: 'Bob',
+        familyName: 'Agent',
+      },
+    }),
+  ])
+
+  const bobRecieving = await bob.processJWT(aliceIssuance.encode())
+
+  // @ts-ignore
+  expect(bobRecieving.getSummary().state.credentialsAllValid).toBeTruthy()
+})
+
 test('Resolution interaction', async () => {
-  const serviceCon = await getConnection()
-  const userCon = await createConnection(testConnection2)
+  const serviceCon = getConnection()
+  const userCon = getConnection('con2')
 
   const serviceDB = new JolocomTypeormStorage(serviceCon)
   const userDB = new JolocomTypeormStorage(userCon)
@@ -128,13 +197,11 @@ test('Resolution interaction', async () => {
   await service.processJWT(userResponse.encode())
 
   expect(service.resolve(user.idw.did)).resolves.toBeTruthy()
-
-  await userCon.close()
 })
 
 test('Decryption Request interaction', async () => {
-  const serviceCon = await getConnection()
-  const userCon = await createConnection(testConnection2)
+  const serviceCon = getConnection()
+  const userCon = getConnection('con2')
 
   const serviceDB = new JolocomTypeormStorage(serviceCon)
   const userDB = new JolocomTypeormStorage(userCon)
@@ -195,13 +262,11 @@ test('Decryption Request interaction', async () => {
   expect(
     Buffer.from(decryptionResponse.interactionToken.result, 'base64'),
   ).toEqual(data)
-
-  await userCon.close()
-}, 40000)
+})
 
 test('Signing Request interaction', async () => {
-  const serviceCon = await getConnection()
-  const userCon = await createConnection(testConnection2)
+  const serviceCon = getConnection()
+  const userCon = getConnection('con2')
 
   const serviceDB = new JolocomTypeormStorage(serviceCon)
   const userDB = new JolocomTypeormStorage(userCon)
@@ -265,6 +330,4 @@ test('Signing Request interaction', async () => {
       user.idw.identity,
     ),
   ).resolves.toBeTruthy()
-
-  await userCon.close()
-}, 40000)
+})
