@@ -131,8 +131,6 @@ export class JolocomSDK extends BackendMiddleware {
         return this.createNewIdentity(pass)
       }
     }
-
-    throw new BackendError(BackendError.codes.NoWallet)
   }
 
   async usePlugins(...plugs: JolocomPlugin[]) {

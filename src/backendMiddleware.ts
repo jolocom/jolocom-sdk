@@ -124,10 +124,12 @@ export class BackendMiddleware {
       pass,
       this.didMethods.getDefault().registrar,
     )
+
     await this.storeIdentityData(
       this._identityWallet.identity,
       this._keyProvider,
     )
+
     return this._identityWallet
   }
 
@@ -174,7 +176,10 @@ export class BackendMiddleware {
    * @returns An identity corrosponding to the entropy
    */
 
-  public async loadFromMnemonic(mnemonic: string, newPass: string): Promise<IdentityWallet> {
+  public async loadFromMnemonic(mnemonic: string, newPass?: string): Promise<IdentityWallet> {
+    if (newPass) await this.keyChainLib.savePassword(newPass)
+    const pass = newPass || (await this.keyChainLib.getPassword())
+
     const didMethod = this.didMethods.getDefault()
 
     if (!didMethod.recoverFromSeed) {
@@ -183,17 +188,24 @@ export class BackendMiddleware {
 
     const { identityWallet, succesfullyResolved } = await didMethod.recoverFromSeed(
       Buffer.from(mnemonicToEntropy(mnemonic), 'hex'),
-      newPass
+      pass
     )
 
     if (!succesfullyResolved) {
       throw new Error(`Identity for did ${identityWallet.did} not anchored, can't load`)
     }
 
+    this._identityWallet = identityWallet
+    //@ts-ignore private property, but no other reference present
+    this._keyProvider = identityWallet._keyProvider
+
     return identityWallet
   }
 
-  public async createFromMnemonic(mnemonic: string, newPass: string, shouldOverwrite?: boolean): Promise<IdentityWallet> {
+  public async createFromMnemonic(mnemonic: string, newPass?: string, shouldOverwrite?: boolean): Promise<IdentityWallet> {
+    if (newPass) await this.keyChainLib.savePassword(newPass)
+    const pass = newPass || (await this.keyChainLib.getPassword())
+
     const didMethod = this.didMethods.getDefault()
 
     if (!didMethod.recoverFromSeed) {
@@ -202,20 +214,22 @@ export class BackendMiddleware {
 
     const { identityWallet, succesfullyResolved } = await didMethod.recoverFromSeed(
       Buffer.from(mnemonicToEntropy(mnemonic), 'hex'),
-      newPass
+      pass
     )
 
     if (!shouldOverwrite && succesfullyResolved) {
       throw new Error(`Identity for did ${identityWallet.did} already anchored, and shouldOverwrite? was set to ${shouldOverwrite}`)
     }
 
+    this._identityWallet = identityWallet
+    //@ts-ignore private property on idw, but no other reference present
+    this._keyProvider = identityWallet._keyProvider
+
     await didMethod.registrar.create(
-      //@ts-ignore property is private, but no other reference available
-      identityWallet._keyProvider,
-      newPass
+      this.keyProvider,
+      pass
     )
 
     return identityWallet
   }
-
 }
