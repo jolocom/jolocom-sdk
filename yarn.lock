@@ -1274,6 +1274,13 @@
     "@ethersproject/properties" "^5.0.3"
     "@ethersproject/strings" "^5.0.3"
 
+"@hawkingnetwork/ed25519-hd-key-rn@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@hawkingnetwork/ed25519-hd-key-rn/-/ed25519-hd-key-rn-1.0.1.tgz#aeb48f3648abe3f522ef1d064b84593aed2a38f1"
+  integrity sha512-M5SiKEyCo1ft4y0mDI5Wt4yUxQQbonJoLcow0fPeqeiFBpxeivYk7WCCjG+QS0PQMIIJ2cTpKh2Q/W63oyn5jA==
+  dependencies:
+    create-hmac "^1.1.7"
+
 "@istanbuljs/load-nyc-config@^1.0.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@istanbuljs/load-nyc-config/-/load-nyc-config-1.1.0.tgz#fd3db1d59ecf7cf121e80650bb86712f9b55eced"
@@ -1716,6 +1723,18 @@
   integrity sha512-+ZjSA8ELlOp8SlKi0YLB2tz9d5iPNEmOBd+8Rz21wTMdaXQIa9b6TEnD6l5qKOCypE7FSyPyck12qZJxSDNoog==
   dependencies:
     "@types/node" "*"
+
+"@types/sinon@^9.0.5":
+  version "9.0.5"
+  resolved "https://registry.yarnpkg.com/@types/sinon/-/sinon-9.0.5.tgz#56b2a12662dd8c7d081cdc511af5f872cb37377f"
+  integrity sha512-4CnkGdM/5/FXDGqL32JQ1ttVrGvhOoesLLF7VnTh4KdjK5N5VQOtxaylFqqTjnHx55MnD9O02Nbk5c1ELC8wlQ==
+  dependencies:
+    "@types/sinonjs__fake-timers" "*"
+
+"@types/sinonjs__fake-timers@*":
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/@types/sinonjs__fake-timers/-/sinonjs__fake-timers-6.0.1.tgz#681df970358c82836b42f989188d133e218c458e"
+  integrity sha512-yYezQwGWty8ziyYLdZjwxyMb0CZR49h8JALHGrxjQHWlqGgc8kLdHEgWrgL0uZ29DMvEVBDnHU2Wg36zKSIUtA==
 
 "@types/stack-utils@^1.0.1":
   version "1.0.1"
@@ -4984,16 +5003,18 @@ jest@^26.4.2:
     import-local "^3.0.2"
     jest-cli "^26.4.2"
 
-jolocom-lib@^5.1.0-rc1:
-  version "5.1.0-rc1"
-  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-5.1.0-rc1.tgz#a1f017732d8279b3a6f31f21fd09d1f54bda99d3"
-  integrity sha512-Oa1gUtSXlUZndwlqSYwjPjybmiJjjOp6P+Ycz3xFXv4Nn1gOxMKWVCqobWwut2qEKHAaeLmw51sWqWc7u6kvuA==
+jolocom-lib@^5.1.0-rc2:
+  version "5.1.0-rc2"
+  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-5.1.0-rc2.tgz#21bac2e22620aaef0634a65ac03137bbe1de8281"
+  integrity sha512-sM5HPTJPVUDmhfruRKELGy9eLuPpG+tNHUa0b1d7jd7aL6DdDMVuUTBSSH09iHC3q2Ga78QLyGWZvLHMsBf5mw==
   dependencies:
+    "@hawkingnetwork/ed25519-hd-key-rn" "^1.0.1"
     "@jolocom/jolo-did-registrar" "^1.0.0-rc5"
     "@jolocom/jolo-did-resolver" "^1.0.0-rc5"
     "@jolocom/native-core" "^1.0.0-rc1"
     "@jolocom/protocol-ts" "^0.5.1"
     "@jolocom/vaulted-key-provider" "^0.7.4"
+    "@types/sinon" "^9.0.5"
     base64url "^3.0.1"
     bip32 "^1.0.2"
     bip39 "^3.0.1"
