@@ -5,13 +5,14 @@ import {
   ConnectionOptions,
 } from 'typeorm'
 import { getConnectionConfig } from './util'
-
+import { entropyToMnemonic } from 'jolocom-lib/js/utils/crypto'
 import { InternalDb } from 'local-resolver-registrar/js/db'
 import { JolocomSDK, NaivePasswordStore } from '../'
 import { JolocomTypeormStorage } from '@jolocom/sdk-storage-typeorm'
+import { Identity } from 'jolocom-lib/js/identity/identity'
 
 const conn1Name = 'decrypt1'
-const conn2Name = 'decrypt1'
+const conn2Name = 'decrypt2'
 
 const testConnection1 = getConnectionConfig(conn1Name) as ConnectionOptions
 const testConnection2 = getConnectionConfig(conn2Name) as ConnectionOptions
@@ -39,19 +40,13 @@ test('Decryption Request interaction', async () => {
   const serviceCon = getConnection(conn1Name)
   const userCon = getConnection(conn2Name)
 
-  const serviceDB = new JolocomTypeormStorage(serviceCon)
-  const userDB = new JolocomTypeormStorage(userCon)
-
-  // in this test, the service is "anchored" (the user can always resolve them), and
+  // in this test, the service is "anchored" (the user can always resolve them)
   const service = getSdk(serviceCon)
-  service.didMethods.setDefault(service.didMethods.get('jun'))
-  await service.init()
+  service.didMethods.setDefault(service.didMethods.get('jolo'))
 
-  // insert the service's KEL to the user DB (make the service resolvable)
-  const serviceId = service.idw.did.split(':')[2]
-  const serviceEL = await serviceDB.eventDB.read(serviceId)
-
-  await userDB.eventDB.append(serviceId, serviceEL)
+  await service.loadFromMnemonic(
+    entropyToMnemonic(Buffer.from('a'.repeat(64), 'hex')),
+  )
 
   const user = getSdk(userCon)
   // the user is "unanchored" (the service cannot resolve them initially)
@@ -75,6 +70,9 @@ test('Decryption Request interaction', async () => {
 
   // process the resolution response, containing the state update proof of the User
   await service.processJWT(userResponse.encode())
+
+  // the service should be able to resolve the user now
+  await expect(service.resolve(user.idw.did)).resolves.toBeInstanceOf(Identity)
 
   const data = Buffer.from('hello there')
 

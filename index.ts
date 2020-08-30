@@ -359,7 +359,9 @@ export class JolocomSDK extends BackendMiddleware {
       {
         message: {
           callbackURL: req.callbackURL,
-          request: req.toDecrypt.toString('base64'),
+          request: {
+            data: req.toDecrypt.toString('base64'),
+          }
         },
         typ: DecryptionType.DecryptionRequest,
       },
@@ -403,7 +405,9 @@ export class JolocomSDK extends BackendMiddleware {
       {
         message: {
           callbackURL: req.callbackURL,
-          request: req.toSign.toString('base64'),
+          request: {
+            data: req.toSign.toString('base64'),
+          }
         },
         typ: SigningType.SigningRequest,
       },

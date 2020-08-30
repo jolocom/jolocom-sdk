@@ -99,7 +99,7 @@ export const isDecryptionRequest = (
 ): token is DecryptionRequest =>
   type === DecryptionType.DecryptionRequest &&
   isRPCRequest(token) &&
-  typeof token.request === 'string'
+  typeof token.request.data === 'string'
 
 export const isDecryptionResponse = (
   token: any,
