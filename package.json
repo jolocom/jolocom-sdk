@@ -69,10 +69,11 @@
     }
   },
   "peerDependencies": {
-    "jolocom-lib": "^5.1.0-rc1"
+    "jolocom-lib": "/home/eg/Documents/work/jolocom-lib/jolocom-lib-5.1.0-rc3.tgz"
   },
   "dependencies": {
     "form-data": "^3.0.0",
+    "local-resolver-registrar": "^0.3.1",
     "ramda": "^0.26.1"
   },
   "config": {
