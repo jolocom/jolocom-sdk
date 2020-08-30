@@ -1,6 +1,6 @@
 {
   "name": "@jolocom/sdk",
-  "version": "1.0.0-rc0",
+  "version": "1.0.0-rc2",
   "main": "js/index.js",
   "files": [
     "js/"
@@ -45,7 +45,7 @@
     "fs-extra": "^8.1.0",
     "husky": "^3.0.5",
     "jest": "^26.4.2",
-    "jolocom-lib": "^5.1.0-rc1",
+    "jolocom-lib": "^5.1.0-rc2",
     "local-did-resolver": "^0.3.0",
     "mockdate": "^2.0.2",
     "node-fetch": "^2.6.0",
@@ -69,7 +69,7 @@
     }
   },
   "peerDependencies": {
-    "jolocom-lib": "^5.1.0-rc1"
+    "jolocom-lib": "^5.1.0-rc2"
   },
   "dependencies": {
     "form-data": "^3.0.0",
