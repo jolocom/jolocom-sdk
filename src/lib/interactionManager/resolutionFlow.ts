@@ -11,15 +11,17 @@ export enum ResolutionType {
   ResolutionResponse = 'ResolutionResponse',
 }
 
-export interface ResolutionFlowState {
-  requested?: string
-  resolution_result?: ResolutionResult
-}
-
 export interface ResolutionRequest {
+  description?: string
   uri?: string
   callbackURL?: string
 }
+
+export interface ResolutionFlowState {
+  request?: ResolutionRequest
+  resolution_result?: ResolutionResult
+}
+
 
 export const isResolutionRequest = (
   t: any,
@@ -64,7 +66,7 @@ export class ResolutionFlow extends Flow<ResolutionRequest | ResolutionResult> {
       case ResolutionType.ResolutionRequest:
         if (isResolutionRequest(iT, token.interactionType)) {
           await this.validateTokenAndPush(token)
-          this.state.requested = iT.uri
+          this.state.request = iT
           return true
         }
       case ResolutionType.ResolutionResponse:

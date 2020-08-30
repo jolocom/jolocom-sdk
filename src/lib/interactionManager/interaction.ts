@@ -145,11 +145,11 @@ export class Interaction {
     const request = this.findMessageByType(
       ResolutionType.ResolutionRequest,
     ) as JSONWebToken<ResolutionRequest>
-    const requested =
-      (this.getSummary().state as ResolutionFlowState).requested ||
+    const reqMessage = (this.flow.state as ResolutionFlowState).request
+    const uriToResolve = reqMessage && reqMessage.uri ||
       this.ctx.ctx.idw.did
 
-    const stateId = last(requested.split(':')) || ''
+    const stateId = last(uriToResolve.split(':')) || ''
 
     const stateProof = await this.ctx.ctx.storageLib.eventDB
       .read(stateId)
@@ -162,7 +162,7 @@ export class Interaction {
         message: {
           '@context': 'https://www.w3.org/ns/did-resolution/v1',
           didDocument: (
-            await this.ctx.ctx.resolve(requested)
+            await this.ctx.ctx.resolve(uriToResolve)
           ).didDocument.toJSON(),
           resolverMetadata: {
             driverId: this.ctx.ctx.identityWallet.did,
