@@ -1,6 +1,6 @@
 import { IdentityWallet } from 'jolocom-lib/js/identityWallet/identityWallet'
 import { IStorage, IPasswordStore, NaivePasswordStore } from './lib/storage'
-import { SoftwareKeyProvider, IVaultedKeyProvider } from 'jolocom-lib'
+import { SoftwareKeyProvider } from 'jolocom-lib'
 import { Identity } from 'jolocom-lib/js/identity/identity'
 import { LocalDidMethod } from 'jolocom-lib/js/didMethods/local'
 import { BackendError, BackendMiddlewareErrorCodes } from './lib/errors/types'
@@ -58,7 +58,7 @@ export class BackendMiddleware {
     throw new BackendError(BackendMiddlewareErrorCodes.NoWallet)
   }
 
-  public get keyProvider(): IVaultedKeyProvider {
+  public get keyProvider(): SoftwareKeyProvider {
     if (this._keyProvider) return this._keyProvider
     throw new BackendError(BackendMiddlewareErrorCodes.NoKeyProvider)
   }
@@ -168,45 +168,54 @@ export class BackendMiddleware {
   }
 
   /**
-   * Loads an Identity based on a BIP 39 12 word seed phrase
-   *
-   * @param mnemonic - 12 word BIP 39 seed phrase, space-delimited
-   * @returns An identity corrosponding to the sead phrase mnemonic
-   */
-  public async initWithMnemonic(mnemonic: string, newPassword?: string): Promise<IdentityWallet> {
-    const seed = Buffer.from(mnemonicToEntropy(mnemonic), 'hex')
-    return this.initWithEntropy(seed, newPassword)
-  }
-
-  /**
    * Loads an Identity based on a buffer of entropy.
    *
    * @param entropy - Buffer of private entropy to generate keys with
    * @returns An identity corrosponding to the entropy
    */
-  public async initWithEntropy(seed: Buffer, newPass?: string): Promise<IdentityWallet> {
+
+  public async loadFromMnemonic(mnemonic: string, newPass: string): Promise<IdentityWallet> {
     const didMethod = this.didMethods.getDefault()
 
     if (!didMethod.recoverFromSeed) {
       throw new Error(`Recovery not implemented for method ${didMethod.prefix}`)
     }
 
-    if (newPass) {
-      await this.keyChainLib.savePassword(newPass)
-    }
-
-    const pass = newPass || (await this.keyChainLib.getPassword())
-    const idw = await didMethod.recoverFromSeed(seed, pass)
-
-      //@ts-ignore KeyProvider is private. We have no other reference to it though.
-    this._keyProvider = idw._keyProvider
-    this._identityWallet = idw
-
-    await this.storeIdentityData(
-      this._identityWallet.identity,
-      this._keyProvider
+    const { identityWallet, succesfullyResolved } = await didMethod.recoverFromSeed(
+      Buffer.from(mnemonicToEntropy(mnemonic), 'hex'),
+      newPass
     )
 
-    return idw
+    if (!succesfullyResolved) {
+      throw new Error(`Identity for did ${identityWallet.did} not anchored, can't load`)
+    }
+
+    return identityWallet
   }
+
+  public async createFromMnemonic(mnemonic: string, newPass: string, shouldOverwrite?: boolean): Promise<IdentityWallet> {
+    const didMethod = this.didMethods.getDefault()
+
+    if (!didMethod.recoverFromSeed) {
+      throw new Error(`Recovery not implemented for method ${didMethod.prefix}`)
+    }
+
+    const { identityWallet, succesfullyResolved } = await didMethod.recoverFromSeed(
+      Buffer.from(mnemonicToEntropy(mnemonic), 'hex'),
+      newPass
+    )
+
+    if (!shouldOverwrite && succesfullyResolved) {
+      throw new Error(`Identity for did ${identityWallet.did} already anchored, and shouldOverwrite? was set to ${shouldOverwrite}`)
+    }
+
+    await didMethod.registrar.create(
+      //@ts-ignore property is private, but no other reference available
+      identityWallet._keyProvider,
+      newPass
+    )
+
+    return identityWallet
+  }
+
 }

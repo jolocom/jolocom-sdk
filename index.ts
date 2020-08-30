@@ -94,20 +94,11 @@ export class JolocomSDK extends BackendMiddleware {
     return this.identityWallet
   }
 
+  // Currently does not handle mnemonic, to avoid complexity.
+  // Separate methods are exposed for recovery / identity creation from mnemonic
   async init(
-    { storedDid, mnemonic, auto }: IJolocomSDKInitOptions = { auto: true },
+    { storedDid, auto }: IJolocomSDKInitOptions = { auto: true },
   ) {
-    if (mnemonic)
-      try {
-        return await this.initWithMnemonic(mnemonic)
-      } catch (err) {
-        if (
-          (!(err instanceof BackendError) ||
-            err.message !== BackendError.codes.NoWallet) &&
-          !auto
-        )
-          throw err
-      }
 
     let pass
     try {
