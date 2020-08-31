@@ -64,9 +64,7 @@
     "yarn": "^1.22.0"
   },
   "husky": {
-    "hooks": {
-      "prepare-commit-msg": "exec < /dev/tty && git cz --hook || true"
-    }
+    "hooks": {}
   },
   "peerDependencies": {
     "jolocom-lib": "^5.1.0-rc2"
