@@ -1,15 +1,18 @@
 import { IdentityWallet } from 'jolocom-lib/js/identityWallet/identityWallet'
 import { IStorage, IPasswordStore, NaivePasswordStore } from './lib/storage'
-import {
-  createJolocomRegistry,
-  JolocomRegistry,
-} from 'jolocom-lib/js/registries/jolocomRegistry'
-import { JolocomLib } from 'jolocom-lib'
-import { publicKeyToDID } from 'jolocom-lib/js/utils/crypto'
+import { SoftwareKeyProvider } from 'jolocom-lib'
 import { Identity } from 'jolocom-lib/js/identity/identity'
-import { SoftwareKeyProvider } from 'jolocom-lib/js/vaultedKeyProvider/softwareProvider'
-import { generateSecureRandomBytes } from './lib/util'
+import { LocalDidMethod } from 'jolocom-lib/js/didMethods/local'
 import { BackendError, BackendMiddlewareErrorCodes } from './lib/errors/types'
+import { DidMethodKeeper } from './didMethodKeeper'
+import { walletUtils } from '@jolocom/native-core'
+import { InternalDb } from 'local-resolver-registrar/js/db'
+import {
+  authAsIdentityFromKeyProvider,
+  createIdentityFromKeyProvider,
+} from 'jolocom-lib/js/didMethods/utils'
+import { mnemonicToEntropy } from 'jolocom-lib/js/utils/crypto'
+import { IResolver } from 'jolocom-lib/js/didMethods/types'
 
 export class BackendMiddleware {
   private _identityWallet!: IdentityWallet
@@ -17,19 +20,37 @@ export class BackendMiddleware {
 
   public storageLib: IStorage
   public keyChainLib: IPasswordStore
-  public registry: JolocomRegistry
-
-  private newIdentityPromise!: Promise<IdentityWallet>
+  public didMethods = new DidMethodKeeper()
+  public resolver: IResolver
 
   public constructor(config: {
-    fuelingEndpoint: string
     storage: IStorage
     passwordStore?: IPasswordStore
+    eventDB?: InternalDb
   }) {
-    // FIXME actually use fuelingEndpoint
     this.storageLib = config.storage
     this.keyChainLib = config.passwordStore || new NaivePasswordStore()
-    this.registry = createJolocomRegistry()
+    const localDidMethod = new LocalDidMethod(
+      config.eventDB || this.storageLib.eventDB,
+    )
+    this.didMethods.register('jun', localDidMethod)
+    // FIXME the prefix bit is required just to match IResolver
+    // but does anything need it at that level?
+    this.resolver = { prefix: '', resolve: this.resolve.bind(this) }
+  }
+
+  /**
+   * Resolve a DID string such as 'did:jolo:123456789abcdef0' to an Identity
+   *
+   * @param did string the did to resolve
+   * @returns Identity the resolved identity
+   */
+  public async resolve(did: string): Promise<Identity> {
+    return this.storageLib.get.didDoc(did).then(ddo => Identity.fromDidDocument({didDocument: ddo})).catch(async _ => {
+      const resolved = await this.didMethods.getForDid(did).resolver.resolve(did)
+      await this.storageLib.store.didDoc(resolved.didDocument).catch(_ => {})
+      return resolved
+    })
   }
 
   public get identityWallet(): IdentityWallet {
@@ -42,13 +63,16 @@ export class BackendMiddleware {
     throw new BackendError(BackendMiddlewareErrorCodes.NoKeyProvider)
   }
 
-  public async prepareIdentityWallet(): Promise<IdentityWallet> {
-    if (this._identityWallet) return this._identityWallet
+  public async loadIdentity(
+    did?: string,
+    pass?: string,
+  ): Promise<IdentityWallet> {
+    if (pass) await this.keyChainLib.savePassword(pass)
 
-    const encryptedEntropy = await this.storageLib.get.encryptedSeed()
-    let encryptionPass
+    const encryptedWalletInfo = await this.storageLib.get.encryptedWallet(did)
+    let encryptionPass!: string
     try {
-      encryptionPass = await this.keyChainLib.getPassword()
+      encryptionPass = pass || (await this.keyChainLib.getPassword())
     } catch (e) {
       // This may fail if the application was uninstalled and reinstalled, as
       // the android keystore is cleared on uninstall, but the database may
@@ -56,98 +80,93 @@ export class BackendMiddleware {
       // FIXME: Sentry.captureException(e)
     }
 
-    if (encryptedEntropy && !encryptionPass) {
-      // if we can't decrypt the encryptedEntropy, then
-      // FIXME throw a proper error
-      throw new Error('error decrypting database!')
+    if (encryptedWalletInfo && !encryptionPass) {
+      // if we can't decrypt the encryptedWallet, then
+      throw new BackendError(BackendError.codes.DecryptionFailed)
     }
 
-    if (!encryptedEntropy || !encryptionPass) {
-      // If either encryptedEntropy or encryptionPass was missing, we throw
+    if (!encryptedWalletInfo || !encryptionPass) {
+      // If either encryptedWallet or encryptionPass was missing, we throw
       // NoEntropy to signal that we cannot prepare an identityWallet instance due
-      // to lack of a seed.
-      // Note that the case of having an encryptionPass but no encryptedEntropy
+      // to lack of a wallet.
+      // Note that the case of having an encryptionPass but no encryptedWallet
       // is an uncommon edge case, but may potentially happen due to errors/bugs
       // etc
-      throw new BackendError(BackendMiddlewareErrorCodes.NoEntropy)
+      throw new BackendError(BackendMiddlewareErrorCodes.NoWallet)
     }
 
-    this._keyProvider = new JolocomLib.KeyProvider(
-      Buffer.from(encryptedEntropy, 'hex'),
+    this._keyProvider = new SoftwareKeyProvider(
+      walletUtils,
+      Buffer.from(encryptedWalletInfo.encryptedWallet, 'base64'),
+      encryptedWalletInfo.id,
     )
 
-    const { jolocomIdentityKey: derivationPath } = JolocomLib.KeyTypes
-
-    const userPubKey = this._keyProvider.getPublicKey({
-      derivationPath,
+    const identityWallet = await authAsIdentityFromKeyProvider(
+      this._keyProvider,
       encryptionPass,
-    })
-
-    const didDocument = await this.storageLib.get.didDoc(
-      publicKeyToDID(userPubKey),
+      this.resolver,
     )
 
-    if (didDocument) {
-      const identity = Identity.fromDidDocument({ didDocument })
+    await this.storageLib.store.didDoc(identityWallet.didDocument)
+    return (this._identityWallet = identityWallet)
+  }
 
-      // TODO Simplify constructor
-      return (this._identityWallet = new IdentityWallet({
-        identity,
-        vaultedKeyProvider: this._keyProvider,
-        publicKeyMetadata: {
-          derivationPath,
-          keyId: identity.publicKeySection[0].id,
-        },
-        contractsAdapter: this.registry.contractsAdapter,
-        contractsGateway: this.registry.contractsGateway,
-      }))
-    } else {
-      const identityWallet = await this.registry.authenticate(
-        this._keyProvider,
-        {
-          encryptionPass,
-          derivationPath,
-        },
-      )
+  public async createNewIdentity(newPass?: string): Promise<IdentityWallet> {
+    if (newPass) await this.keyChainLib.savePassword(newPass)
+    const pass = newPass || (await this.keyChainLib.getPassword())
+    this._keyProvider = await SoftwareKeyProvider.newEmptyWallet(
+      walletUtils,
+      '',
+      pass,
+    )
+    this._identityWallet = await createIdentityFromKeyProvider(
+      this._keyProvider,
+      pass,
+      this.didMethods.getDefault().registrar,
+    )
 
-      await this.storageLib.store.didDoc(identityWallet.didDocument)
-      return (this._identityWallet = identityWallet)
-    }
+    await this.storeIdentityData(
+      this._identityWallet.identity,
+      this._keyProvider,
+    )
+
+    return this._identityWallet
   }
 
   /**
-   * Loads an Identity based on a BIP 39 12 word seed phrase
+   * Loads an Identity if one is not already instantiated
    *
-   * @param mnemonic - 12 word BIP 39 seed phrase, space-delimited
-   * @returns An identity corrosponding to the sead phrase mnemonic
+   * @param did - DID of Identity to be loaded from DB
+   * @param newPass - new password to be set, in case the new Wallet has a new Pass
+   * @returns Identity An identity corrosponding to the given DID
    */
-  public async initWithMnemonic(mnemonic: string): Promise<Identity> {
-    const password = (await generateSecureRandomBytes(32)).toString('base64')
-    this._keyProvider = JolocomLib.KeyProvider.recoverKeyPair(
-      mnemonic,
-      password,
-    ) as SoftwareKeyProvider
-    const { jolocomIdentityKey: derivationPath } = JolocomLib.KeyTypes
+  public async prepareIdentityWallet(
+    did?: string,
+    newPass?: string,
+  ): Promise<IdentityWallet> {
+    if (this._identityWallet) return this._identityWallet
 
-    const identityWallet = await this.registry.authenticate(this._keyProvider, {
-      encryptionPass: password,
-      derivationPath,
-    })
-    this._identityWallet = identityWallet
-    await this.keyChainLib.savePassword(password)
-    await this.storeIdentityData()
-    return identityWallet.identity
+    return this.loadIdentity(did, newPass)
   }
 
-  /*
-   * Returns the seed phrase based on a buffer of entropy
+  /**
+   * Stores a DID Document and its corrosponding Key Provider
    *
-   * @param entropy - Buffer of private entropy
-   * @returns The seed phrase corresponding to the entropy
+   * @param id - Identity being Stored
+   * @param skp - Key Provider for the Identity
+   * @returns void
    */
-  public fromEntropyToMnemonic(entropy: Buffer): string {
-    const vkp = JolocomLib.KeyProvider.fromSeed(entropy, 'a')
-    return vkp.getMnemonic('a')
+  public async storeIdentityData(
+    id: Identity,
+    skp: SoftwareKeyProvider,
+  ): Promise<void> {
+    if (id.did !== skp.id) throw new Error('Identity data inconsistant')
+    await this.storageLib.store.encryptedWallet({
+      id: skp.id,
+      encryptedWallet: skp.encryptedWallet,
+      timestamp: Date.now(),
+    })
+    await this.storageLib.store.didDoc(id.didDocument)
   }
 
   /**
@@ -156,96 +175,61 @@ export class BackendMiddleware {
    * @param entropy - Buffer of private entropy to generate keys with
    * @returns An identity corrosponding to the entropy
    */
-  public async initWithEntropy(entropy: Buffer): Promise<Identity> {
-    // this is ugly but it works, is no less unsafe, and was quick
-    return this.initWithMnemonic(this.fromEntropyToMnemonic(entropy))
-  }
 
-  public async createKeyProvider(encodedEntropy: string): Promise<void> {
-    const password = (await generateSecureRandomBytes(32)).toString('base64')
-    this._keyProvider = JolocomLib.KeyProvider.fromSeed(
-      Buffer.from(encodedEntropy, 'hex'),
-      password,
+  public async loadFromMnemonic(mnemonic: string, newPass?: string): Promise<IdentityWallet> {
+    if (newPass) await this.keyChainLib.savePassword(newPass)
+    const pass = newPass || (await this.keyChainLib.getPassword())
+
+    const didMethod = this.didMethods.getDefault()
+
+    if (!didMethod.recoverFromSeed) {
+      throw new Error(`Recovery not implemented for method ${didMethod.prefix}`)
+    }
+
+    const { identityWallet, succesfullyResolved } = await didMethod.recoverFromSeed(
+      Buffer.from(mnemonicToEntropy(mnemonic), 'hex'),
+      pass
     )
-    await this.keyChainLib.savePassword(password)
-  }
 
-  public async fuelKeyWithEther(): Promise<void> {
-    const password = await this.keyChainLib.getPassword()
-    await JolocomLib.util.fuelKeyWithEther(
-      this.keyProvider.getPublicKey({
-        encryptionPass: password,
-        derivationPath: JolocomLib.KeyTypes.ethereumKey,
-      }),
-    )
-  }
+    if (!succesfullyResolved) {
+      throw new Error(`Identity for did ${identityWallet.did} not anchored, can't load`)
+    }
 
-  public async createIdentity(): Promise<IdentityWallet> {
-    const password = await this.keyChainLib.getPassword()
-    // FIXME
-    // registry.create fails while storing json in ipfs
-    // it seems the request is badly formatted
-    // something to do with FormData or node-fetch
-    // needs to remove the polyfill stuff
-    // console.log('does registry.create fail?')
-    this._identityWallet = await this.registry.create(
-      this.keyProvider,
-      password,
-    )
-    // console.log('registry.create doesn't fail!')
-    await this.storeIdentityData()
-    return this._identityWallet
-  }
-
-  public async loadIdentityFromMnemonic(mnemonic: string): Promise<Identity> {
-    const password = (await generateSecureRandomBytes(32)).toString('base64')
-    this._keyProvider = JolocomLib.KeyProvider.recoverKeyPair(
-      mnemonic,
-      password,
-    ) as SoftwareKeyProvider
-    const { jolocomIdentityKey: derivationPath } = JolocomLib.KeyTypes
-
-    const identityWallet = await this.registry.authenticate(this._keyProvider, {
-      encryptionPass: password,
-      derivationPath,
-    })
     this._identityWallet = identityWallet
-    await this.keyChainLib.savePassword(password)
-    await this.storeIdentityData()
-    return identityWallet.identity
+    //@ts-ignore private property, but no other reference present
+    this._keyProvider = identityWallet._keyProvider
+
+    return identityWallet
   }
 
-  private async storeIdentityData(): Promise<void> {
-    const personaData = {
-      did: this._identityWallet.identity.did,
-      controllingKeyPath: JolocomLib.KeyTypes.jolocomIdentityKey,
+  public async createFromMnemonic(mnemonic: string, newPass?: string, shouldOverwrite?: boolean): Promise<IdentityWallet> {
+    if (newPass) await this.keyChainLib.savePassword(newPass)
+    const pass = newPass || (await this.keyChainLib.getPassword())
+
+    const didMethod = this.didMethods.getDefault()
+
+    if (!didMethod.recoverFromSeed) {
+      throw new Error(`Recovery not implemented for method ${didMethod.prefix}`)
     }
-    await this.storageLib.store.persona(personaData)
-    const encryptedSeedData = {
-      encryptedEntropy: this.keyProvider.encryptedSeed,
-      timestamp: Date.now(),
+
+    const { identityWallet, succesfullyResolved } = await didMethod.recoverFromSeed(
+      Buffer.from(mnemonicToEntropy(mnemonic), 'hex'),
+      pass
+    )
+
+    if (!shouldOverwrite && succesfullyResolved) {
+      throw new Error(`Identity for did ${identityWallet.did} already anchored, and shouldOverwrite? was set to ${shouldOverwrite}`)
     }
-    await this.storageLib.store.encryptedSeed(encryptedSeedData)
-    await this.storageLib.store.didDoc(this._identityWallet.didDocument)
-  }
 
-  /**
-   * Returns an agent with an Identity provided by a buffer of entropy.
-   * WARNING: this registers an identity on the Jolocom DID Method
-   *
-   * @param seed - Buffer of private entropy to generate keys with
-   * @returns An Agent with the identity corrosponding to the seed
-   */
-  public async createNewIdentity(seed: Buffer): Promise<IdentityWallet> {
-    if (this.newIdentityPromise) return this.newIdentityPromise
-    return (this.newIdentityPromise = this._createNewIdentity(seed))
-  }
+    this._identityWallet = identityWallet
+    //@ts-ignore private property on idw, but no other reference present
+    this._keyProvider = identityWallet._keyProvider
 
-  private async _createNewIdentity(seed: Buffer): Promise<IdentityWallet> {
-    const encodedEntropy = seed.toString('hex')
-    await this.createKeyProvider(encodedEntropy)
-    await this.fuelKeyWithEther()
-    await this.createIdentity()
-    return this.identityWallet
+    await didMethod.registrar.create(
+      this.keyProvider,
+      pass
+    )
+
+    return identityWallet
   }
 }

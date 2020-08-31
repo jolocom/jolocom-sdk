@@ -3,15 +3,15 @@ import {
   CredentialOfferResponseSelection,
 } from 'jolocom-lib/js/interactionTokens/interactionTokens.types'
 import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
-import { IdentitySummary } from '../types'
-import { FlowState } from './flow'
 import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRequest'
 import { CredentialResponse } from 'jolocom-lib/js/interactionTokens/credentialResponse'
 import { ChannelTransport } from '../channels'
+import { IdentitySummary } from '../types'
+import { FlowState } from './flow'
 
 export enum InteractionRole {
   Requester = 'requester',
-  Responder = 'responder'
+  Responder = 'responder',
 }
 
 // TODO define and refactor how the UI components/containers handle the InteractionSummary.
@@ -33,7 +33,11 @@ export enum FlowType {
   CredentialShare = 'CredentialShare',
   CredentialOffer = 'CredentialOffer',
   Authorization = 'Authorization',
-  EstablishChannel = 'EstablishChannel'
+  Resolution = 'Resolution',
+  EstablishChannel = 'EstablishChannel',
+  Encrypt = 'Encrypt',
+  Decrypt = 'Decrypt',
+  Sign = 'Sign',
 }
 
 export enum EstablishChannelType {
@@ -55,8 +59,23 @@ export interface EstablishChannelFlowState {
 }
 
 export enum AuthorizationType {
-  AuthorizationRequest = 'authorizationRequest',
-  AuthorizationResponse = 'authorizationResponse',
+  AuthorizationRequest = 'AuthorizationRequest',
+  AuthorizationResponse = 'AuthorizationResponse',
+}
+
+export enum EncryptionType {
+  EncryptionRequest = 'EncryptionRequest',
+  EncryptionResponse = 'EncryptionResponse',
+}
+
+export enum DecryptionType {
+  DecryptionRequest = 'DecryptionRequest',
+  DecryptionResponse = 'DecryptionResponse',
+}
+
+export enum SigningType {
+  SigningRequest =  'SigningRequest',
+  SigningResponse = 'SigningResponse',
 }
 
 export interface AuthorizationResponse {
@@ -127,3 +146,22 @@ type ValidationErrorMap = {
 export interface SignedCredentialWithMetadata extends CredentialOffer {
   signedCredential?: SignedCredential
 }
+
+type RequestMessage<T> = {
+  request: T
+  callbackURL: string
+}
+
+type ResponseMessage<T> = {
+  result: T
+}
+
+type Base64String = string
+type DidDocKeyId = string
+
+export type DecryptionRequest = RequestMessage<{ target: DidDocKeyId, data: Base64String }>
+export type DecryptionResponse = ResponseMessage<Base64String>
+export type EncryptionRequest = RequestMessage<{ target: DidDocKeyId; data: Base64String }>
+export type EncryptionResponse = ResponseMessage<Base64String>
+export type SigningRequest = RequestMessage<{ target: DidDocKeyId; data: Base64String }>
+export type SigningResponse = ResponseMessage<Base64String>

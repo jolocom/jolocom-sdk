@@ -1,6 +1,6 @@
 import { createConnection, getConnection, Connection } from "typeorm"
-import { JolocomSDK, NaivePasswordStore } from '@jolocom/sdk'
 import { JolocomTypeormStorage } from '@jolocom/sdk-storage-typeorm'
+import { JolocomSDK, NaivePasswordStore } from '..'
 
 const getSdk = async (connection: Connection) =>
   new JolocomSDK({

@@ -17,7 +17,7 @@ export class AuthorizationFlow extends Flow<
     description: '',
   }
 
-  public handleInteractionToken(
+  public async onValidMessage(
     token: AuthorizationRequest | AuthorizationResponse,
     interactionType: string,
   ) {

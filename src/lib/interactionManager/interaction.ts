@@ -1,27 +1,37 @@
 import { CredentialOfferFlow } from './credentialOfferFlow'
-import { InteractionType } from 'jolocom-lib/js/interactionTokens/types'
+import {
+  InteractionType,
+  CredentialOfferResponseSelection,
+} from 'jolocom-lib/js/interactionTokens/types'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import {
   InteractionSummary,
   InteractionRole,
-  SignedCredentialWithMetadata,
   AuthenticationFlowState,
   FlowType,
   EstablishChannelType,
   EstablishChannelRequest,
   CredentialOfferFlowState,
   CredentialVerificationSummary,
+  EncryptionType,
+  DecryptionType,
+  SigningType,
+  EncryptionRequest,
+  EncryptionResponse,
+  DecryptionRequest,
+  DecryptionResponse,
+  SigningRequest,
+  SigningResponse,
 } from './types'
 import { CredentialRequestFlow } from './credentialRequestFlow'
 import { Flow } from './flow'
-import { last } from 'ramda'
 import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credentialOfferRequest'
 import { AuthenticationFlow } from './authenticationFlow'
 import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRequest'
 import { AppError, ErrorCode } from '../errors'
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { Identity } from 'jolocom-lib/js/identity/identity'
-import { generateIdentitySummary } from '../../utils/generateIdentitySummary'
+
 import {
   AuthorizationType,
   AuthorizationRequest,
@@ -34,8 +44,22 @@ import {
   InteractionManager,
   InteractionTransportAPI,
 } from './interactionManager'
+
+import {
+  ResolutionType,
+  ResolutionFlow,
+  ResolutionFlowState,
+  ResolutionRequest,
+} from './resolutionFlow'
+import { last } from 'ramda'
+
 import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
 import { CredentialOfferResponse } from 'jolocom-lib/js/interactionTokens/credentialOfferResponse'
+
+import { EncryptionFlow } from './encryptionFlow'
+import { DecryptionFlow } from './decryptionFlow'
+import { SigningFlow } from './signingFlow'
+import { generateIdentitySummary } from '../../utils/generateIdentitySummary'
 
 /***
  * - initiated by InteractionManager when an interaction starts
@@ -48,7 +72,11 @@ const interactionFlowForMessage = {
   [InteractionType.CredentialRequest]: CredentialRequestFlow,
   [InteractionType.Authentication]: AuthenticationFlow,
   [AuthorizationType.AuthorizationRequest]: AuthorizationFlow,
+  [ResolutionType.ResolutionRequest]: ResolutionFlow,
   [EstablishChannelType.EstablishChannelRequest]: EstablishChannelFlow,
+  [EncryptionType.EncryptionRequest]: EncryptionFlow,
+  [DecryptionType.DecryptionRequest]: DecryptionFlow,
+  [SigningType.SigningRequest]: SigningFlow,
 }
 
 export class Interaction {
@@ -79,9 +107,10 @@ export class Interaction {
 
   get counterparty(): Identity | undefined {
     if (!this.role) return
-    const counterRole = this.role === InteractionRole.Requester
-      ? InteractionRole.Responder
-      : InteractionRole.Requester
+    const counterRole =
+      this.role === InteractionRole.Requester
+        ? InteractionRole.Responder
+        : InteractionRole.Requester
     return this.participants[counterRole]
   }
 
@@ -112,15 +141,52 @@ export class Interaction {
     )
   }
 
+  public async createResolutionResponse() {
+    const request = this.findMessageByType(
+      ResolutionType.ResolutionRequest,
+    ) as JSONWebToken<ResolutionRequest>
+    const reqMessage = (this.flow.state as ResolutionFlowState).request
+    const uriToResolve = reqMessage && reqMessage.uri ||
+      this.ctx.ctx.idw.did
+
+    const stateId = last(uriToResolve.split(':')) || ''
+
+    const stateProof = await this.ctx.ctx.storageLib.eventDB
+      .read(stateId)
+      .catch((_: any) => {
+        return []
+      })
+
+    return this.ctx.ctx.identityWallet.create.message(
+      {
+        message: {
+          '@context': 'https://www.w3.org/ns/did-resolution/v1',
+          didDocument: (
+            await this.ctx.ctx.resolve(uriToResolve)
+          ).didDocument.toJSON(),
+          resolverMetadata: {
+            driverId: this.ctx.ctx.identityWallet.did,
+            driver: 'jolocom/peer-resolution/0.1',
+            retrieved: Date.now(),
+          },
+          methodMetadata: { stateProof },
+        },
+        typ: ResolutionType.ResolutionResponse,
+      },
+      await this.ctx.ctx.keyChainLib.getPassword(),
+      request,
+    )
+  }
+
   public async createEstablishChannelResponse(transportIdx: number) {
     const request = this.findMessageByType(
-      EstablishChannelType.EstablishChannelRequest
+      EstablishChannelType.EstablishChannelRequest,
     ) as JSONWebToken<EstablishChannelRequest>
 
     return this.ctx.ctx.identityWallet.create.message(
       {
         message: { transportIdx },
-        typ: EstablishChannelType.EstablishChannelResponse
+        typ: EstablishChannelType.EstablishChannelResponse,
       },
       await this.ctx.ctx.keyChainLib.getPassword(),
       request,
@@ -173,7 +239,7 @@ export class Interaction {
   }
 
   public async createCredentialOfferResponseToken(
-    selectedOffering: SignedCredentialWithMetadata[],
+    selectedOffering: CredentialOfferResponseSelection[],
   ) {
     const credentialOfferRequest = this.findMessageByType(
       InteractionType.CredentialOfferRequest,
@@ -181,9 +247,7 @@ export class Interaction {
 
     const credentialOfferResponseAttr = {
       callbackURL: credentialOfferRequest.interactionToken.callbackURL,
-      selectedCredentials: selectedOffering.map(offer => ({
-        type: offer.type,
-      })),
+      selectedCredentials: selectedOffering,
     }
 
     return this.ctx.ctx.identityWallet.create.interactionTokens.response.offer(
@@ -193,36 +257,36 @@ export class Interaction {
     )
   }
 
-  public async issueSelectedCredentials(
-    offerMap?: {
-      [k: string]: (inp?: any) => Promise<{ claim: any, metadata?: any, subject?: string }>
-    }
-  ): Promise<SignedCredential[]> {
+  public async issueSelectedCredentials(offerMap?: {
+    [k: string]: (
+      inp?: any,
+    ) => Promise<{ claim: any; metadata?: any; subject?: string }>
+  }): Promise<SignedCredential[]> {
     const flowState = this.flow.state as CredentialOfferFlowState
     const password = await this.ctx.ctx.keyChainLib.getPassword()
-    return Promise.all(flowState.selectedTypes.map(async (type) => {
-      const offerTypeHandler = offerMap && offerMap[type]
-      const credDesc = offerTypeHandler && await offerTypeHandler()
+    return Promise.all(
+      flowState.selectedTypes.map(async type => {
+        const offerTypeHandler = offerMap && offerMap[type]
+        const credDesc = offerTypeHandler && (await offerTypeHandler())
 
-      const metadata = credDesc && credDesc.metadata || { context: [] }
-      const subject = credDesc && credDesc.subject || this.counterparty?.did
-      if (!subject) throw new Error('no subject for credential')
+        const metadata = (credDesc && credDesc.metadata) || { context: [] }
+        const subject = (credDesc && credDesc.subject) || this.counterparty?.did
+        if (!subject) throw new Error('no subject for credential')
 
-      return this.ctx.ctx.idw.create.signedCredential(
-        {
-          metadata,
-          claim: credDesc?.claim,
-          subject
-        },
-        password
-      )
-    }))
+        return this.ctx.ctx.idw.create.signedCredential(
+          {
+            metadata,
+            claim: credDesc?.claim,
+            subject,
+          },
+          password,
+        )
+      }),
+    )
   }
 
-  public async createCredentialReceiveToken(
-    customCreds?: SignedCredential[]
-  ) {
-    let creds = customCreds || await this.issueSelectedCredentials()
+  public async createCredentialReceiveToken(customCreds?: SignedCredential[]) {
+    let creds = customCreds || (await this.issueSelectedCredentials())
 
     const request = this.findMessageByType(
       InteractionType.CredentialOfferResponse,
@@ -250,39 +314,133 @@ export class Interaction {
     token: JSONWebToken<T>,
   ): Promise<boolean> {
     if (!this.participants.requester) {
-      // TODO what happens if the signer isnt resolvable
-      this.participants.requester = await this.ctx.ctx.registry.resolve(token.signer.did)
-      if (this.participants.requester.did === this.ctx.ctx.identityWallet.did) {
-        this.role = InteractionRole.Requester
+      try {
+        const requester = await this.ctx.ctx.resolve(token.signer.did)
+        this.participants.requester = requester
+        if (requester.did === this.ctx.ctx.identityWallet.did) {
+          this.role = InteractionRole.Requester
+        }
+      } catch (err) {
+        // TODO what should we do if the signer isnt resolvable
+        console.error('error resolving requester', err)
       }
     } else if (!this.participants.responder) {
-      this.participants.responder = await this.ctx.ctx.registry.resolve(
-        token.signer.did,
-      )
-      if (this.participants.responder.did === this.ctx.ctx.identityWallet.did) {
-        this.role = InteractionRole.Responder
-      }
-    }
-
-    if (token.signer.did !== this.ctx.ctx.identityWallet.did) {
       try {
-        await this.ctx.ctx.identityWallet.validateJWT(
-          token,
-          last(this.getMessages()),
-          this.ctx.ctx.registry,
-        )
+        const responder = await this.ctx.ctx.resolve(token.signer.did)
+        this.participants.responder = responder
+        if (responder.did === this.ctx.ctx.identityWallet.did) {
+          this.role = InteractionRole.Responder
+        }
       } catch (err) {
-        throw new AppError(ErrorCode.InvalidToken, err)
+        console.error('error resolving responder', err)
       }
     }
 
-    return this.flow
-      .handleInteractionToken(token.interactionToken, token.interactionType)
-      .then(res => {
-        this.interactionMessages.push(token)
-        // this.ctx.ctx.storageLib.store.interactionToken(token)
-        return res
-      })
+    return this.flow.handleInteractionToken(token).then(res => {
+      this.interactionMessages.push(token)
+      this.ctx.ctx.storageLib.store.interactionToken(token)
+      return res
+    })
+  }
+
+  public async createEncResponseToken(): Promise<
+    JSONWebToken<EncryptionResponse>
+  > {
+    const encRequest = this.findMessageByType(
+      EncryptionType.EncryptionRequest,
+    ) as JSONWebToken<EncryptionRequest>
+    const msg = encRequest.payload.interactionToken!.request
+
+    const data = Buffer.from(
+      encRequest.payload.interactionToken!.request.data,
+      'base64',
+    )
+
+    const targetParts = msg.target.split('#')
+    let result
+    if (targetParts.length == 2) {
+      // it includes a keyRef
+      result = await this.ctx.ctx.identityWallet.asymEncryptToDidKey(
+        data,
+        msg.target,
+        this.ctx.ctx.resolver,
+      )
+    } else if (targetParts.length == 1) {
+      // it does not include a keyRef
+      result = await this.ctx.ctx.identityWallet.asymEncryptToDid(
+        data,
+        msg.target,
+        this.ctx.ctx.resolver,
+      )
+    } else {
+      throw new Error('bad encryption target: ' + msg.target)
+    }
+
+    return this.ctx.ctx.identityWallet.create.message(
+      {
+        message: {
+          callbackURL: encRequest.payload.interactionToken!.callbackURL,
+          result: result.toString('base64'),
+        },
+        typ: EncryptionType.EncryptionResponse,
+      },
+      await this.ctx.ctx.keyChainLib.getPassword(),
+      encRequest,
+    )
+  }
+
+  public async createDecResponseToken(): Promise<
+    JSONWebToken<DecryptionResponse>
+  > {
+    const decRequest = this.findMessageByType(
+      DecryptionType.DecryptionRequest,
+    ) as JSONWebToken<DecryptionRequest>
+
+    const password = await this.ctx.ctx.keyChainLib.getPassword()
+
+    const data = Buffer.from(
+      decRequest.payload.interactionToken!.request.data,
+      'base64',
+    )
+    const result = await this.ctx.ctx.identityWallet.asymDecrypt(data, password)
+
+    return this.ctx.ctx.identityWallet.create.message(
+      {
+        message: {
+          result: result.toString('base64'),
+        },
+        typ: DecryptionType.DecryptionResponse,
+      },
+      password,
+      decRequest,
+    )
+  }
+
+  public async createSigningResponseToken(): Promise<
+    JSONWebToken<SigningResponse>
+  > {
+    const sigRequest = this.findMessageByType(SigningType.SigningRequest) as JSONWebToken<
+      SigningRequest
+    >
+    const pass = await this.ctx.ctx.keyChainLib.getPassword()
+    return this.ctx.ctx.identityWallet.create.message(
+      {
+        message: {
+          result: (
+            await this.ctx.ctx.identityWallet.sign(
+              Buffer.from(
+                sigRequest.payload.interactionToken!.request.data,
+                'base64',
+              ),
+              pass,
+            )
+          ).toString('base64'),
+        },
+        typ: SigningType.SigningResponse,
+      },
+      pass,
+      sigRequest,
+    )
   }
 
   public getSummary(): InteractionSummary {
@@ -315,6 +473,7 @@ export class Interaction {
    *   the server only holds the status code right now)
    *   If we're linking, the return value is a promise, as per {@see http://reactnative.dev/docs/linking.html#openurl}
    */
+
   public async send<T>(token: JSONWebToken<T>) {
     // @ts-ignore - CredentialReceive has no callbackURL, needs fix on the lib for JWTEncodable.
     const { callbackURL } = token.interactionToken
@@ -369,7 +528,7 @@ export class Interaction {
 
   public storeIssuerProfile() {
     return this.ctx.ctx.storageLib.store.issuerProfile(
-      generateIdentitySummary(this.participants.requester!)
+      generateIdentitySummary(this.participants.requester!),
     )
   }
 }
