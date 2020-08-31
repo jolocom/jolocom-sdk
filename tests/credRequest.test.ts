@@ -81,7 +81,9 @@ test('Credential Request interaction', async () => {
 
   const aliceCredReq = await alice.credRequestToken({
     callbackURL: 'nowhere',
-    credentialRequirements: [{ type: ['Name'], constraints: [] }],
+    credentialRequirements: [
+      { type: ['ProofOfNameCredential'], constraints: [] },
+    ],
   })
 
   const bobInteraction = await bob.processJWT(aliceCredReq)
@@ -96,6 +98,6 @@ test('Credential Request interaction', async () => {
   expect(
     // @ts-ignore
     aliceInteraction.getSummary().state.providedCredentials[0]
-      .suppliedCredentials.len,
-  ).toEqual(1)
+      .suppliedCredentials,
+  ).toHaveLength(1)
 })
