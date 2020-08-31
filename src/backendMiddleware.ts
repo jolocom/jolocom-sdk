@@ -199,6 +199,11 @@ export class BackendMiddleware {
     //@ts-ignore private property, but no other reference present
     this._keyProvider = identityWallet._keyProvider
 
+    await this.storeIdentityData(
+      this._identityWallet.identity,
+      this._keyProvider,
+    )
+
     return identityWallet
   }
 
@@ -228,6 +233,11 @@ export class BackendMiddleware {
     await didMethod.registrar.create(
       this.keyProvider,
       pass
+    )
+
+    await this.storeIdentityData(
+      this._identityWallet.identity,
+      this._keyProvider,
     )
 
     return identityWallet
