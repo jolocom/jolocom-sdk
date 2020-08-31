@@ -1,6 +1,6 @@
 # Jolocom SDK
 
-[![npm package jolocom-sdk](https://img.shields.io/npm/v/jolocom-sdk?style=flat-square)](https://www.npmjs.com/package/jolocom-sdk)
+[![npm package @jolocom/sdk](https://img.shields.io/npm/v/@jolocom/sdk?style=flat-square)](https://www.npmjs.com/package/@jolocom/sdk)
 [![chat on gitter](https://img.shields.io/gitter/room/jolocom/jolocom-sdk?style=flat-square)](https://gitter.im/jolocom/jolocom-sdk)
 
 [Jolocom](https://jolocom.io) Software Development Kit - Facilitating applications to manage and
