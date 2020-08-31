@@ -95,20 +95,11 @@ export class JolocomSDK extends BackendMiddleware {
     return this.identityWallet
   }
 
+  // Currently does not handle mnemonic, to avoid complexity.
+  // Separate methods are exposed for recovery / identity creation from mnemonic
   async init(
-    { storedDid, mnemonic, auto }: IJolocomSDKInitOptions = { auto: true },
+    { storedDid, auto }: IJolocomSDKInitOptions = { auto: true },
   ) {
-    if (mnemonic)
-      try {
-        return await this.initWithMnemonic(mnemonic)
-      } catch (err) {
-        if (
-          (!(err instanceof BackendError) ||
-            err.message !== BackendError.codes.NoWallet) &&
-          !auto
-        )
-          throw err
-      }
 
     let pass
     try {
@@ -140,8 +131,6 @@ export class JolocomSDK extends BackendMiddleware {
         return this.createNewIdentity(pass)
       }
     }
-
-    throw new BackendError(BackendError.codes.NoWallet)
   }
 
   async usePlugins(...plugs: JolocomPlugin[]) {
@@ -370,7 +359,9 @@ export class JolocomSDK extends BackendMiddleware {
       {
         message: {
           callbackURL: req.callbackURL,
-          request: req.toDecrypt.toString('base64'),
+          request: {
+            data: req.toDecrypt.toString('base64'),
+          }
         },
         typ: DecryptionType.DecryptionRequest,
       },
@@ -414,7 +405,9 @@ export class JolocomSDK extends BackendMiddleware {
       {
         message: {
           callbackURL: req.callbackURL,
-          request: req.toSign.toString('base64'),
+          request: {
+            data: req.toSign.toString('base64'),
+          }
         },
         typ: SigningType.SigningRequest,
       },

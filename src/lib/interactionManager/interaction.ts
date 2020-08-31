@@ -395,7 +395,9 @@ export class Interaction {
     const decRequest = this.findMessageByType(
       DecryptionType.DecryptionRequest,
     ) as JSONWebToken<DecryptionRequest>
+
     const password = await this.ctx.ctx.keyChainLib.getPassword()
+
     const data = Buffer.from(
       decRequest.payload.interactionToken!.request.data,
       'base64',
@@ -405,7 +407,6 @@ export class Interaction {
     return this.ctx.ctx.identityWallet.create.message(
       {
         message: {
-          callbackURL: decRequest.payload.interactionToken!.callbackURL,
           result: result.toString('base64'),
         },
         typ: DecryptionType.DecryptionResponse,
@@ -425,7 +426,6 @@ export class Interaction {
     return this.ctx.ctx.identityWallet.create.message(
       {
         message: {
-          callbackURL: sigRequest.payload.interactionToken!.callbackURL,
           result: (
             await this.ctx.ctx.identityWallet.sign(
               Buffer.from(
