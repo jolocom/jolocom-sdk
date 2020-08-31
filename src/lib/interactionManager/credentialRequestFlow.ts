@@ -50,7 +50,9 @@ export class CredentialRequestFlow extends Flow<
 
   private async handleCredentialResponse(token: CredentialResponse) {
     this.state.providedCredentials.push(token)
-    return token.satisfiesRequest(this.state.constraints[-1])
+    const lastIndex = this.state.constraints.length - 1
+    if (lastIndex >= 0) return token.satisfiesRequest(this.state.constraints[lastIndex])
+    else return true
   }
 
   public async getAvailableCredentials(request: CredentialRequest) {
