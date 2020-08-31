@@ -73,7 +73,7 @@ export const isEstablishChannelResponse = (
   token: any,
   type: EstablishChannelType,
 ): token is EstablishChannelResponse =>
-  type === EstablishChannelType.EstablishChannelResponse && !!token.transportIdx
+  type === EstablishChannelType.EstablishChannelResponse && typeof token.transportIdx !== undefined
 
 const isRPCRequest = (token: any) => !!token.callbackURL && !!token.request
 const isRPCResponse = (token: any) => !token.callbackURL && !!token.result
