@@ -48,7 +48,7 @@ test('Resolution interaction', async () => {
   // in this test, the service is "anchored" (the user can always resolve them), and
   // the user is "unanchored" (the service cannot resolve them initially)
   const service = getSdk(serviceCon)
-  service.didMethods.setDefault(service.didMethods.get('jun'))
+  service.setDefaultDidMethod('jun')
   await service.init()
 
   // insert the service's KEL to the user DB (make the service resolvable)
@@ -58,7 +58,7 @@ test('Resolution interaction', async () => {
   await userDB.eventDB.append(serviceId, serviceEL)
 
   const user = getSdk(userCon)
-  user.didMethods.setDefault(user.didMethods.get('jun'))
+  user.setDefaultDidMethod('jun')
   await user.init()
 
   // ensure the service is resolvable by the user

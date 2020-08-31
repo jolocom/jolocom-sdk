@@ -47,7 +47,7 @@ test('Signing Request interaction', async () => {
 
   // in this test, the service is "anchored" (the user can always resolve them)
   const service = getSdk(serviceCon)
-  service.didMethods.setDefault(service.didMethods.get('jolo'))
+  service.setDefaultDidMethod('jolo')
 
   await service.loadFromMnemonic(
     entropyToMnemonic(Buffer.from('a'.repeat(64), 'hex')),
@@ -55,7 +55,7 @@ test('Signing Request interaction', async () => {
 
   const user = getSdk(userCon)
   // the user is "unanchored" (the service cannot resolve them initially)
-  user.didMethods.setDefault(user.didMethods.get('jun'))
+  user.setDefaultDidMethod('jun')
   await user.init()
 
   // ensure the service is resolvable by the user

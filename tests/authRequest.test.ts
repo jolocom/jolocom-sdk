@@ -38,12 +38,12 @@ afterEach(async () => {
 test('Authentication interaction', async () => {
   const con1 = getConnection(conn1Name)
   const alice = getSdk(con1)
-  alice.didMethods.setDefault(alice.didMethods.get('jun'))
+  alice.setDefaultDidMethod('jun')
   await alice.init()
 
   const con2 = getConnection(conn1Name)
   const bob = getSdk(con2)
-  bob.didMethods.setDefault(bob.didMethods.get('jun'))
+  bob.setDefaultDidMethod('jun')
   await bob.createNewIdentity()
 
   const aliceAuthRequest = await alice.authRequestToken({
