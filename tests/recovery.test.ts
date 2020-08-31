@@ -44,7 +44,7 @@ const pass = 'secret'
 test('Recover existing jolo identity from mnemonic', async () => {
   const con = getConnection(conn1Name)
   const agent = getSdk(con)
-  agent.didMethods.setDefault(agent.didMethods.get('jolo'))
+  agent.setDefaultDidMethod('jolo')
   const expectedDid = 'did:jolo:b2d5d8d6cc140033419b54a237a5db51710439f9f462d1fc98f698eca7ce9777'
 
   const identityWallet = await agent.loadFromMnemonic(mnemonic64A, pass)
@@ -58,7 +58,7 @@ test('Recover existing jolo identity from mnemonic', async () => {
 test('Fail to recover non existing jolo identity from mnemonic', async () => {
   const con = getConnection(conn1Name)
   const agent = getSdk(con)
-  agent.didMethods.setDefault(agent.didMethods.get('jolo'))
+  agent.setDefaultDidMethod('jolo')
 
   return expect(agent.loadFromMnemonic(mnemonicRandom, pass)).rejects.toBeInstanceOf(Error)
 })
@@ -68,7 +68,7 @@ test('Load local identity from mnemonic', async () => {
   const con = getConnection(conn1Name)
   const agent = getSdk(con)
 
-  agent.didMethods.setDefault(agent.didMethods.get('jun'))
+  agent.setDefaultDidMethod('jun')
   const expectedDid = 'did:jun:FhHgj-WRVqeODSIJl1a8GDV9KG9WM8HLIo6ucni6zlHcyJNhQxHW5nA6YLR4NQuOB2X1xdkYUq7VRBUBahCYmpA'
 
   const identityWallet = await agent.loadFromMnemonic(mnemonic64A, pass)

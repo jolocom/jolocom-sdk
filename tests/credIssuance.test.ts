@@ -42,11 +42,11 @@ test('Credential Issuance interaction', async () => {
   const bobCon = getConnection(conn2Name)
 
   const alice = getSdk(aliceCon)
-  alice.didMethods.setDefault(alice.didMethods.get('jun'))
+  alice.setDefaultDidMethod('jun')
   await alice.init()
 
   const bob = getSdk(bobCon)
-  bob.didMethods.setDefault(bob.didMethods.get('jun'))
+  bob.setDefaultDidMethod('jun')
   await bob.createNewIdentity()
 
   // making them mutually resolvable
