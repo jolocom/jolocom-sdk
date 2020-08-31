@@ -12,7 +12,6 @@ import {
   EstablishChannelType,
   EstablishChannelRequest,
   CredentialOfferFlowState,
-  CredentialVerificationSummary,
   EncryptionType,
   DecryptionType,
   SigningType,
