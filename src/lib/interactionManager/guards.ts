@@ -49,66 +49,52 @@ export const isAuthorizationRequest = (
   token: any,
   type: AuthorizationType,
 ): token is AuthorizationRequest =>
-  type === AuthorizationType.AuthorizationRequest &&
-  !!token.description &&
-  !!token.callbackURL
+  type === AuthorizationType.AuthorizationRequest
 
 export const isAuthorizationResponse = (
   token: any,
   type: AuthorizationType,
 ): token is AuthorizationResponse =>
-  type === AuthorizationType.AuthorizationResponse &&
-  !!token.description &&
-  !token.callbackURL
+  type === AuthorizationType.AuthorizationResponse
 
 export const isEstablishChannelRequest = (
   token: any,
   type: EstablishChannelType,
 ): token is EstablishChannelRequest =>
-  type === EstablishChannelType.EstablishChannelRequest &&
-  !!token.description &&
-  !!token.transports
+  type === EstablishChannelType.EstablishChannelRequest
 
 export const isEstablishChannelResponse = (
   token: any,
   type: EstablishChannelType,
 ): token is EstablishChannelResponse =>
-  type === EstablishChannelType.EstablishChannelResponse && typeof token.transportIdx !== undefined
-
-const isRPCRequest = (token: any) => !!token.callbackURL && !!token.request
-const isRPCResponse = (token: any) => !token.callbackURL && !!token.result
+  type === EstablishChannelType.EstablishChannelResponse
 
 export const isEncryptionRequest = (
   token: any,
   type: EncryptionType,
 ): token is EncryptionRequest =>
-  type === EncryptionType.EncryptionRequest &&
-  isRPCRequest(token) &&
-  typeof token.request.target === 'string' &&
-  typeof token.request.data === 'string'
+  type === EncryptionType.EncryptionRequest
 
 export const isEncryptionResponse = (
   token: any,
   type: EncryptionType,
 ): token is EncryptionResponse =>
-  type === EncryptionType.EncryptionResponse && isRPCResponse(token)
+  type === EncryptionType.EncryptionResponse
 
 export const isDecryptionRequest = (
   token: any,
   type: DecryptionType,
 ): token is DecryptionRequest =>
-  type === DecryptionType.DecryptionRequest &&
-  isRPCRequest(token) &&
-  typeof token.request.data === 'string'
+  type === DecryptionType.DecryptionRequest
 
 export const isDecryptionResponse = (
   token: any,
   type: DecryptionType,
 ): token is DecryptionResponse =>
-  type === DecryptionType.DecryptionResponse && isRPCResponse(token)
+  type === DecryptionType.DecryptionResponse
 
 export const isSigningRequest = (token: any, type: SigningType): token is SigningRequest =>
-  type === SigningType.SigningRequest && isRPCRequest(token)
+  type === SigningType.SigningRequest
 
 export const isSigningResponse = (token: any, type: SigningType): token is SigningResponse =>
-  type === SigningType.SigningResponse && isRPCResponse(token)
+  type === SigningType.SigningResponse
