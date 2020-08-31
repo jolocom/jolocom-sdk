@@ -12,7 +12,6 @@ import {
   EstablishChannelType,
   EstablishChannelRequest,
   CredentialOfferFlowState,
-  CredentialVerificationSummary,
   EncryptionType,
   DecryptionType,
   SigningType,
@@ -215,16 +214,14 @@ export class Interaction {
     )
   }
 
-  public async createCredentialResponse(
-    selectedCredentials: CredentialVerificationSummary[],
-  ) {
+  public async createCredentialResponse(selectedCredentials: string[]) {
     const request = this.findMessageByType(
       InteractionType.CredentialRequest,
     ) as JSONWebToken<CredentialRequest>
 
     const credentials = await Promise.all(
       selectedCredentials.map(
-        async ({ id }) => (await this.getVerifiableCredential({ id }))[0],
+        async id => (await this.getVerifiableCredential({ id }))[0],
       ),
     )
 
