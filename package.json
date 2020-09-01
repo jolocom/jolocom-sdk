@@ -12,7 +12,7 @@
     "format": "eslint --fix --ext .ts --ext .tsx .",
     "repl": "REPL=1 ts-node -P . -r ./bin/repl.ts",
     "typeorm": "ts-node -O '{\"module\": \"commonjs\"}' -r ./bin/repl.ts node_modules/.bin/typeorm",
-    "test": "jest"
+    "test": "eslint --ext .ts --ext .tsx .; jest"
   },
   "private": false,
   "devDependencies": {
