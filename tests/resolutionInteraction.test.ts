@@ -15,8 +15,8 @@ import { getConnectionConfig } from './util'
 const conn1Name = 'resolution1'
 const conn2Name = 'resolution2'
 
-const testConnection1 = getConnectionConfig(conn1Name) as ConnectionOptions 
-const testConnection2 = getConnectionConfig(conn2Name) as ConnectionOptions 
+const testConnection1 = getConnectionConfig(conn1Name) as ConnectionOptions
+const testConnection2 = getConnectionConfig(conn2Name) as ConnectionOptions
 
 const getSdk = (connection: Connection, eDB?: InternalDb) =>
   new JolocomSDK({
@@ -31,12 +31,11 @@ beforeEach(async () => {
 })
 
 afterEach(async () => {
-  let conn1 = getConnection(conn1Name)
+  const conn1 = getConnection(conn1Name)
   await conn1.close()
-  let conn2 = getConnection(conn2Name)
+  const conn2 = getConnection(conn2Name)
   return conn2.close()
 })
-
 
 test('Resolution interaction', async () => {
   const serviceCon = getConnection(conn1Name)
@@ -81,5 +80,3 @@ test('Resolution interaction', async () => {
 
   expect(service.resolve(user.idw.did)).resolves.toBeTruthy()
 })
-
-

@@ -29,13 +29,11 @@ beforeEach(async () => {
 })
 
 afterEach(async () => {
-  let conn1 = getConnection(conn1Name)
+  const conn1 = getConnection(conn1Name)
   await conn1.close()
-  let conn2 = getConnection(conn2Name)
+  const conn2 = getConnection(conn2Name)
   return conn2.close()
 })
-
-
 
 test('Credential Issuance interaction', async () => {
   const aliceCon = getConnection(conn1Name)
@@ -60,10 +58,14 @@ test('Credential Issuance interaction', async () => {
   await bob.didMethods.getDefault().registrar.encounter(aliceEL)
 
   // ensure bob is resolvable by alice
-  expect(alice.resolve(bob.idw.did)).resolves.toMatchObject(Promise.resolve(bob.idw.didDocument.toJSON()))
+  expect(alice.resolve(bob.idw.did)).resolves.toMatchObject(
+    Promise.resolve(bob.idw.didDocument.toJSON()),
+  )
 
   // ensure alice is resolvable by bob
-  expect(bob.resolve(alice.idw.did)).resolves.toMatchObject(Promise.resolve(alice.idw.didDocument.toJSON()))
+  expect(bob.resolve(alice.idw.did)).resolves.toMatchObject(
+    Promise.resolve(alice.idw.didDocument.toJSON()),
+  )
 
   const aliceCredOffer = await alice.credOfferToken({
     callbackURL: 'nowhere',

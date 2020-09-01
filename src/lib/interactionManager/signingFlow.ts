@@ -4,7 +4,7 @@ import { isSigningRequest, isSigningResponse } from './guards'
 import { SigningRequest, SigningResponse, FlowType, SigningType } from './types'
 
 export interface SigningFlowState extends FlowState {
-  request?: SigningRequest,
+  request?: SigningRequest
   signature?: Buffer
 }
 
@@ -21,13 +21,15 @@ export class SigningFlow extends Flow<SigningRequest | SigningResponse> {
     token: SigningRequest | SigningResponse,
     tokenType: string,
   ) {
-    switch(tokenType) {
+    switch (tokenType) {
       case SigningType.SigningRequest:
-        if (isSigningRequest(token, tokenType))
+        if (isSigningRequest(token, tokenType)) {
           return this.consumeSigningRequest(token)
+        }
       case SigningType.SigningResponse:
-        if (isSigningResponse(token, tokenType))
+        if (isSigningResponse(token, tokenType)) {
           return this.consumeSigningResponse(token)
+        }
       default:
         throw new Error('Interaction type not found')
     }

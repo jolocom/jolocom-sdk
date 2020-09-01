@@ -12,7 +12,7 @@ enum HttpMethods {
   HEAD = 'HEAD',
 }
 
-/** 
+/**
  * @todo is this used anywhere?
  * @todo the res.json() prevents us from using these methods
  * Also

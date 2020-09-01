@@ -33,11 +33,13 @@ export class CredentialRequestFlow extends Flow<
   ) {
     switch (interactionType) {
       case InteractionType.CredentialRequest:
-        if (isCredentialRequest(token))
+        if (isCredentialRequest(token)) {
           return this.handleCredentialRequest(token)
+        }
       case InteractionType.CredentialResponse:
-        if (isCredentialResponse(token))
+        if (isCredentialResponse(token)) {
           return this.handleCredentialResponse(token)
+        }
       default:
         throw new Error('Interaction type not found')
     }
@@ -51,8 +53,9 @@ export class CredentialRequestFlow extends Flow<
   private async handleCredentialResponse(token: CredentialResponse) {
     this.state.providedCredentials.push(token)
     const lastIndex = this.state.constraints.length - 1
-    if (lastIndex >= 0) return token.satisfiesRequest(this.state.constraints[lastIndex])
-    else return true
+    if (lastIndex >= 0) {
+      return token.satisfiesRequest(this.state.constraints[lastIndex])
+    } else return true
   }
 
   public async getAvailableCredentials(request: CredentialRequest) {

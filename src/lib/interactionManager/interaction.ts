@@ -79,7 +79,7 @@ const interactionFlowForMessage = {
 }
 
 export class Interaction {
-  private interactionMessages: JSONWebToken<any>[] = []
+  private interactionMessages: Array<JSONWebToken<any>> = []
   public id: string
   public ctx: InteractionManager
   public flow: Flow<any>
@@ -145,16 +145,13 @@ export class Interaction {
       ResolutionType.ResolutionRequest,
     ) as JSONWebToken<ResolutionRequest>
     const reqMessage = (this.flow.state as ResolutionFlowState).request
-    const uriToResolve = reqMessage && reqMessage.uri ||
-      this.ctx.ctx.idw.did
+    const uriToResolve = (reqMessage && reqMessage.uri) || this.ctx.ctx.idw.did
 
     const stateId = last(uriToResolve.split(':')) || ''
 
     const stateProof = await this.ctx.ctx.storageLib.eventDB
       .read(stateId)
-      .catch((_: any) => {
-        return []
-      })
+      .catch((_: any) => [])
 
     return this.ctx.ctx.identityWallet.create.message(
       {
@@ -283,7 +280,7 @@ export class Interaction {
   }
 
   public async createCredentialReceiveToken(customCreds?: SignedCredential[]) {
-    let creds = customCreds || (await this.issueSelectedCredentials())
+    const creds = customCreds || (await this.issueSelectedCredentials())
 
     const request = this.findMessageByType(
       InteractionType.CredentialOfferResponse,
@@ -416,9 +413,9 @@ export class Interaction {
   public async createSigningResponseToken(): Promise<
     JSONWebToken<SigningResponse>
   > {
-    const sigRequest = this.findMessageByType(SigningType.SigningRequest) as JSONWebToken<
-      SigningRequest
-    >
+    const sigRequest = this.findMessageByType(
+      SigningType.SigningRequest,
+    ) as JSONWebToken<SigningRequest>
     const pass = await this.ctx.ctx.keyChainLib.getPassword()
     return this.ctx.ctx.identityWallet.create.message(
       {
@@ -447,9 +444,8 @@ export class Interaction {
     }
   }
 
-  public getAttributesByType = (type: string[]) => {
-    return this.ctx.ctx.storageLib.get.attributesByType(type)
-  }
+  public getAttributesByType = (type: string[]) =>
+    this.ctx.ctx.storageLib.get.attributesByType(type)
 
   public async getStoredCredentialById(id: string) {
     return this.ctx.ctx.storageLib.get.verifiableCredential({
@@ -457,9 +453,8 @@ export class Interaction {
     })
   }
 
-  public getVerifiableCredential = (query?: object) => {
-    return this.ctx.ctx.storageLib.get.verifiableCredential(query)
-  }
+  public getVerifiableCredential = (query?: object) =>
+    this.ctx.ctx.storageLib.get.verifiableCredential(query)
 
   /**
    * @dev This will crash with a credential receive because it doesn't contain a callbackURL
@@ -487,8 +482,9 @@ export class Interaction {
     const { issued, credentialsValidity } = this.flow
       .state as CredentialOfferFlowState
 
-    if (!issued.length)
+    if (!issued.length) {
       throw new AppError(ErrorCode.SaveExternalCredentialFailed)
+    }
 
     return Promise.all(
       issued.map((cred, i) => {
@@ -504,8 +500,9 @@ export class Interaction {
     const { offerSummary, selection, credentialsValidity } = this.flow
       .state as CredentialOfferFlowState
 
-    if (!selection.length)
+    if (!selection.length) {
       throw new AppError(ErrorCode.SaveCredentialMetadataFailed)
+    }
 
     const issuer = generateIdentitySummary(this.participants.requester!)
 

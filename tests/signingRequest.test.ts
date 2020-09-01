@@ -18,9 +18,8 @@ import { verifySignatureWithIdentity } from 'jolocom-lib/js/utils/validation'
 const conn1Name = 'signing1'
 const conn2Name = 'signing2'
 
-const testConnection1 = getConnectionConfig(conn1Name) as ConnectionOptions 
-const testConnection2 = getConnectionConfig(conn2Name) as ConnectionOptions 
-
+const testConnection1 = getConnectionConfig(conn1Name) as ConnectionOptions
+const testConnection2 = getConnectionConfig(conn2Name) as ConnectionOptions
 
 const getSdk = (connection: Connection, eDB?: InternalDb) =>
   new JolocomSDK({
@@ -35,9 +34,9 @@ beforeEach(async () => {
 })
 
 afterEach(async () => {
-  let conn1 = getConnection(conn1Name)
+  const conn1 = getConnection(conn1Name)
   await conn1.close()
-  let conn2 = getConnection(conn2Name)
+  const conn2 = getConnection(conn2Name)
   return conn2.close()
 })
 

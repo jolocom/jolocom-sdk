@@ -20,7 +20,9 @@ export class DidMethodKeeper {
 
   get(methodName: string) {
     const method = this.methods[methodName]
-    if (!method) throw new Error('no did method "' + methodName + '" registered!')
+    if (!method) {
+      throw new Error('no did method "' + methodName + '" registered!')
+    }
     return method
   }
 
@@ -38,4 +40,3 @@ export class DidMethodKeeper {
     return this._defaultMethod
   }
 }
-

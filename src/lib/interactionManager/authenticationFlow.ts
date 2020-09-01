@@ -16,8 +16,9 @@ export class AuthenticationFlow extends Flow<Authentication> {
         // FIXME there's already enough type information from the guard
         // These guards are necessary, the instanceof check can happen here
         // directly
-        if (isAuthenticationRequest(token))
+        if (isAuthenticationRequest(token)) {
           return this.consumeAuthenticationRequest(token)
+        }
       default:
         throw new Error('Interaction type not found')
     }

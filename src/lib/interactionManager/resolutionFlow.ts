@@ -22,7 +22,6 @@ export interface ResolutionFlowState {
   resolution_result?: ResolutionResult
 }
 
-
 export const isResolutionRequest = (
   t: any,
   typ: string,

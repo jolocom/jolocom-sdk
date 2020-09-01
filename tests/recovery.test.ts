@@ -29,23 +29,26 @@ beforeEach(async () => {
 })
 
 afterEach(async () => {
-  let conn1 = getConnection(conn1Name)
+  const conn1 = getConnection(conn1Name)
   await conn1.close()
 
-  let conn2 = getConnection(conn2Name)
+  const conn2 = getConnection(conn2Name)
   return conn2.close()
 })
 
-const mnemonic64A = 'primary fetch primary fetch primary fetch primary fetch primary fetch primary fetch primary fetch primary fetch primary fetch primary fetch primary fetch primary foster'
+const mnemonic64A =
+  'primary fetch primary fetch primary fetch primary fetch primary fetch primary fetch primary fetch primary fetch primary fetch primary fetch primary fetch primary foster'
 
-const mnemonicRandom = 'heavy clock off seed chef rifle praise punch grace argue outer traffic play rescue night comic install opera off system figure rice still hungry' 
+const mnemonicRandom =
+  'heavy clock off seed chef rifle praise punch grace argue outer traffic play rescue night comic install opera off system figure rice still hungry'
 
 const pass = 'secret'
 test('Recover existing jolo identity from mnemonic', async () => {
   const con = getConnection(conn1Name)
   const agent = getSdk(con)
   agent.setDefaultDidMethod('jolo')
-  const expectedDid = 'did:jolo:b2d5d8d6cc140033419b54a237a5db51710439f9f462d1fc98f698eca7ce9777'
+  const expectedDid =
+    'did:jolo:b2d5d8d6cc140033419b54a237a5db51710439f9f462d1fc98f698eca7ce9777'
 
   const identityWallet = await agent.loadFromMnemonic(mnemonic64A, pass)
 
@@ -60,16 +63,18 @@ test('Fail to recover non existing jolo identity from mnemonic', async () => {
   const agent = getSdk(con)
   agent.setDefaultDidMethod('jolo')
 
-  return expect(agent.loadFromMnemonic(mnemonicRandom, pass)).rejects.toBeInstanceOf(Error)
+  return expect(
+    agent.loadFromMnemonic(mnemonicRandom, pass),
+  ).rejects.toBeInstanceOf(Error)
 })
-
 
 test('Load local identity from mnemonic', async () => {
   const con = getConnection(conn1Name)
   const agent = getSdk(con)
 
   agent.setDefaultDidMethod('jun')
-  const expectedDid = 'did:jun:FhHgj-WRVqeODSIJl1a8GDV9KG9WM8HLIo6ucni6zlHcyJNhQxHW5nA6YLR4NQuOB2X1xdkYUq7VRBUBahCYmpA'
+  const expectedDid =
+    'did:jun:FhHgj-WRVqeODSIJl1a8GDV9KG9WM8HLIo6ucni6zlHcyJNhQxHW5nA6YLR4NQuOB2X1xdkYUq7VRBUBahCYmpA'
 
   const identityWallet = await agent.loadFromMnemonic(mnemonic64A, pass)
 

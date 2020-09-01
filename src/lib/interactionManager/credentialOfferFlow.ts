@@ -39,14 +39,17 @@ export class CredentialOfferFlow extends Flow<
   ): Promise<boolean> {
     switch (interactionType) {
       case InteractionType.CredentialOfferRequest:
-        if (isCredentialOfferRequest(token))
+        if (isCredentialOfferRequest(token)) {
           return this.handleOfferRequest(token)
+        }
       case InteractionType.CredentialOfferResponse:
-        if (isCredentialOfferResponse(token))
+        if (isCredentialOfferResponse(token)) {
           return this.handleOfferResponse(token)
+        }
       case InteractionType.CredentialsReceive:
-        if (isCredentialReceive(token))
+        if (isCredentialReceive(token)) {
           return this.handleCredentialReceive(token)
+        }
       default:
         throw new Error('Interaction type not found')
     }

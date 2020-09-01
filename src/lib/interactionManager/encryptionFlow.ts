@@ -1,6 +1,11 @@
 import { Interaction } from './interaction'
 import { Flow, FlowState } from './flow'
-import { EncryptionRequest, EncryptionResponse, FlowType, EncryptionType } from './types'
+import {
+  EncryptionRequest,
+  EncryptionResponse,
+  FlowType,
+  EncryptionType,
+} from './types'
 import { isEncryptionRequest, isEncryptionResponse } from './guards'
 
 export interface EncryptionFlowState extends FlowState {
@@ -24,11 +29,13 @@ export class EncryptionFlow extends Flow<
   ) {
     switch (interactionType) {
       case EncryptionType.EncryptionRequest:
-        if (isEncryptionRequest(token, interactionType))
+        if (isEncryptionRequest(token, interactionType)) {
           return this.consumeEncryptionRequest(token)
+        }
       case EncryptionType.EncryptionResponse:
-        if (isEncryptionResponse(token, interactionType))
+        if (isEncryptionResponse(token, interactionType)) {
           return this.consumeEncryptionResponse(token)
+        }
       default:
         throw new Error('Interaction type not found')
     }
@@ -41,7 +48,7 @@ export class EncryptionFlow extends Flow<
   }
 
   public async consumeEncryptionResponse(token: EncryptionResponse) {
-    this.state.encryptedData = Buffer.from(token.result, "base64")
+    this.state.encryptedData = Buffer.from(token.result, 'base64')
     return true
   }
 }

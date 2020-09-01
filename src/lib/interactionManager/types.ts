@@ -74,7 +74,7 @@ export enum DecryptionType {
 }
 
 export enum SigningType {
-  SigningRequest =  'SigningRequest',
+  SigningRequest = 'SigningRequest',
   SigningResponse = 'SigningResponse',
 }
 
@@ -135,7 +135,9 @@ export interface AttributeSummary {
 }
 
 export type IssuanceResult = Array<
-  SignedCredentialWithMetadata & { validationErrors: ValidationErrorMap }
+  SignedCredentialWithMetadata & {
+    validationErrors: ValidationErrorMap
+  }
 >
 
 type ValidationErrorMap = {
@@ -159,9 +161,18 @@ type ResponseMessage<T> = {
 type Base64String = string
 type DidDocKeyId = string
 
-export type DecryptionRequest = RequestMessage<{ target: DidDocKeyId, data: Base64String }>
+export type DecryptionRequest = RequestMessage<{
+  target: DidDocKeyId
+  data: Base64String
+}>
 export type DecryptionResponse = ResponseMessage<Base64String>
-export type EncryptionRequest = RequestMessage<{ target: DidDocKeyId; data: Base64String }>
+export type EncryptionRequest = RequestMessage<{
+  target: DidDocKeyId
+  data: Base64String
+}>
 export type EncryptionResponse = ResponseMessage<Base64String>
-export type SigningRequest = RequestMessage<{ target: DidDocKeyId; data: Base64String }>
+export type SigningRequest = RequestMessage<{
+  target: DidDocKeyId
+  data: Base64String
+}>
 export type SigningResponse = ResponseMessage<Base64String>

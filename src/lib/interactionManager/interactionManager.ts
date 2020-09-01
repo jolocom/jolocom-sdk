@@ -20,7 +20,7 @@ export interface InteractionTransportAPI {
 // TODO move out to environment specific plugins
 const httpTransport = {
   type: InteractionTransportType.HTTP,
-  handler: function(config: InteractionTransport) {
+  handler(config: InteractionTransport) {
     const { callbackURL } = config
     return {
       send: async (token: JSONWebToken<any>) => {
@@ -43,11 +43,10 @@ const httpTransport = {
           return JolocomLib.parse.interactionToken.fromJWT(token)
         }
         return
-      }
+      },
     }
-  }
+  },
 }
-
 
 /***
  * - initiated inside BackendMiddleware
@@ -58,7 +57,10 @@ const httpTransport = {
  *
  */
 
-export class InteractionManager extends Transportable<InteractionTransport, InteractionTransportAPI> {
+export class InteractionManager extends Transportable<
+  InteractionTransport,
+  InteractionTransportAPI
+> {
   public readonly ctx: JolocomSDK
 
   public interactions: {
@@ -69,15 +71,21 @@ export class InteractionManager extends Transportable<InteractionTransport, Inte
     super()
     this.ctx = ctx
     // TODO move this out to an environemnt specific plugin
-    this.registerTransportHandler(InteractionTransportType.HTTP, httpTransport.handler)
+    this.registerTransportHandler(
+      InteractionTransportType.HTTP,
+      httpTransport.handler,
+    )
   }
 
-  public async start<T>(transportType: InteractionTransportType, token: JSONWebToken<T>) {
+  public async start<T>(
+    transportType: InteractionTransportType,
+    token: JSONWebToken<T>,
+  ) {
     // @ts-ignore - CredentialReceive has no callbackURL, needs fix on the lib for JWTEncodable.
     const { callbackURL } = token.interactionToken
     const transportConfig: InteractionTransport = {
       type: transportType,
-      callbackURL
+      callbackURL,
     }
 
     if (!transportConfig) throw new Error('no transport coniguration!')

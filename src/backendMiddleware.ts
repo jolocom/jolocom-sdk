@@ -46,11 +46,16 @@ export class BackendMiddleware {
    * @returns Identity the resolved identity
    */
   public async resolve(did: string): Promise<Identity> {
-    return this.storageLib.get.didDoc(did).then(ddo => Identity.fromDidDocument({didDocument: ddo})).catch(async _ => {
-      const resolved = await this.didMethods.getForDid(did).resolver.resolve(did)
-      await this.storageLib.store.didDoc(resolved.didDocument).catch(_ => {})
-      return resolved
-    })
+    return this.storageLib.get
+      .didDoc(did)
+      .then(ddo => Identity.fromDidDocument({ didDocument: ddo }))
+      .catch(async _ => {
+        const resolved = await this.didMethods
+          .getForDid(did)
+          .resolver.resolve(did)
+        await this.storageLib.store.didDoc(resolved.didDocument).catch(_ => {})
+        return resolved
+      })
   }
 
   public get identityWallet(): IdentityWallet {
@@ -176,7 +181,10 @@ export class BackendMiddleware {
    * @returns An identity corrosponding to the entropy
    */
 
-  public async loadFromMnemonic(mnemonic: string, newPass?: string): Promise<IdentityWallet> {
+  public async loadFromMnemonic(
+    mnemonic: string,
+    newPass?: string,
+  ): Promise<IdentityWallet> {
     if (newPass) await this.keyChainLib.savePassword(newPass)
     const pass = newPass || (await this.keyChainLib.getPassword())
 
@@ -186,13 +194,18 @@ export class BackendMiddleware {
       throw new Error(`Recovery not implemented for method ${didMethod.prefix}`)
     }
 
-    const { identityWallet, succesfullyResolved } = await didMethod.recoverFromSeed(
+    const {
+      identityWallet,
+      succesfullyResolved,
+    } = await didMethod.recoverFromSeed(
       Buffer.from(mnemonicToEntropy(mnemonic), 'hex'),
-      pass
+      pass,
     )
 
     if (!succesfullyResolved) {
-      throw new Error(`Identity for did ${identityWallet.did} not anchored, can't load`)
+      throw new Error(
+        `Identity for did ${identityWallet.did} not anchored, can't load`,
+      )
     }
 
     this._identityWallet = identityWallet
@@ -207,7 +220,11 @@ export class BackendMiddleware {
     return identityWallet
   }
 
-  public async createFromMnemonic(mnemonic: string, newPass?: string, shouldOverwrite?: boolean): Promise<IdentityWallet> {
+  public async createFromMnemonic(
+    mnemonic: string,
+    newPass?: string,
+    shouldOverwrite?: boolean,
+  ): Promise<IdentityWallet> {
     if (newPass) await this.keyChainLib.savePassword(newPass)
     const pass = newPass || (await this.keyChainLib.getPassword())
 
@@ -217,23 +234,25 @@ export class BackendMiddleware {
       throw new Error(`Recovery not implemented for method ${didMethod.prefix}`)
     }
 
-    const { identityWallet, succesfullyResolved } = await didMethod.recoverFromSeed(
+    const {
+      identityWallet,
+      succesfullyResolved,
+    } = await didMethod.recoverFromSeed(
       Buffer.from(mnemonicToEntropy(mnemonic), 'hex'),
-      pass
+      pass,
     )
 
     if (!shouldOverwrite && succesfullyResolved) {
-      throw new Error(`Identity for did ${identityWallet.did} already anchored, and shouldOverwrite? was set to ${shouldOverwrite}`)
+      throw new Error(
+        `Identity for did ${identityWallet.did} already anchored, and shouldOverwrite? was set to ${shouldOverwrite}`,
+      )
     }
 
     this._identityWallet = identityWallet
     //@ts-ignore private property on idw, but no other reference present
     this._keyProvider = identityWallet._keyProvider
 
-    await didMethod.registrar.create(
-      this.keyProvider,
-      pass
-    )
+    await didMethod.registrar.create(this.keyProvider, pass)
 
     await this.storeIdentityData(
       this._identityWallet.identity,

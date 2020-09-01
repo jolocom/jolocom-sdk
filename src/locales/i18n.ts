@@ -20,12 +20,12 @@ export const locales = ['en', 'de', 'nl']
 const defaultLocale = { languageTag: 'en', isRTL: false }
 
 /** @dev Only english is offered until the Dutch and German terms are polished, previous code:
-*
-* import * as RNLocalize from 'react-native-localize'
-* const { languageTag } =
-* RNLocalize.findBestAvailableLanguage(locales) || fallback
-* I18n.locale = languageTag
-*/
+ *
+ * import * as RNLocalize from 'react-native-localize'
+ * const { languageTag } =
+ * RNLocalize.findBestAvailableLanguage(locales) || fallback
+ * I18n.locale = languageTag
+ */
 
 I18n.locale = defaultLocale.languageTag
 

@@ -30,9 +30,9 @@ beforeEach(async () => {
 })
 
 afterEach(async () => {
-  let conn1 = getConnection(conn1Name)
+  const conn1 = getConnection(conn1Name)
   await conn1.close()
-  let conn2 = getConnection(conn2Name)
+  const conn2 = getConnection(conn2Name)
   return conn2.close()
 })
 
@@ -97,5 +97,3 @@ test('Decryption Request interaction', async () => {
     Buffer.from(decryptionResponse.interactionToken.result, 'base64'),
   ).toEqual(data)
 })
-
-
