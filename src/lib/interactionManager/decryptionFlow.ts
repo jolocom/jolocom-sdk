@@ -1,6 +1,11 @@
 import { Interaction } from './interaction'
 import { Flow, FlowState } from './flow'
-import { DecryptionRequest, DecryptionResponse, FlowType, DecryptionType } from './types'
+import {
+  DecryptionRequest,
+  DecryptionResponse,
+  FlowType,
+  DecryptionType,
+} from './types'
 import { isDecryptionRequest, isDecryptionResponse } from './guards'
 
 export interface DecryptionFlowState extends FlowState {
@@ -24,11 +29,13 @@ export class DecryptionFlow extends Flow<
   ) {
     switch (interactionType) {
       case DecryptionType.DecryptionRequest:
-        if (isDecryptionRequest(token, interactionType))
+        if (isDecryptionRequest(token, interactionType)) {
           return this.consumeDecryptionRequest(token)
+        }
       case DecryptionType.DecryptionResponse:
-        if (isDecryptionResponse(token, interactionType))
+        if (isDecryptionResponse(token, interactionType)) {
           return this.consumeDecryptionResponse(token)
+        }
       default:
         throw new Error('Interaction type not found')
     }

@@ -64,7 +64,7 @@ export interface IStorageGet {
     nonce?: string
     type?: string
     issuer?: string
-  }): Promise<JSONWebToken<any>[]>
+  }): Promise<Array<JSONWebToken<any>>>
 }
 
 export interface IStorageDelete {

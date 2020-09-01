@@ -1,4 +1,7 @@
-import { InteractionSummary, EstablishChannelFlowState } from '../interactionManager/types'
+import {
+  InteractionSummary,
+  EstablishChannelFlowState,
+} from '../interactionManager/types'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { Interaction } from '../interactionManager/interaction'
 import { ChannelTransportAPI, ChannelKeeper } from './channelKeeper'
@@ -22,7 +25,7 @@ export class Channel {
   public id: string
   public initialInteraction: Interaction
   public authPromise: Promise<boolean>
-  private _threads: {[id: string]: ChannelQuery} = {}
+  private _threads: { [id: string]: ChannelQuery } = {}
   private _threadIdList: string[] = []
   private _transportAPI?: ChannelTransportAPI
   private _started = false
@@ -32,7 +35,7 @@ export class Channel {
   public constructor(
     ctx: ChannelKeeper,
     initialInteraction: Interaction,
-    transportAPI?: ChannelTransportAPI
+    transportAPI?: ChannelTransportAPI,
   ) {
     this.ctx = ctx
     this.id = initialInteraction.id
@@ -65,7 +68,7 @@ export class Channel {
 
     return {
       initialInteraction: this.initialInteraction.getSummary(),
-      interactions
+      interactions,
     }
   }
 
@@ -106,7 +109,6 @@ export class Channel {
     //
     // const resp = await interxn.getOrCreateResponse()
 
-
     // TODO
     // some form of simple permission system so that the user knows what they
     // are consenting to when they open a channel
@@ -141,7 +143,7 @@ export class Channel {
 
     if (!this._started) {
       this._started = true
-      this._startedPromise = new Promise(async (resolve) => {
+      this._startedPromise = new Promise(async resolve => {
         while (this._started) {
           const msg = await this.transportAPI.receive()
           const interxn = await this.processJWT(msg)
@@ -172,7 +174,7 @@ export class Channel {
     }
     const qId = token.nonce
 
-    let query: ChannelQuery = {}
+    const query: ChannelQuery = {}
     query.promise = new Promise((resolve, reject) => {
       query.resolve = resolve
       query.reject = reject

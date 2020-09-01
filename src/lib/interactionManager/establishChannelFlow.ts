@@ -51,8 +51,9 @@ export class EstablishChannelFlow extends Flow<
     if (!this.state.transports) throw new Error('no transports yet!')
 
     this.state.transport = this.state.transports[token.transportIdx]
-    if (!this.state.transport)
+    if (!this.state.transport) {
       throw new Error('no transport at index ' + token.transportIdx + '.')
+    }
 
     // TODO ensure that transport is actually successfully established
     this.state.established = true

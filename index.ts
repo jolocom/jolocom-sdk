@@ -16,6 +16,7 @@ import {
   EstablishChannelType,
   DecryptionType,
   EncryptionType,
+  SigningType,
 } from './src/lib/interactionManager/types'
 import { BackendError } from './src/lib/errors/types'
 
@@ -96,10 +97,7 @@ export class JolocomSDK extends BackendMiddleware {
 
   // Currently does not handle mnemonic, to avoid complexity.
   // Separate methods are exposed for recovery / identity creation from mnemonic
-  async init(
-    { storedDid, auto }: IJolocomSDKInitOptions = { auto: true },
-  ) {
-
+  async init({ storedDid, auto }: IJolocomSDKInitOptions = { auto: true }) {
     let pass
     try {
       pass = await this.keyChainLib.getPassword()
@@ -122,9 +120,9 @@ export class JolocomSDK extends BackendMiddleware {
         (!(err instanceof BackendError) ||
           err.message !== BackendError.codes.NoWallet) &&
         !auto
-      )
+      ) {
         throw err
-      else {
+      } else {
         console.warn('Generating a random password')
         pass = (await generateSecureRandomBytes(32)).toString('base64')
         return this.createNewIdentity(pass)
@@ -235,7 +233,7 @@ export class JolocomSDK extends BackendMiddleware {
    * @returns Base64 encoded signed Resolution Request
    */
   public async resolutionRequestToken(
-    req: { description?: string, uri?: string; callbackURL?: string } = {},
+    req: { description?: string; uri?: string; callbackURL?: string } = {},
   ): Promise<string> {
     const token = await this.idw.create.message(
       {
@@ -360,7 +358,7 @@ export class JolocomSDK extends BackendMiddleware {
           callbackURL: req.callbackURL,
           request: {
             data: req.toDecrypt.toString('base64'),
-          }
+          },
         },
         typ: DecryptionType.DecryptionRequest,
       },
@@ -406,9 +404,9 @@ export class JolocomSDK extends BackendMiddleware {
           callbackURL: req.callbackURL,
           request: {
             data: req.toSign.toString('base64'),
-          }
+          },
         },
-        typ: CallType.Sign,
+        typ: SigningType.SigningRequest,
       },
       await this.keyChainLib.getPassword(),
     )

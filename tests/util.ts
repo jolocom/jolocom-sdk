@@ -7,4 +7,3 @@ export const getConnectionConfig = (name: string) => ({
   synchronize: true,
   logging: false,
 })
-

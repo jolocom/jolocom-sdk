@@ -72,29 +72,29 @@ export const isEstablishChannelResponse = (
 export const isEncryptionRequest = (
   token: any,
   type: EncryptionType,
-): token is EncryptionRequest =>
-  type === EncryptionType.EncryptionRequest
+): token is EncryptionRequest => type === EncryptionType.EncryptionRequest
 
 export const isEncryptionResponse = (
   token: any,
   type: EncryptionType,
-): token is EncryptionResponse =>
-  type === EncryptionType.EncryptionResponse
+): token is EncryptionResponse => type === EncryptionType.EncryptionResponse
 
 export const isDecryptionRequest = (
   token: any,
   type: DecryptionType,
-): token is DecryptionRequest =>
-  type === DecryptionType.DecryptionRequest
+): token is DecryptionRequest => type === DecryptionType.DecryptionRequest
 
 export const isDecryptionResponse = (
   token: any,
   type: DecryptionType,
-): token is DecryptionResponse =>
-  type === DecryptionType.DecryptionResponse
+): token is DecryptionResponse => type === DecryptionType.DecryptionResponse
 
-export const isSigningRequest = (token: any, type: SigningType): token is SigningRequest =>
-  type === SigningType.SigningRequest
+export const isSigningRequest = (
+  token: any,
+  type: SigningType,
+): token is SigningRequest => type === SigningType.SigningRequest
 
-export const isSigningResponse = (token: any, type: SigningType): token is SigningResponse =>
-  type === SigningType.SigningResponse
+export const isSigningResponse = (
+  token: any,
+  type: SigningType,
+): token is SigningResponse => type === SigningType.SigningResponse
