@@ -444,8 +444,9 @@ export class Interaction {
     }
   }
 
-  public getAttributesByType = (type: string[]) =>
-    this.ctx.ctx.storageLib.get.attributesByType(type)
+  public async getAttributesByType(type: string[]) {
+    return this.ctx.ctx.storageLib.get.attributesByType(type)
+  }
 
   public async getStoredCredentialById(id: string) {
     return this.ctx.ctx.storageLib.get.verifiableCredential({
@@ -453,8 +454,9 @@ export class Interaction {
     })
   }
 
-  public getVerifiableCredential = (query?: object) =>
-    this.ctx.ctx.storageLib.get.verifiableCredential(query)
+  public async getVerifiableCredential(query?: object) {
+    return this.ctx.ctx.storageLib.get.verifiableCredential(query)
+  }
 
   /**
    * @dev This will crash with a credential receive because it doesn't contain a callbackURL
@@ -476,7 +478,7 @@ export class Interaction {
     if (this.flow.type !== flow) throw new AppError(ErrorCode.WrongFlow)
   }
 
-  public storeSelectedCredentials() {
+  public async storeSelectedCredentials() {
     this.checkFlow(FlowType.CredentialOffer)
 
     const { issued, credentialsValidity } = this.flow
@@ -487,14 +489,13 @@ export class Interaction {
     }
 
     return Promise.all(
-      issued.map((cred, i) => {
-        credentialsValidity[i] &&
-          this.ctx.ctx.storageLib.store.verifiableCredential(cred)
+      issued.filter((cred, i) => credentialsValidity[i]).map(cred => {
+          return this.ctx.ctx.storageLib.store.verifiableCredential(cred)
       }),
     )
   }
 
-  public storeCredentialMetadata() {
+  public async storeCredentialMetadata() {
     this.checkFlow(FlowType.CredentialOffer)
 
     const { offerSummary, selection, credentialsValidity } = this.flow
@@ -510,17 +511,19 @@ export class Interaction {
       selection.map(({ type }, i) => {
         const metadata = offerSummary.find(metadata => metadata.type === type)
 
-        metadata &&
-          credentialsValidity[i] &&
-          this.ctx.ctx.storageLib.store.credentialMetadata({
+        if (metadata && credentialsValidity[i]) {
+          return this.ctx.ctx.storageLib.store.credentialMetadata({
             ...metadata,
             issuer,
           })
+        }
+
+        return
       }),
     )
   }
 
-  public storeIssuerProfile() {
+  public async storeIssuerProfile() {
     return this.ctx.ctx.storageLib.store.issuerProfile(
       generateIdentitySummary(this.participants.requester!),
     )
