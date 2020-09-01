@@ -49,11 +49,13 @@ export class BackendMiddleware {
     return this.storageLib.get
       .didDoc(did)
       .then(ddo => Identity.fromDidDocument({ didDocument: ddo }))
-      .catch(async _ => {
+      .catch(async () => {
         const resolved = await this.didMethods
           .getForDid(did)
           .resolver.resolve(did)
-        await this.storageLib.store.didDoc(resolved.didDocument).catch(_ => {})
+        await this.storageLib.store.didDoc(resolved.didDocument).catch(err => {
+          console.error('Failed store DID document after resolving', err)
+        })
         return resolved
       })
   }

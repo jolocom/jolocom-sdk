@@ -8,7 +8,7 @@ const getSdk = async (connection: Connection) =>
     storage: new JolocomTypeormStorage(connection),
   })
 
-beforeEach(() =>
+beforeEach(async () =>
   createConnection({
     type: 'sqlite',
     database: ':memory:',
@@ -21,7 +21,7 @@ beforeEach(() =>
   }),
 )
 
-afterEach(() => {
+afterEach(async () => {
   const conn = getConnection()
   return conn.close()
 })
