@@ -22,7 +22,7 @@ export class EstablishChannelFlow extends Flow<
     super(ctx)
   }
 
-  public onValidMessage(
+  public async onValidMessage(
     token: EstablishChannelRequest | EstablishChannelResponse,
     interactionType: EstablishChannelType,
   ) {
