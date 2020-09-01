@@ -330,11 +330,10 @@ export class Interaction {
       }
     }
 
-    return this.flow.handleInteractionToken(token).then(res => {
-      this.interactionMessages.push(token)
-      this.ctx.ctx.storageLib.store.interactionToken(token)
-      return res
-    })
+    const res = await this.flow.handleInteractionToken(token)
+    this.interactionMessages.push(token)
+    await this.ctx.ctx.storageLib.store.interactionToken(token)
+    return res
   }
 
   public async createEncResponseToken(): Promise<
@@ -352,14 +351,14 @@ export class Interaction {
 
     const targetParts = msg.target.split('#')
     let result
-    if (targetParts.length == 2) {
+    if (targetParts.length === 2) {
       // it includes a keyRef
       result = await this.ctx.ctx.identityWallet.asymEncryptToDidKey(
         data,
         msg.target,
         this.ctx.ctx.resolver,
       )
-    } else if (targetParts.length == 1) {
+    } else if (targetParts.length === 1) {
       // it does not include a keyRef
       result = await this.ctx.ctx.identityWallet.asymEncryptToDid(
         data,
@@ -489,9 +488,11 @@ export class Interaction {
     }
 
     return Promise.all(
-      issued.filter((cred, i) => credentialsValidity[i]).map(cred => {
-          return this.ctx.ctx.storageLib.store.verifiableCredential(cred)
-      }),
+      issued
+        .filter((cred, i) => credentialsValidity[i])
+        .map(async cred =>
+          this.ctx.ctx.storageLib.store.verifiableCredential(cred),
+        ),
     )
   }
 
