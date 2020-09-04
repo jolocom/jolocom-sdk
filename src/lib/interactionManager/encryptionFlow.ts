@@ -23,7 +23,7 @@ export class EncryptionFlow extends Flow<
     super(ctx)
   }
 
-  public onValidMessage(
+  public async onValidMessage(
     token: EncryptionRequest | EncryptionResponse,
     interactionType: string,
   ) {

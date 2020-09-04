@@ -58,12 +58,12 @@ test('Credential Issuance interaction', async () => {
   await bob.didMethods.getDefault().registrar.encounter(aliceEL)
 
   // ensure bob is resolvable by alice
-  expect(alice.resolve(bob.idw.did)).resolves.toMatchObject(
+  await expect(alice.resolve(bob.idw.did)).resolves.toMatchObject(
     Promise.resolve(bob.idw.didDocument.toJSON()),
   )
 
   // ensure alice is resolvable by bob
-  expect(bob.resolve(alice.idw.did)).resolves.toMatchObject(
+  await expect(bob.resolve(alice.idw.did)).resolves.toMatchObject(
     Promise.resolve(alice.idw.didDocument.toJSON()),
   )
 
