@@ -45,8 +45,8 @@
     "fs-extra": "^8.1.0",
     "husky": "^3.0.5",
     "jest": "^26.4.2",
-    "jolocom-lib": "^5.1.0-rc5",
-    "local-did-resolver": "^0.3.0",
+    "jolocom-lib": "^5.1.0-rc6",
+    "local-resolver-registrar": "^0.3.3",
     "mockdate": "^2.0.2",
     "node-fetch": "^2.6.0",
     "precise-commits": "^1.0.2",
@@ -67,11 +67,10 @@
     "hooks": {}
   },
   "peerDependencies": {
-    "jolocom-lib": "^5.1.0-rc5"
+    "jolocom-lib": "^5.1.0-rc6"
   },
   "dependencies": {
     "form-data": "^3.0.0",
-    "local-resolver-registrar": "^0.3.1",
     "ramda": "^0.26.1"
   },
   "config": {
