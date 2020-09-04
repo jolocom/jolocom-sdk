@@ -1497,6 +1497,11 @@
     detect-node "^2.0.4"
     node-fetch "^2.6.0"
 
+"@jolocom/local-resolver-registrar@^1.0.0-rc0":
+  version "1.0.0-rc0"
+  resolved "https://registry.yarnpkg.com/@jolocom/local-resolver-registrar/-/local-resolver-registrar-1.0.0-rc0.tgz#7948ad6b484e07f6932f8aafa5f9cfedd94f58d3"
+  integrity sha512-7edvGZUzxwvUrq23barezdN6SrafHli9brRYpTGPgzpwOyIKJqHZDiE2mBM5YnoSd66W+6AxryML9wg0it8q2A==
+
 "@jolocom/native-core-node-darwin-x64@^1.0.0-rc15":
   version "1.0.0-rc15"
   resolved "https://registry.yarnpkg.com/@jolocom/native-core-node-darwin-x64/-/native-core-node-darwin-x64-1.0.0-rc15.tgz#4bc65d7bffbc706b1f4b120bcb70406a55ca396c"
@@ -4940,14 +4945,15 @@ jest@^26.4.2:
     import-local "^3.0.2"
     jest-cli "^26.4.2"
 
-jolocom-lib@^5.1.0-rc6:
-  version "5.1.0-rc6"
-  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-5.1.0-rc6.tgz#5c2cac68ad789c2bf1d5317fd3d5357895f8e6bf"
-  integrity sha512-ihHvWW5NmYLzfHxVNNYtrwU6lXtsv/yabq08/o6KuhLoPNzGD8zsozyDwQUkfX88JUEphmBeERfgF/bRCTlitg==
+jolocom-lib@^5.1.0-rc7:
+  version "5.1.0-rc7"
+  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-5.1.0-rc7.tgz#cb1f38623d583e10102c5aee3d4af212ab367225"
+  integrity sha512-v2x+u5hbTAtYtN4hACtEYY8b6cUr4XhoTjBSyOp4Kz4+t9Hf6yENhUCNNyBaPxlm2N4uftnFJuxtwe7YK3B3DQ==
   dependencies:
     "@hawkingnetwork/ed25519-hd-key-rn" "^1.0.1"
     "@jolocom/jolo-did-registrar" "^1.0.0-rc5"
     "@jolocom/jolo-did-resolver" "^1.0.0-rc5"
+    "@jolocom/local-resolver-registrar" "^1.0.0-rc0"
     "@jolocom/native-core" "^1.0.0-rc3"
     "@jolocom/protocol-ts" "^0.5.1"
     "@jolocom/vaulted-key-provider" "^0.7.4"
@@ -4962,7 +4968,6 @@ jolocom-lib@^5.1.0-rc6:
     json-logic-js "^1.2.2"
     jsonld "^1.6.1"
     jsontokens "^1.0.0"
-    local-resolver-registrar "^0.3.3"
     node-fetch "^2.3.0"
     reflect-metadata "^0.1.13"
     secrets.js-grempe "^1.1.0"
@@ -5207,11 +5212,6 @@ loader-utils@^1.0.2:
     big.js "^5.2.2"
     emojis-list "^3.0.0"
     json5 "^1.0.1"
-
-local-resolver-registrar@^0.3.3:
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/local-resolver-registrar/-/local-resolver-registrar-0.3.3.tgz#3d620e46b7789ed2f3b9cd3811face317b50b602"
-  integrity sha512-o3mEAq9P2Mus44RLhkcmASl+goVYwCZ5Ok9PsreuIbxpall+9p+2Po9I/ZAXPv+yYEX4+GKQplkZtTUswFg94Q==
 
 locate-path@^2.0.0:
   version "2.0.0"
