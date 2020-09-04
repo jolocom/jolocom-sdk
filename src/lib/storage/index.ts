@@ -5,7 +5,7 @@ import {
   CredentialOfferRenderInfo,
 } from 'jolocom-lib/js/interactionTokens/interactionTokens.types'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
-import { InternalDb } from 'local-resolver-registrar/js/db'
+import { InternalDb } from '@jolocom/local-resolver-registrar/js/db'
 
 import { IdentitySummary } from '../types'
 

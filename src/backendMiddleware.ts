@@ -6,7 +6,7 @@ import { LocalDidMethod } from 'jolocom-lib/js/didMethods/local'
 import { BackendError, BackendMiddlewareErrorCodes } from './lib/errors/types'
 import { DidMethodKeeper } from './didMethodKeeper'
 import { walletUtils } from '@jolocom/native-core'
-import { InternalDb } from 'local-resolver-registrar/js/db'
+import { InternalDb } from '@jolocom/local-resolver-registrar/js/db'
 import {
   authAsIdentityFromKeyProvider,
   createIdentityFromKeyProvider,
