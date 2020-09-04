@@ -59,7 +59,9 @@ export const compareDates = (date1: Date, date2: Date): number =>
       (1000 * 60 * 60 * 24),
   )
 
-export function generateSecureRandomBytes(length: number): Promise<Buffer> {
+export async function generateSecureRandomBytes(
+  length: number,
+): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     RNRandomBytes.randomBytes(length, (err, bytes) => {
       if (err) reject(err)

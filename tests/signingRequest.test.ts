@@ -58,10 +58,10 @@ test('Signing Request interaction', async () => {
   await user.init()
 
   // ensure the service is resolvable by the user
-  expect(user.resolve(service.idw.did)).resolves.toBeTruthy()
+  await expect(user.resolve(service.idw.did)).resolves.toBeTruthy()
 
   // ensure the user is not resolvable by the service
-  expect(service.resolve(user.idw.did)).rejects.toBeTruthy()
+  await expect(service.resolve(user.idw.did)).rejects.toBeTruthy()
 
   // create a resolution request
   const serviceResRequest = await service.resolutionRequestToken()
@@ -91,10 +91,9 @@ test('Signing Request interaction', async () => {
   const serviceSigInt = await service.processJWT(signResponse.encode())
 
   const state = serviceSigInt.getSummary().state as SigningFlowState
-  // //// @ts-ignore
-  expect(state.signature).toBeDefined()
+  await expect(state.signature).toBeDefined()
 
-  expect(
+  await expect(
     verifySignatureWithIdentity(
       data,
       state.signature!,

@@ -54,10 +54,10 @@ test('Decryption Request interaction', async () => {
   await user.init()
 
   // ensure the service is resolvable by the user
-  expect(user.resolve(service.idw.did)).resolves.toBeTruthy()
+  await expect(user.resolve(service.idw.did)).resolves.toBeTruthy()
 
   // ensure the user is not resolvable by the service
-  expect(service.resolve(user.idw.did)).rejects.toBeTruthy()
+  await expect(service.resolve(user.idw.did)).rejects.toBeTruthy()
 
   // create a resolution request
   const serviceResRequest = await service.resolutionRequestToken()
