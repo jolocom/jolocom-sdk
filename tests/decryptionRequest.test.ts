@@ -6,7 +6,7 @@ import {
 } from 'typeorm'
 import { getConnectionConfig } from './util'
 import { entropyToMnemonic } from 'jolocom-lib/js/utils/crypto'
-import { InternalDb } from 'local-resolver-registrar/js/db'
+import { InternalDb } from '@jolocom/local-resolver-registrar/js/db'
 import { JolocomSDK, NaivePasswordStore } from '../'
 import { JolocomTypeormStorage } from '@jolocom/sdk-storage-typeorm'
 import { Identity } from 'jolocom-lib/js/identity/identity'

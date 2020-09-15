@@ -6,7 +6,7 @@ import {
 } from 'typeorm'
 import { JolocomTypeormStorage } from '@jolocom/sdk-storage-typeorm'
 import { claimsMetadata } from 'jolocom-lib'
-import { InternalDb } from 'local-resolver-registrar/js/db'
+import { InternalDb } from '@jolocom/local-resolver-registrar/js/db'
 import { JolocomSDK, NaivePasswordStore } from '../'
 import { getConnectionConfig } from './util'
 

@@ -5,7 +5,7 @@ import {
   ConnectionOptions,
 } from 'typeorm'
 
-import { InternalDb } from 'local-resolver-registrar/js/db'
+import { InternalDb } from '@jolocom/local-resolver-registrar/js/db'
 
 import { SigningFlowState } from '../src/lib/interactionManager/signingFlow'
 import { JolocomSDK, NaivePasswordStore } from '../'
