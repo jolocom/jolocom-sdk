@@ -6,10 +6,8 @@
     "js/"
   ],
   "scripts": {
-    "build": "ttsc -p .",
+    "build": "rm -rf js && ttsc -p .",
     "prepare": "yarn build",
-    "clean:node": "rm -rf node_modules",
-    "format": "eslint --fix --ext .ts --ext .tsx .",
     "repl": "REPL=1 ts-node -P . -r ./bin/repl.ts",
     "typeorm": "ts-node -O '{\"module\": \"commonjs\"}' -r ./bin/repl.ts node_modules/.bin/typeorm",
     "lint": "eslint --ext .ts --ext .tsx .",
