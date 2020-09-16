@@ -19,6 +19,7 @@ import {
   SigningType,
 } from './src/lib/interactionManager/types'
 import { SDKError, ErrorCode } from './src/lib/errors'
+export { SDKError, ErrorCode }
 
 export {
   ICredentialRequest as CredentialRequirements,
