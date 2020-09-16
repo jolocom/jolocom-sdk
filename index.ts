@@ -30,7 +30,6 @@ export {
   ISignedCredCreationArgs as CredentialData,
 }
 import { BackendMiddleware } from './src/backendMiddleware'
-import defaultConfig from './src/config'
 import { IStorage, IPasswordStore } from './src/lib/storage'
 import { AuthorizationType } from './src/lib/interactionManager/types'
 export { NaivePasswordStore } from './src/lib/storage'
@@ -84,10 +83,7 @@ export class JolocomSDK extends BackendMiddleware {
   /**/
 
   constructor(conf: IJolocomSDKConfig) {
-    super({
-      ...defaultConfig,
-      ...conf,
-    })
+    super(conf)
     this.interactionManager = new InteractionManager(this)
   }
 
