@@ -17,19 +17,19 @@ Interested in our vision? Take a look at our [whitepaper](https://jolocom.io/wp-
   - [Installation](#installation)
     - [In another project](#in-another-project)
     - [Running a debug version for development](#running-a-debug-version-for-development)
-  - [Testing](#testing)
   - [Usage](#usage)
     - [Authentication](#authentication)
     - [Credential Request](#credential-request)
     - [Credential Issance](#credential-issance)
-  - [Code Style and Formatting](#code-style-and-formatting)
+  - [Development](#development)
+    - [Testing](#testing)
+    - [Code Style and Formatting](#code-style-and-formatting)
 
 <!-- markdown-toc end -->
 
 ## Prerequisites
 
-- Set-up requires [Node.js](https://nodejs.org/en/download/) to be installed on your computer.
-  - `Node.js v10` is required to build the project.
+- Set-up requires [Node.js](https://nodejs.org/en/download/) v10 to be installed on your computer.
 - We use [Yarn](https://yarnpkg.com) as our package manager.
 
 ## Installation
@@ -48,23 +48,6 @@ ways:
 
 NOTE: using the arbitrary input buffer registers a new identity on the Jolocom
 DID Method
-
-### Running a debug version for development
-
-1. Clone the sdk repository to your computer.
-2. `cd` into the directory and run `yarn` or `yarn install` from your terminal to install the required packages.
-
-To run a repl, use `yarn repl`.
-
-## Testing
-
-We use Jest for unit tests, and [detox](https://github.com/wix/Detox) + Jest for end-to-end tests.
-
-To run unit tests, with watch and testing coverage display enabled:
-
-```bash
-yarn test --watch --coverage
-```
 
 ## Usage
 
@@ -194,7 +177,22 @@ const alicesIssuence = await alicesInteraction.createCredentialReceiveToken([
 const bobReceives = await bob.processJWT(alicesIssuence.encode())
 ```
 
-## Code Style and Formatting
+## Development
+
+1. Clone the sdk repository to your computer.
+2. `cd` into the directory and run `yarn` or `yarn install` from your terminal to install the required packages.
+
+To run a repl, use `yarn repl`.
+
+### Testing
+
+We use [Jest](https://jestjs.io) for unit tests. To run unit tests, with watch and testing coverage display enabled:
+
+```bash
+yarn test --watch --coverage
+```
+
+### Code Style and Formatting
 
 - We use [ESLint](https://eslint.org/) and [Prettier](https://prettier.io/) to keep a consistent style across the codebase.
   - There are plugins available for a range of IDEs and text editors; automatic formatting on save is also supported in some editors.
