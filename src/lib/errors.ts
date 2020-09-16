@@ -1,13 +1,10 @@
 export enum ErrorCode {
   Unknown = 'Unknown',
 
-  WalletInitFailed = 'WalletInit',
-  SaveClaimFailed = 'SaveClaim',
   SaveExternalCredentialFailed = 'SaveExtCred',
   SaveCredentialMetadataFailed = 'SaveCredMetadata',
   TransportNotSupported = 'UnsuportedTransport',
 
-  DeepLinkUrlNotFound = 'DeepLinkUrlNotFound',
   TokenExpired = 'TokenExpired',
   InvalidSignature = 'InvalidSignature',
   WrongDID = 'WrongDID',
@@ -22,8 +19,6 @@ export enum ErrorCode {
   CredentialRequestFailed = 'CredRequest',
   CredentialResponseFailed = 'CredResponse',
   ParseJWTFailed = 'ParseJWT',
-
-  RegistrationFailed = 'Registration',
 
   InvalidToken = 'InvalidToken',
 
