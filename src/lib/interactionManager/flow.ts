@@ -1,7 +1,7 @@
 import { Interaction } from './interaction'
 import { FlowType } from './types'
 import { last } from 'ramda'
-import { AppError, ErrorCode } from '../errors'
+import { SDKError, ErrorCode } from '../errors'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 
 // FIXME why is this exported?
@@ -32,7 +32,7 @@ export abstract class Flow<T> {
       this.history.push(token)
       return this.onValidMessage(token.interactionToken, token.interactionType)
     } catch (err) {
-      throw new AppError(ErrorCode.InvalidToken, err)
+      throw new SDKError(ErrorCode.InvalidToken, err)
     }
   }
 

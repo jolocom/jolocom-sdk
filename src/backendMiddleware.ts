@@ -3,7 +3,7 @@ import { IStorage, IPasswordStore, NaivePasswordStore } from './lib/storage'
 import { SoftwareKeyProvider } from 'jolocom-lib'
 import { Identity } from 'jolocom-lib/js/identity/identity'
 import { LocalDidMethod } from 'jolocom-lib/js/didMethods/local'
-import { BackendError, BackendMiddlewareErrorCodes } from './lib/errors/types'
+import { SDKError, ErrorCode } from './lib/errors'
 import { DidMethodKeeper } from './didMethodKeeper'
 import { walletUtils } from '@jolocom/native-core'
 import { InternalDb } from '@jolocom/local-resolver-registrar/js/db'
@@ -62,12 +62,12 @@ export class BackendMiddleware {
 
   public get identityWallet(): IdentityWallet {
     if (this._identityWallet) return this._identityWallet
-    throw new BackendError(BackendMiddlewareErrorCodes.NoWallet)
+    throw new SDKError(ErrorCode.NoWallet)
   }
 
   public get keyProvider(): SoftwareKeyProvider {
     if (this._keyProvider) return this._keyProvider
-    throw new BackendError(BackendMiddlewareErrorCodes.NoKeyProvider)
+    throw new SDKError(ErrorCode.NoKeyProvider)
   }
 
   public async loadIdentity(
@@ -89,7 +89,7 @@ export class BackendMiddleware {
 
     if (encryptedWalletInfo && !encryptionPass) {
       // if we can't decrypt the encryptedWallet, then
-      throw new BackendError(BackendError.codes.DecryptionFailed)
+      throw new SDKError(ErrorCode.DecryptionFailed)
     }
 
     if (!encryptedWalletInfo || !encryptionPass) {
@@ -99,7 +99,7 @@ export class BackendMiddleware {
       // Note that the case of having an encryptionPass but no encryptedWallet
       // is an uncommon edge case, but may potentially happen due to errors/bugs
       // etc
-      throw new BackendError(BackendMiddlewareErrorCodes.NoWallet)
+      throw new SDKError(ErrorCode.NoWallet)
     }
 
     this._keyProvider = new SoftwareKeyProvider(

@@ -1,4 +1,4 @@
-import { AppError, ErrorCode } from './errors'
+import { SDKError, ErrorCode } from './errors'
 
 interface ITransportDesc {
   type: string
@@ -27,7 +27,7 @@ export class Transportable<
     transport: TransportDesc,
   ): Promise<TransportAPI> {
     const transportHandler = this._transportHandlers[transport.type]
-    if (!transportHandler) throw new AppError(ErrorCode.TransportNotSupported)
+    if (!transportHandler) throw new SDKError(ErrorCode.TransportNotSupported)
     const transportAPI = await transportHandler(transport)
     transportAPI.desc = transport
     return transportAPI

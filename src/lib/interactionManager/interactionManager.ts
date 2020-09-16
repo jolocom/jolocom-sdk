@@ -3,7 +3,7 @@ import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { Interaction } from './interaction'
 import { InteractionTransportType } from './types'
 import { Transportable } from '../transports'
-import { AppError, ErrorCode } from '../errors'
+import { SDKError, ErrorCode } from '../errors'
 
 export interface InteractionTransport {
   type: InteractionTransportType
@@ -33,7 +33,7 @@ const httpTransport = {
         if (!response.ok) {
           // TODO Error code for failed send?
           // TODO Actually include some info about the error
-          throw new AppError(ErrorCode.Unknown)
+          throw new SDKError(ErrorCode.Unknown)
         }
 
         const text = await response.text()

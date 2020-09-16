@@ -1,6 +1,6 @@
 import { Flow } from './flow'
 import { FlowType } from './types'
-import { AppError, ErrorCode } from '../errors'
+import { SDKError, ErrorCode } from '../errors'
 import { last } from 'ramda'
 
 import { ResolutionResult } from '../resolution'
@@ -48,7 +48,7 @@ export class ResolutionFlow extends Flow<ResolutionRequest | ResolutionResult> {
       this.history.push(token)
       return true
     } catch (err) {
-      throw new AppError(ErrorCode.InvalidToken, err)
+      throw new SDKError(ErrorCode.InvalidToken, err)
     }
   }
 

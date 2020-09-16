@@ -1,3 +1,4 @@
+import { randomBytes } from 'crypto'
 import { claimsMetadata } from 'jolocom-lib'
 import {
   uiCategoryByCredentialType,
@@ -6,11 +7,8 @@ import {
 } from './categories'
 import { BaseMetadata } from 'cred-types-jolocom-core'
 
-import { NativeModules } from '../polyfills/reactNative'
 import { DecoratedClaims } from './types'
 import { equals } from 'ramda'
-// this comes from 'react-native-randombytes'
-const { RNRandomBytes } = NativeModules
 
 export const getClaimMetadataByCredentialType = (
   type: string,
@@ -63,7 +61,7 @@ export async function generateSecureRandomBytes(
   length: number,
 ): Promise<Buffer> {
   return new Promise((resolve, reject) => {
-    RNRandomBytes.randomBytes(length, (err, bytes) => {
+    randomBytes(length, (err, bytes) => {
       if (err) reject(err)
       else resolve(bytes)
     })
