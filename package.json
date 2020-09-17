@@ -48,7 +48,7 @@
     "jest": "^26.4.2",
     "jolocom-lib": "^5.1.0-rc7",
     "mockdate": "^2.0.2",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "precise-commits": "^1.0.2",
     "prettier": "^1.18.2",
     "regenerator-runtime": "^0.13.5",
