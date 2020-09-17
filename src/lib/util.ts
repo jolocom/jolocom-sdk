@@ -1,3 +1,4 @@
+import { randomBytes } from 'crypto'
 import { claimsMetadata } from 'jolocom-lib'
 import {
   uiCategoryByCredentialType,
@@ -6,11 +7,33 @@ import {
 } from './categories'
 import { BaseMetadata } from 'cred-types-jolocom-core'
 
-import { NativeModules } from '../polyfills/reactNative'
-import { DecoratedClaims } from './types'
+import { DecoratedClaims, IdentitySummary, IssuerPublicProfileSummary } from './types'
 import { equals } from 'ramda'
-// this comes from 'react-native-randombytes'
-const { RNRandomBytes } = NativeModules
+import { Identity } from 'jolocom-lib/js/identity/identity'
+
+/**
+ * Given an identity, returns an object satisfying the {@link IdentitySummary} interface.
+ * @dev Currently used with the {@link IssuerCard} component
+ * @note In case the identity does not contain a Public Profile credential,
+ * the function will return a minimal default which can be rendered.
+ * @param identity - Instance of identity to generate the summary for
+ */
+
+export const generateIdentitySummary = (
+  identity: Identity,
+): IdentitySummary => {
+  const { publicProfile, did } = identity
+  if (!publicProfile) {
+    return {
+      did,
+    }
+  }
+  const { id, ...parsedProfile } = publicProfile.claim
+  return {
+    did,
+    publicProfile: parsedProfile as IssuerPublicProfileSummary,
+  }
+}
 
 export const getClaimMetadataByCredentialType = (
   type: string,
@@ -63,7 +86,7 @@ export async function generateSecureRandomBytes(
   length: number,
 ): Promise<Buffer> {
   return new Promise((resolve, reject) => {
-    RNRandomBytes.randomBytes(length, (err, bytes) => {
+    randomBytes(length, (err, bytes) => {
       if (err) reject(err)
       else resolve(bytes)
     })

@@ -18,7 +18,8 @@ import {
   EncryptionType,
   SigningType,
 } from './src/lib/interactionManager/types'
-import { BackendError } from './src/lib/errors/types'
+import { SDKError, ErrorCode } from './src/lib/errors'
+export { SDKError, ErrorCode }
 
 export {
   ICredentialRequest as CredentialRequirements,
@@ -30,7 +31,6 @@ export {
   ISignedCredCreationArgs as CredentialData,
 }
 import { BackendMiddleware } from './src/backendMiddleware'
-import defaultConfig from './src/config'
 import { IStorage, IPasswordStore } from './src/lib/storage'
 import { AuthorizationType } from './src/lib/interactionManager/types'
 export { NaivePasswordStore } from './src/lib/storage'
@@ -84,10 +84,7 @@ export class JolocomSDK extends BackendMiddleware {
   /**/
 
   constructor(conf: IJolocomSDKConfig) {
-    super({
-      ...defaultConfig,
-      ...conf,
-    })
+    super(conf)
     this.interactionManager = new InteractionManager(this)
   }
 
@@ -106,7 +103,7 @@ export class JolocomSDK extends BackendMiddleware {
     }
 
     if (!pass) {
-      if (!auto) throw new BackendError(BackendError.codes.NoWallet)
+      if (!auto) throw new SDKError(ErrorCode.NoWallet)
 
       console.warn('Generating a random password')
       pass = (await generateSecureRandomBytes(32)).toString('base64')
@@ -117,8 +114,8 @@ export class JolocomSDK extends BackendMiddleware {
       return await this.loadIdentity(storedDid)
     } catch (err) {
       if (
-        (!(err instanceof BackendError) ||
-          err.message !== BackendError.codes.NoWallet) &&
+        (!(err instanceof SDKError) ||
+          err.message !== ErrorCode.NoWallet) &&
         !auto
       ) {
         throw err

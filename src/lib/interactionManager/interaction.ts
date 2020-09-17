@@ -27,7 +27,7 @@ import { Flow } from './flow'
 import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credentialOfferRequest'
 import { AuthenticationFlow } from './authenticationFlow'
 import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRequest'
-import { AppError, ErrorCode } from '../errors'
+import { SDKError, ErrorCode } from '../errors'
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { Identity } from 'jolocom-lib/js/identity/identity'
 
@@ -50,7 +50,7 @@ import { CredentialOfferResponse } from 'jolocom-lib/js/interactionTokens/creden
 import { EncryptionFlow } from './encryptionFlow'
 import { DecryptionFlow } from './decryptionFlow'
 import { SigningFlow } from './signingFlow'
-import { generateIdentitySummary } from '../../utils/generateIdentitySummary'
+import { generateIdentitySummary } from '../../lib/util'
 
 import {
   ResolutionType,
@@ -474,7 +474,7 @@ export class Interaction {
   }
 
   private checkFlow(flow: FlowType) {
-    if (this.flow.type !== flow) throw new AppError(ErrorCode.WrongFlow)
+    if (this.flow.type !== flow) throw new SDKError(ErrorCode.WrongFlow)
   }
 
   public async storeSelectedCredentials() {
@@ -484,7 +484,7 @@ export class Interaction {
       .state as CredentialOfferFlowState
 
     if (!issued.length) {
-      throw new AppError(ErrorCode.SaveExternalCredentialFailed)
+      throw new SDKError(ErrorCode.SaveExternalCredentialFailed)
     }
 
     return Promise.all(
@@ -503,7 +503,7 @@ export class Interaction {
       .state as CredentialOfferFlowState
 
     if (!selection.length) {
-      throw new AppError(ErrorCode.SaveCredentialMetadataFailed)
+      throw new SDKError(ErrorCode.SaveCredentialMetadataFailed)
     }
 
     const issuer = generateIdentitySummary(this.participants.requester!)
