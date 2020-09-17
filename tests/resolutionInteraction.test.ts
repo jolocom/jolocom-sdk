@@ -1,64 +1,28 @@
-import {
-  createConnection,
-  getConnection,
-  Connection,
-  ConnectionOptions,
-} from 'typeorm'
+import { JolocomSDK } from '../'
 
-import { InternalDb } from '@jolocom/local-resolver-registrar/js/db'
-
-import { JolocomSDK, NaivePasswordStore } from '../'
-import { JolocomTypeormStorage } from '@jolocom/sdk-storage-typeorm'
-
-import { getConnectionConfig } from './util'
-
+import { createAgent, destroyAgent, meetAgent } from './util'
 const conn1Name = 'resolution1'
 const conn2Name = 'resolution2'
-
-const testConnection1 = getConnectionConfig(conn1Name) as ConnectionOptions
-const testConnection2 = getConnectionConfig(conn2Name) as ConnectionOptions
-
-const getSdk = (connection: Connection, eDB?: InternalDb) =>
-  new JolocomSDK({
-    passwordStore: new NaivePasswordStore(),
-    storage: new JolocomTypeormStorage(connection),
-    eventDB: eDB,
-  })
+let service: JolocomSDK, user: JolocomSDK
 
 beforeEach(async () => {
-  await createConnection(testConnection1)
-  await createConnection(testConnection2)
+  service = await createAgent(conn1Name)
+  service.setDefaultDidMethod('jun')
+  await service.createNewIdentity()
+
+  user = await createAgent(conn2Name)
+  user.setDefaultDidMethod('jun')
+  await user.createNewIdentity()
 })
 
 afterEach(async () => {
-  const conn1 = getConnection(conn1Name)
-  await conn1.close()
-  const conn2 = getConnection(conn2Name)
-  return conn2.close()
+  await destroyAgent(conn1Name)
+  await destroyAgent(conn2Name)
 })
 
 test('Resolution interaction', async () => {
-  const serviceCon = getConnection(conn1Name)
-  const userCon = getConnection(conn2Name)
-
-  const serviceDB = new JolocomTypeormStorage(serviceCon)
-  const userDB = new JolocomTypeormStorage(userCon)
-
-  // in this test, the service is "anchored" (the user can always resolve them), and
-  // the user is "unanchored" (the service cannot resolve them initially)
-  const service = getSdk(serviceCon)
-  service.setDefaultDidMethod('jun')
-  await service.init()
-
   // insert the service's KEL to the user DB (make the service resolvable)
-  const serviceId = service.idw.did.split(':')[2]
-  const serviceEL = await serviceDB.eventDB.read(serviceId)
-
-  await userDB.eventDB.append(serviceId, serviceEL)
-
-  const user = getSdk(userCon)
-  user.setDefaultDidMethod('jun')
-  await user.init()
+  await meetAgent(user, service)
 
   // ensure the service is resolvable by the user
   await expect(user.resolve(service.idw.did)).resolves.toBeTruthy()

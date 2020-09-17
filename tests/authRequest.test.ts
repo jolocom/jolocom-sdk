@@ -1,50 +1,29 @@
-import {
-  createConnection,
-  getConnection,
-  Connection,
-  ConnectionOptions,
-} from 'typeorm'
-
-import { InternalDb } from '@jolocom/local-resolver-registrar/js/db'
-import { JolocomSDK, NaivePasswordStore } from '../'
-import { JolocomTypeormStorage } from '@jolocom/sdk-storage-typeorm'
-import { getConnectionConfig } from './util'
+import { JolocomSDK } from '../'
+import { createAgent, destroyAgent, meetAgent } from './util'
 
 const conn1Name = 'auth1'
 const conn2Name = 'auth2'
-
-const testConnection1 = getConnectionConfig(conn1Name) as ConnectionOptions
-const testConnection2 = getConnectionConfig(conn2Name) as ConnectionOptions
-
-const getSdk = (connection: Connection, eDB?: InternalDb) =>
-  new JolocomSDK({
-    passwordStore: new NaivePasswordStore(),
-    storage: new JolocomTypeormStorage(connection),
-    eventDB: eDB,
-  })
+let alice: JolocomSDK, bob: JolocomSDK
 
 beforeEach(async () => {
-  await createConnection(testConnection1)
-  await createConnection(testConnection2)
+  alice = await createAgent(conn1Name)
+  alice.setDefaultDidMethod('jun')
+  await alice.createNewIdentity()
+
+  bob = await createAgent(conn2Name)
+  bob.setDefaultDidMethod('jun')
+  await bob.createNewIdentity()
 })
 
 afterEach(async () => {
-  const conn1 = getConnection(conn1Name)
-  await conn1.close()
-  const conn2 = getConnection(conn2Name)
-  return conn2.close()
+  await destroyAgent(conn1Name)
+  await destroyAgent(conn2Name)
 })
 
 test('Authentication interaction', async () => {
-  const con1 = getConnection(conn1Name)
-  const alice = getSdk(con1)
-  alice.setDefaultDidMethod('jun')
-  await alice.init()
-
-  const con2 = getConnection(conn1Name)
-  const bob = getSdk(con2)
-  bob.setDefaultDidMethod('jun')
-  await bob.createNewIdentity()
+  // making them mutually resolvable
+  await meetAgent(alice, bob)
+  await meetAgent(bob, alice)
 
   const aliceAuthRequest = await alice.authRequestToken({
     callbackURL: 'nowhere',
