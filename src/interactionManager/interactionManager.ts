@@ -1,4 +1,4 @@
-import { JolocomSDK, JolocomLib } from 'index'
+import { JolocomSDK, JolocomLib } from '..'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { Interaction } from './interaction'
 import { InteractionTransportType } from './types'

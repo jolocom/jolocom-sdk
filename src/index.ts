@@ -17,8 +17,8 @@ import {
   DecryptionType,
   EncryptionType,
   SigningType,
-} from './src/lib/interactionManager/types'
-import { SDKError, ErrorCode } from './src/lib/errors'
+} from './interactionManager/types'
+import { SDKError, ErrorCode } from './errors'
 export { SDKError, ErrorCode }
 
 export {
@@ -30,19 +30,19 @@ export {
   BaseMetadata as CredentialDefinition,
   ISignedCredCreationArgs as CredentialData,
 }
-import { BackendMiddleware } from './src/backendMiddleware'
-import { IStorage, IPasswordStore } from './src/lib/storage'
-import { AuthorizationType } from './src/lib/interactionManager/types'
-export { NaivePasswordStore } from './src/lib/storage'
+import { BackendMiddleware } from './backendMiddleware'
+import { IStorage, IPasswordStore } from './storage'
+import { AuthorizationType } from './interactionManager/types'
+export { NaivePasswordStore } from './storage'
 export { JolocomLib } from 'jolocom-lib'
 export { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
-import { Interaction } from './src/lib/interactionManager/interaction'
-import { InteractionManager } from './src/lib/interactionManager/interactionManager'
-import { ChannelKeeper } from './src/lib/channels'
+import { Interaction } from './interactionManager/interaction'
+import { InteractionManager } from './interactionManager/interactionManager'
+import { ChannelKeeper } from './channels'
 import { InternalDb } from '@jolocom/local-resolver-registrar/js/db'
-import { ResolutionType } from './src/lib/interactionManager/resolutionFlow'
-import { generateSecureRandomBytes } from 'src/lib/util'
+import { ResolutionType } from './interactionManager/resolutionFlow'
+import { generateSecureRandomBytes } from './util'
 
 export interface IJolocomSDKConfig {
   storage: IStorage

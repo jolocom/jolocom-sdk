@@ -1,5 +1,5 @@
 import { createAgent, destroyAgent } from './util'
-import { SigningFlowState } from '../src/lib/interactionManager/signingFlow'
+import { SigningFlowState } from '../src/interactionManager/signingFlow'
 import { JolocomSDK } from '../'
 import { entropyToMnemonic } from 'jolocom-lib/js/utils/crypto'
 import { Identity } from 'jolocom-lib/js/identity/identity'

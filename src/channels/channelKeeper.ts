@@ -3,7 +3,7 @@ import {
   FlowType,
 } from '../interactionManager/types'
 import { Interaction } from '../interactionManager/interaction'
-import { JolocomSDK } from 'index'
+import { JolocomSDK } from '..'
 import { Channel } from './channel'
 import { Transportable } from '../transports'
 

@@ -50,7 +50,7 @@ import { CredentialOfferResponse } from 'jolocom-lib/js/interactionTokens/creden
 import { EncryptionFlow } from './encryptionFlow'
 import { DecryptionFlow } from './decryptionFlow'
 import { SigningFlow } from './signingFlow'
-import { generateIdentitySummary } from '../../lib/util'
+import { generateIdentitySummary } from '../util'
 
 import {
   ResolutionType,
