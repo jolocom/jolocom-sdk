@@ -40,10 +40,10 @@ export const getSdk = (connection: Connection, eDB?: InternalDb) =>
     eventDB: eDB,
   })
 
+/**
+ * Allow alice to resolve bob
+ */
 export async function meetAgent(alice: JolocomSDK, bob: JolocomSDK) {
-  const aliceId = alice.idw.did.split(':')[2]
-  const aliceEL = await alice.storageLib.eventDB.read(aliceId)
-
   const bobId = bob.idw.did.split(':')[2]
   const bobEL = await bob.storageLib.eventDB.read(bobId)
 
