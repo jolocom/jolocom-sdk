@@ -3,7 +3,7 @@ import {
   CredentialOfferRenderInfo,
 } from 'jolocom-lib/js/interactionTokens/interactionTokens.types'
 
-import { PublicProfileClaimMetadata } from 'cred-types-jolocom-core/types'
+import { PublicProfileClaimMetadata } from '@jolocom/protocol-ts'
 
 /**
  * @dev Simply using all claims required by the public profile

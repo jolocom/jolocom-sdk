@@ -1527,6 +1527,13 @@
   dependencies:
     cred-types-jolocom-core "^0.0.11"
 
+"@jolocom/protocol-ts@^0.5.2":
+  version "0.5.2"
+  resolved "https://registry.yarnpkg.com/@jolocom/protocol-ts/-/protocol-ts-0.5.2.tgz#291a6865f2c3eeb47443bf8be3210848baeb5d25"
+  integrity sha512-vQq5EhapRaxyzM3UaEAycoej1jdaU6RWM1yNeh47SqHqEfRsxsVrI3MYAuUeCXaq5ULv4MCwrDt/Y6ARsR4EOA==
+  dependencies:
+    cred-types-jolocom-core "^0.0.11"
+
 "@jolocom/registry-contract@^1.0.0-rc5":
   version "1.0.0-rc5"
   resolved "https://registry.yarnpkg.com/@jolocom/registry-contract/-/registry-contract-1.0.0-rc5.tgz#0596a708e4e86deddf19602799b35b58d51b7c3e"

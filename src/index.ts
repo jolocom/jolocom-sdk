@@ -1,5 +1,5 @@
 import { JolocomLib } from 'jolocom-lib'
-import { BaseMetadata } from 'cred-types-jolocom-core'
+import { BaseMetadata } from '@jolocom/protocol-ts'
 import { IdentityWallet } from 'jolocom-lib/js/identityWallet/identityWallet'
 import {
   ICredentialRequest,

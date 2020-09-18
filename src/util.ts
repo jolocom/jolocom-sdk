@@ -5,7 +5,7 @@ import {
   Categories,
   uiCredentialTypeByType,
 } from './categories'
-import { BaseMetadata } from 'cred-types-jolocom-core'
+import { BaseMetadata } from '@jolocom/protocol-ts'
 
 import { DecoratedClaims, IdentitySummary, IssuerPublicProfileSummary } from './types'
 import { equals } from 'ramda'

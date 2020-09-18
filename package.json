@@ -69,6 +69,7 @@
     "jolocom-lib": "^5.1.0-rc6"
   },
   "dependencies": {
+    "@jolocom/protocol-ts": "^0.5.2",
     "form-data": "^3.0.0",
     "ramda": "^0.26.1"
   },
