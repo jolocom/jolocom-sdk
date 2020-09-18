@@ -3,9 +3,9 @@ import {
   FlowType,
 } from '../interactionManager/types'
 import { Interaction } from '../interactionManager/interaction'
-import { JolocomSDK } from '..'
 import { Channel } from './channel'
 import { Transportable } from '../transports'
+import { Agent } from '../agent'
 
 export enum ChannelTransportType {
   WebSockets = 'WebSockets',
@@ -27,13 +27,13 @@ export class ChannelKeeper extends Transportable<
   ChannelTransport,
   ChannelTransportAPI
 > {
-  ctx: JolocomSDK
+  ctx: Agent
 
   private _channels: {
     [NONCE: string]: Channel
   } = {}
 
-  constructor(ctx: JolocomSDK) {
+  constructor(ctx: Agent) {
     super()
     this.ctx = ctx
   }

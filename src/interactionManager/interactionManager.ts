@@ -1,9 +1,10 @@
-import { JolocomSDK, JolocomLib } from '..'
+import { JolocomLib } from '..'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { Interaction } from './interaction'
 import { InteractionTransportType } from './types'
 import { Transportable } from '../transports'
 import { SDKError, ErrorCode } from '../errors'
+import { Agent } from '../agent'
 
 export interface InteractionTransport {
   type: InteractionTransportType
@@ -61,13 +62,13 @@ export class InteractionManager extends Transportable<
   InteractionTransport,
   InteractionTransportAPI
 > {
-  public readonly ctx: JolocomSDK
+  public readonly ctx: Agent
 
   public interactions: {
     [NONCE: string]: Interaction
   } = {}
 
-  public constructor(ctx: JolocomSDK) {
+  public constructor(ctx: Agent) {
     super()
     this.ctx = ctx
     // TODO move this out to an environemnt specific plugin

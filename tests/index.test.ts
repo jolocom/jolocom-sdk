@@ -1,12 +1,5 @@
-import { createConnection, getConnection, Connection } from 'typeorm'
-import { JolocomTypeormStorage } from '@jolocom/sdk-storage-typeorm'
-import { JolocomSDK, NaivePasswordStore } from '..'
-
-const getSdk = async (connection: Connection) =>
-  new JolocomSDK({
-    passwordStore: new NaivePasswordStore(),
-    storage: new JolocomTypeormStorage(connection),
-  })
+import { createConnection, getConnection } from 'typeorm'
+import { getSdk } from './util'
 
 beforeEach(async () =>
   createConnection({
@@ -27,6 +20,6 @@ afterEach(async () => {
 })
 
 test('Create identity', async () => {
-  const SDK = getSdk(getConnection())
+  const SDK = await getSdk('test')
   console.log(SDK)
 })

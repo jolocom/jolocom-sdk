@@ -135,7 +135,7 @@ export class Interaction {
         description,
         callbackURL: request.interactionToken.callbackURL,
       },
-      await this.ctx.ctx.keyChainLib.getPassword(),
+      await this.ctx.ctx.passwordStore.getPassword(),
       request,
     )
   }
@@ -150,7 +150,7 @@ export class Interaction {
         message: { transportIdx },
         typ: EstablishChannelType.EstablishChannelResponse,
       },
-      await this.ctx.ctx.keyChainLib.getPassword(),
+      await this.ctx.ctx.passwordStore.getPassword(),
       request,
     )
   }
@@ -164,7 +164,7 @@ export class Interaction {
 
     const stateId = last(uriToResolve.split(':')) || ''
 
-    const stateProof = await this.ctx.ctx.storageLib.eventDB
+    const stateProof = await this.ctx.ctx.storage.eventDB
       .read(stateId)
       .catch((_: any) => [])
 
@@ -184,7 +184,7 @@ export class Interaction {
         },
         typ: ResolutionType.ResolutionResponse,
       },
-      await this.ctx.ctx.keyChainLib.getPassword(),
+      await this.ctx.ctx.passwordStore.getPassword(),
       request,
     )
   }
@@ -206,7 +206,7 @@ export class Interaction {
         },
         typ: AuthorizationType.AuthorizationResponse,
       },
-      await this.ctx.ctx.keyChainLib.getPassword(),
+      await this.ctx.ctx.passwordStore.getPassword(),
       request,
     )
   }
@@ -227,7 +227,7 @@ export class Interaction {
         callbackURL: request.interactionToken.callbackURL,
         suppliedCredentials: credentials.map(c => c.toJSON()),
       },
-      await this.ctx.ctx.keyChainLib.getPassword(),
+      await this.ctx.ctx.passwordStore.getPassword(),
       request,
     )
   }
@@ -246,7 +246,7 @@ export class Interaction {
 
     return this.ctx.ctx.identityWallet.create.interactionTokens.response.offer(
       credentialOfferResponseAttr,
-      await this.ctx.ctx.keyChainLib.getPassword(),
+      await this.ctx.ctx.passwordStore.getPassword(),
       credentialOfferRequest,
     )
   }
@@ -257,7 +257,7 @@ export class Interaction {
     ) => Promise<{ claim: any; metadata?: any; subject?: string }>
   }): Promise<SignedCredential[]> {
     const flowState = this.flow.state as CredentialOfferFlowState
-    const password = await this.ctx.ctx.keyChainLib.getPassword()
+    const password = await this.ctx.ctx.passwordStore.getPassword()
     return Promise.all(
       flowState.selectedTypes.map(async type => {
         const offerTypeHandler = offerMap && offerMap[type]
@@ -290,7 +290,7 @@ export class Interaction {
       {
         signedCredentials: creds.map(c => c.toJSON()),
       },
-      await this.ctx.ctx.keyChainLib.getPassword(),
+      await this.ctx.ctx.passwordStore.getPassword(),
       request,
     )
   }
@@ -332,7 +332,7 @@ export class Interaction {
 
     const res = await this.flow.handleInteractionToken(token)
     this.interactionMessages.push(token)
-    await this.ctx.ctx.storageLib.store.interactionToken(token)
+    await this.ctx.ctx.storage.store.interactionToken(token)
     return res
   }
 
@@ -356,14 +356,14 @@ export class Interaction {
       result = await this.ctx.ctx.identityWallet.asymEncryptToDidKey(
         data,
         msg.target,
-        this.ctx.ctx.resolver,
+        this.ctx.ctx.sdk.resolver,
       )
     } else if (targetParts.length === 1) {
       // it does not include a keyRef
       result = await this.ctx.ctx.identityWallet.asymEncryptToDid(
         data,
         msg.target,
-        this.ctx.ctx.resolver,
+        this.ctx.ctx.sdk.resolver,
       )
     } else {
       throw new Error('bad encryption target: ' + msg.target)
@@ -377,7 +377,7 @@ export class Interaction {
         },
         typ: EncryptionType.EncryptionResponse,
       },
-      await this.ctx.ctx.keyChainLib.getPassword(),
+      await this.ctx.ctx.passwordStore.getPassword(),
       encRequest,
     )
   }
@@ -389,7 +389,7 @@ export class Interaction {
       DecryptionType.DecryptionRequest,
     ) as JSONWebToken<DecryptionRequest>
 
-    const password = await this.ctx.ctx.keyChainLib.getPassword()
+    const password = await this.ctx.ctx.passwordStore.getPassword()
 
     const data = Buffer.from(
       decRequest.payload.interactionToken!.request.data,
@@ -415,7 +415,7 @@ export class Interaction {
     const sigRequest = this.findMessageByType(
       SigningType.SigningRequest,
     ) as JSONWebToken<SigningRequest>
-    const pass = await this.ctx.ctx.keyChainLib.getPassword()
+    const pass = await this.ctx.ctx.passwordStore.getPassword()
     return this.ctx.ctx.identityWallet.create.message(
       {
         message: {
@@ -444,17 +444,17 @@ export class Interaction {
   }
 
   public async getAttributesByType(type: string[]) {
-    return this.ctx.ctx.storageLib.get.attributesByType(type)
+    return this.ctx.ctx.storage.get.attributesByType(type)
   }
 
   public async getStoredCredentialById(id: string) {
-    return this.ctx.ctx.storageLib.get.verifiableCredential({
+    return this.ctx.ctx.storage.get.verifiableCredential({
       id,
     })
   }
 
   public async getVerifiableCredential(query?: object) {
-    return this.ctx.ctx.storageLib.get.verifiableCredential(query)
+    return this.ctx.ctx.storage.get.verifiableCredential(query)
   }
 
   /**
@@ -491,7 +491,7 @@ export class Interaction {
       issued
         .filter((cred, i) => credentialsValidity[i])
         .map(async cred =>
-          this.ctx.ctx.storageLib.store.verifiableCredential(cred),
+          this.ctx.ctx.storage.store.verifiableCredential(cred),
         ),
     )
   }
@@ -513,7 +513,7 @@ export class Interaction {
         const metadata = offerSummary.find(metadata => metadata.type === type)
 
         if (metadata && credentialsValidity[i]) {
-          return this.ctx.ctx.storageLib.store.credentialMetadata({
+          return this.ctx.ctx.storage.store.credentialMetadata({
             ...metadata,
             issuer,
           })
@@ -525,7 +525,7 @@ export class Interaction {
   }
 
   public async storeIssuerProfile() {
-    return this.ctx.ctx.storageLib.store.issuerProfile(
+    return this.ctx.ctx.storage.store.issuerProfile(
       generateIdentitySummary(this.participants.requester!),
     )
   }

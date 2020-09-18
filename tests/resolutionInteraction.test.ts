@@ -1,17 +1,15 @@
-import { JolocomSDK } from '../'
+import { Agent } from '../src'
 
 import { createAgent, destroyAgent, meetAgent } from './util'
 const conn1Name = 'resolution1'
 const conn2Name = 'resolution2'
-let service: JolocomSDK, user: JolocomSDK
+let service: Agent, user: Agent
 
 beforeEach(async () => {
-  service = await createAgent(conn1Name)
-  service.setDefaultDidMethod('jun')
+  service = await createAgent(conn1Name, 'jun')
   await service.createNewIdentity()
 
-  user = await createAgent(conn2Name)
-  user.setDefaultDidMethod('jun')
+  user = await createAgent(conn2Name, 'jun')
   await user.createNewIdentity()
 })
 

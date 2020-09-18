@@ -23,11 +23,11 @@ export enum ErrorCode {
   InvalidToken = 'InvalidToken',
 
   NoEntropy = 'NoEntropy',
+  NoPassword = 'NoPassword',
   NoKeyProvider = 'NoKeyProvider',
   NoWallet = 'NoWallet',
   DecryptionFailed = 'DecryptionFailed',
 }
-
 
 export class SDKError extends Error {
   public static codes = ErrorCode

@@ -7,7 +7,11 @@ import {
 } from './categories'
 import { BaseMetadata } from '@jolocom/protocol-ts'
 
-import { DecoratedClaims, IdentitySummary, IssuerPublicProfileSummary } from './types'
+import {
+  DecoratedClaims,
+  IdentitySummary,
+  IssuerPublicProfileSummary,
+} from './types'
 import { equals } from 'ramda'
 import { Identity } from 'jolocom-lib/js/identity/identity'
 

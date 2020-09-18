@@ -43,7 +43,7 @@ export class ResolutionFlow extends Flow<ResolutionRequest | ResolutionResult> {
       await this.ctx.ctx.ctx.identityWallet.validateJWT(
         token,
         last(this.history),
-        this.ctx.ctx.ctx.resolver,
+        this.ctx.ctx.ctx.sdk.resolver,
       )
       this.history.push(token)
       return true
@@ -77,19 +77,19 @@ export class ResolutionFlow extends Flow<ResolutionRequest | ResolutionResult> {
           ) {
             // cache local state
             const id = last(token.signer.did.split(':')) || ''
-            const cachedEL = await this.ctx.ctx.ctx.storageLib.eventDB.read(id)
+            const cachedEL = await this.ctx.ctx.ctx.storage.eventDB.read(id)
 
             // update local state
-            await this.ctx.ctx.ctx.didMethods
+            await this.ctx.ctx.ctx.sdk.didMethods
               .getForDid(iT.didDocument.id)
               .registrar.encounter(iT.methodMetadata.stateProof)
 
             // verify
             await this.validateTokenAndPush(token).catch(async err => {
               // failed, roll back
-              await this.ctx.ctx.ctx.storageLib.eventDB.delete(id)
-              await this.ctx.ctx.ctx.didMethods
-                .getDefault()
+              await this.ctx.ctx.ctx.storage.eventDB.delete(id)
+              await this.ctx.ctx.ctx.sdk.didMethods
+                .getForDid(iT.didDocument.id)
                 .registrar.encounter(cachedEL)
               throw err
             })

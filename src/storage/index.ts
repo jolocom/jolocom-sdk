@@ -41,7 +41,9 @@ export interface IStorageStore {
   setting(key: string, value: any): Promise<void>
   verifiableCredential(vCred: SignedCredential): Promise<void>
   encryptedWallet(args: EncryptedWalletAttributes): Promise<void>
-  credentialMetadata(credentialMetadata: CredentialMetadataSummary): Promise<void>
+  credentialMetadata(
+    credentialMetadata: CredentialMetadataSummary,
+  ): Promise<void>
   issuerProfile(issuer: IdentitySummary): Promise<void>
   didDoc(doc: DidDocument): Promise<void>
   interactionToken(token: JSONWebToken<any>): Promise<void>
@@ -79,7 +81,6 @@ export interface IStorage {
 }
 
 export interface IPasswordStore {
-  savePassword: (password: string) => Promise<void>
   getPassword: () => Promise<string>
 }
 
@@ -92,9 +93,5 @@ export class NaivePasswordStore implements IPasswordStore {
 
   public async getPassword() {
     return this._pass
-  }
-
-  public async savePassword(pass: string) {
-    this._pass = pass
   }
 }
