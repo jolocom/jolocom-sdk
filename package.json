@@ -6,7 +6,7 @@
     "js/"
   ],
   "scripts": {
-    "build": "rm -rf js && ttsc -p .",
+    "build": "rm -rf js && tsc -p .",
     "prepare": "yarn build",
     "repl": "REPL=1 ts-node -P . -r ./bin/repl.ts",
     "typeorm": "ts-node -O '{\"module\": \"commonjs\"}' -r ./bin/repl.ts node_modules/.bin/typeorm",
@@ -58,7 +58,6 @@
     "ts-node": "^9.0.0",
     "tsconfig-paths": "^3.8.0",
     "tslib": "^1.7.1",
-    "ttypescript": "^1.5.10",
     "typeorm": "^0.2.25",
     "typescript": "^3.7.5",
     "yarn": "^1.22.0"

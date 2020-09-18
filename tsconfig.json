@@ -69,14 +69,6 @@
     "suppressImplicitAnyIndexErrors": true,
     "noEmitHelpers": true,
     "skipLibCheck": true,
-
-    /* Plugins, these are used by ttypescript */
-    "plugins": [
-      {
-        "transform": "@zerollup/ts-transform-paths",
-        "exclude": ["*"]
-      }
-    ]
   },
   "exclude": ["node_modules", "babel.config.js", "jest.config.js", "js"],
   "include": ["./src/**/*", "./index.ts"]
