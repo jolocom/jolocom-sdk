@@ -1,12 +1,9 @@
 import { InteractionType } from 'jolocom-lib/js/interactionTokens/types'
 import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRequest'
-import { getUiCredentialTypeByType } from '../util'
-import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
 import { Interaction } from './interaction'
-import { isEmpty } from 'ramda'
 import { Flow } from './flow'
 import { CredentialResponse } from 'jolocom-lib/js/interactionTokens/credentialResponse'
-import { AttributeSummary, CredentialRequestFlowState, FlowType } from './types'
+import { CredentialRequestFlowState, FlowType } from './types'
 import { isCredentialRequest, isCredentialResponse } from './guards'
 
 export class CredentialRequestFlow extends Flow<
@@ -56,53 +53,5 @@ export class CredentialRequestFlow extends Flow<
     if (lastIndex >= 0) {
       return token.satisfiesRequest(this.state.constraints[lastIndex])
     } else return true
-  }
-
-  public async getAvailableCredentials(request: CredentialRequest) {
-    const { requestedCredentialTypes } = request
-
-    const attributesForType = await Promise.all<AttributeSummary>(
-      requestedCredentialTypes.map(this.ctx.getAttributesByType),
-    )
-
-    const populatedWithCredentials = await Promise.all(
-      attributesForType.map(({ results, type }) => {
-        if (isEmpty(results)) {
-          return [
-            {
-              type: getUiCredentialTypeByType(type),
-              values: [],
-              verifications: [],
-            },
-          ]
-        }
-
-        return Promise.all(
-          results.map(async ({ values, verification }) => ({
-            type: getUiCredentialTypeByType(type),
-            values,
-            verifications: await this.ctx.getVerifiableCredential({
-              id: verification,
-            }),
-          })),
-        )
-      }),
-    )
-
-    const abbreviated = populatedWithCredentials.map(attribute =>
-      attribute.map(entry => ({
-        ...entry,
-        verifications: entry.verifications.map((vCred: SignedCredential) => ({
-          id: vCred.id,
-          issuer: {
-            did: vCred.issuer,
-          },
-          selfSigned: vCred.signer.did === this.ctx.participants.responder!.did,
-          expires: vCred.expires,
-        })),
-      })),
-    )
-
-    return abbreviated.reduce((acc, val) => acc.concat(val))
   }
 }
