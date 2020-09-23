@@ -1,25 +1,7 @@
 import { SoftwareKeyProvider } from 'jolocom-lib'
-import { BaseMetadata } from '@jolocom/protocol-ts'
-import {
-  ICredentialRequest,
-  ICredentialRequestAttrs,
-  CredentialOffer,
-  CredentialOfferRequestAttrs,
-  ICredentialsReceiveAttrs,
-} from 'jolocom-lib/js/interactionTokens/interactionTokens.types'
-import { ISignedCredCreationArgs } from 'jolocom-lib/js/credentials/signedCredential/types'
 import { SDKError, ErrorCode } from './errors'
 export { SDKError, ErrorCode }
 
-export {
-  ICredentialRequest as CredentialRequirements,
-  ICredentialRequestAttrs as CredentialRequest,
-  CredentialOffer,
-  CredentialOfferRequestAttrs,
-  ICredentialsReceiveAttrs as CredentialPayload,
-  BaseMetadata as CredentialDefinition,
-  ISignedCredCreationArgs as CredentialData,
-}
 import { IStorage, IPasswordStore } from './storage'
 export { NaivePasswordStore } from './storage'
 export { JolocomLib } from 'jolocom-lib'
@@ -120,7 +102,7 @@ export class JolocomSDK {
     return
   }
 
-  public async createNewAgent(
+  public async createAgent(
     passOrStore?: string | IPasswordStore,
     didMethodName?: string,
   ): Promise<Agent> {
@@ -128,11 +110,18 @@ export class JolocomSDK {
     const didMethod = didMethodName
       ? this.didMethods.get(didMethodName)
       : this.didMethods.getDefault()
-    const agent = new Agent({
+    return new Agent({
       sdk: this,
       passwordStore,
       didMethod,
     })
+  }
+
+  public async createNewAgent(
+    passOrStore?: string | IPasswordStore,
+    didMethodName?: string,
+  ): Promise<Agent> {
+    const agent = await this.createAgent(passOrStore, didMethodName)
     await agent.createNewIdentity()
     return agent
   }
@@ -142,14 +131,7 @@ export class JolocomSDK {
     did?: string,
   ): Promise<Agent> {
     const didMethodName = did ? did.split(':')[1] : ''
-    const didMethod = didMethodName
-      ? this.didMethods.get(didMethodName)
-      : this.didMethods.getDefault()
-    const agent = new Agent({
-      sdk: this,
-      passwordStore: this._makePassStore(passOrStore),
-      didMethod,
-    })
+    const agent = await this.createAgent(passOrStore, didMethodName)
     await agent.loadIdentity(did)
     return agent
   }
