@@ -1,61 +1,30 @@
-import {
-  createConnection,
-  getConnection,
-  Connection,
-  ConnectionOptions,
-} from 'typeorm'
-import { JolocomTypeormStorage } from '@jolocom/sdk-storage-typeorm'
 import { claimsMetadata } from 'jolocom-lib'
-import { InternalDb } from '@jolocom/local-resolver-registrar/js/db'
-import { JolocomSDK, NaivePasswordStore } from '../'
-import { getConnectionConfig } from './util'
+import { JolocomSDK } from '../'
+import { destroyAgent, createAgent, meetAgent } from './util'
 
 const conn1Name = 'issuance1'
 const conn2Name = 'issuance2'
 
-const testConnection1 = getConnectionConfig(conn1Name) as ConnectionOptions
-const testConnection2 = getConnectionConfig(conn2Name) as ConnectionOptions
-
-const getSdk = (connection: Connection, eDB?: InternalDb) =>
-  new JolocomSDK({
-    passwordStore: new NaivePasswordStore(),
-    storage: new JolocomTypeormStorage(connection),
-    eventDB: eDB,
-  })
-
+let alice: JolocomSDK, bob: JolocomSDK
 beforeEach(async () => {
-  await createConnection(testConnection1)
-  await createConnection(testConnection2)
+  alice = await createAgent(conn1Name)
+  alice.setDefaultDidMethod('jun')
+  await alice.createNewIdentity()
+
+  bob = await createAgent(conn2Name)
+  bob.setDefaultDidMethod('jun')
+  await bob.createNewIdentity()
 })
 
 afterEach(async () => {
-  const conn1 = getConnection(conn1Name)
-  await conn1.close()
-  const conn2 = getConnection(conn2Name)
-  return conn2.close()
+  await destroyAgent(conn1Name)
+  await destroyAgent(conn2Name)
 })
 
 test('Credential Issuance interaction', async () => {
-  const aliceCon = getConnection(conn1Name)
-  const bobCon = getConnection(conn2Name)
-
-  const alice = getSdk(aliceCon)
-  alice.setDefaultDidMethod('jun')
-  await alice.init()
-
-  const bob = getSdk(bobCon)
-  bob.setDefaultDidMethod('jun')
-  await bob.createNewIdentity()
-
   // making them mutually resolvable
-  const aliceId = alice.idw.did.split(':')[2]
-  const aliceEL = await alice.storageLib.eventDB.read(aliceId)
-
-  const bobId = bob.idw.did.split(':')[2]
-  const bobEL = await bob.storageLib.eventDB.read(bobId)
-
-  await alice.didMethods.getDefault().registrar.encounter(bobEL)
-  await bob.didMethods.getDefault().registrar.encounter(aliceEL)
+  await meetAgent(bob, alice)
+  await meetAgent(alice, bob)
 
   // ensure bob is resolvable by alice
   await expect(alice.resolve(bob.idw.did)).resolves.toMatchObject(

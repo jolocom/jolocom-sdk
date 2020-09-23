@@ -1,62 +1,34 @@
-import {
-  createConnection,
-  getConnection,
-  Connection,
-  ConnectionOptions,
-} from 'typeorm'
-
-import { InternalDb } from '@jolocom/local-resolver-registrar/js/db'
-
+import { createAgent, destroyAgent } from './util'
 import { SigningFlowState } from '../src/lib/interactionManager/signingFlow'
-import { JolocomSDK, NaivePasswordStore } from '../'
-import { JolocomTypeormStorage } from '@jolocom/sdk-storage-typeorm'
+import { JolocomSDK } from '../'
 import { entropyToMnemonic } from 'jolocom-lib/js/utils/crypto'
-import { getConnectionConfig } from './util'
 import { Identity } from 'jolocom-lib/js/identity/identity'
 import { verifySignatureWithIdentity } from 'jolocom-lib/js/utils/validation'
 
 const conn1Name = 'signing1'
 const conn2Name = 'signing2'
-
-const testConnection1 = getConnectionConfig(conn1Name) as ConnectionOptions
-const testConnection2 = getConnectionConfig(conn2Name) as ConnectionOptions
-
-const getSdk = (connection: Connection, eDB?: InternalDb) =>
-  new JolocomSDK({
-    passwordStore: new NaivePasswordStore(),
-    storage: new JolocomTypeormStorage(connection),
-    eventDB: eDB,
-  })
+let service: JolocomSDK, user: JolocomSDK
 
 beforeEach(async () => {
-  await createConnection(testConnection1)
-  await createConnection(testConnection2)
-})
-
-afterEach(async () => {
-  const conn1 = getConnection(conn1Name)
-  await conn1.close()
-  const conn2 = getConnection(conn2Name)
-  return conn2.close()
-})
-
-test('Signing Request interaction', async () => {
-  const serviceCon = getConnection(conn1Name)
-  const userCon = getConnection(conn2Name)
-
+  service = await createAgent(conn1Name)
   // in this test, the service is "anchored" (the user can always resolve them)
-  const service = getSdk(serviceCon)
   service.setDefaultDidMethod('jolo')
-
   await service.loadFromMnemonic(
     entropyToMnemonic(Buffer.from('a'.repeat(64), 'hex')),
   )
 
-  const user = getSdk(userCon)
+  user = await createAgent(conn2Name)
   // the user is "unanchored" (the service cannot resolve them initially)
   user.setDefaultDidMethod('jun')
   await user.init()
+})
 
+afterEach(async () => {
+  await destroyAgent(conn1Name)
+  await destroyAgent(conn2Name)
+})
+
+test('Signing Request interaction', async () => {
   // ensure the service is resolvable by the user
   await expect(user.resolve(service.idw.did)).resolves.toBeTruthy()
 
