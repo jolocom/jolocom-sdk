@@ -20,7 +20,6 @@ afterEach(async () => {
 test('Authentication interaction', async () => {
   // making them mutually resolvable
   await meetAgent(alice, bob)
-  await meetAgent(bob, alice)
 
   const aliceAuthRequest = await alice.authRequestToken({
     callbackURL: 'nowhere',

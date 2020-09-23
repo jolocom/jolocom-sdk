@@ -20,7 +20,7 @@ afterEach(async () => {
 
 test('Resolution interaction', async () => {
   // insert the service's KEL to the user DB (make the service resolvable)
-  await meetAgent(user, service)
+  await meetAgent(user, service, false)
 
   // ensure the service is resolvable by the user
   await expect(user.resolve(service.idw.did)).resolves.toBeTruthy()

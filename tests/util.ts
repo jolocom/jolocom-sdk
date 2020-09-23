@@ -18,11 +18,13 @@ export async function createAgent(
   const passwordStore = pass
     ? { getPassword: async () => pass }
     : new NaivePasswordStore()
-  return new Agent({
+  const agent = new Agent({
     sdk,
     passwordStore,
     didMethod,
   })
+  await agent.createNewIdentity()
+  return agent
 }
 
 export async function destroyAgent(name = defaultAgentName) {
@@ -51,9 +53,11 @@ export const getSdk = async (name: string) => {
 /**
  * Allow alice to resolve bob
  */
-export async function meetAgent(alice: Agent, bob: Agent) {
+export async function meetAgent(alice: Agent, bob: Agent, both = true) {
   const bobId = bob.idw.did.split(':')[2]
   const bobEL = await bob.storage.eventDB.read(bobId)
 
   await alice.didMethod.registrar.encounter(bobEL)
+
+  if (both) await meetAgent(bob, alice, false)
 }
