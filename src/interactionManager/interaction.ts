@@ -41,7 +41,6 @@ import { EstablishChannelFlow } from './establishChannelFlow'
 
 import {
   InteractionManager,
-  InteractionTransportAPI,
 } from './interactionManager'
 
 import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
@@ -59,6 +58,8 @@ import {
   ResolutionRequest,
 } from './resolutionFlow'
 import { last } from 'ramda'
+import { TransportAPI, TransportDesc, InteractionTransportType } from '../types'
+import { Transportable } from '../transports'
 
 /***
  * - initiated by InteractionManager when an interaction starts
@@ -78,13 +79,11 @@ const interactionFlowForMessage = {
   [SigningType.SigningRequest]: SigningFlow,
 }
 
-export class Interaction {
-  private interactionMessages: Array<JSONWebToken<any>> = []
+export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable {
+  private messages: Array<JSONWebToken<any>> = []
   public id: string
   public ctx: InteractionManager
-  public flow: Flow<any>
-
-  public transportAPI: InteractionTransportAPI
+  public flow: F
 
   public participants: {
     [k in InteractionRole]?: Identity
@@ -94,14 +93,35 @@ export class Interaction {
 
   public constructor(
     ctx: InteractionManager,
-    transportAPI: InteractionTransportAPI,
     id: string,
     interactionType: string,
+    transportAPI?: TransportAPI
   ) {
+    super(transportAPI)
+
     this.ctx = ctx
-    this.transportAPI = transportAPI
     this.id = id
     this.flow = new interactionFlowForMessage[interactionType](this)
+  }
+
+  get firstMessage() {
+    if (this.messages.length < 1) throw new Error('Empty interaction')
+    return this.messages[0]
+  }
+
+  get lastMessage() {
+    if (this.messages.length < 1) throw new Error('Empty interaction')
+    return this.messages[this.messages.length - 1]
+  }
+
+  public getMessages() {
+    return this.messages
+  }
+
+  private findMessageByType(type: string) {
+    return this.getMessages().find(
+      ({ interactionType }) => interactionType === type,
+    )
   }
 
   get counterparty(): Identity | undefined {
@@ -113,15 +133,6 @@ export class Interaction {
     return this.participants[counterRole]
   }
 
-  public getMessages() {
-    return this.interactionMessages
-  }
-
-  private findMessageByType(type: string) {
-    return this.getMessages().find(
-      ({ interactionType }) => interactionType === type,
-    )
-  }
 
   // TODO Try to write a respond function that collapses these
   public async createAuthenticationResponse() {
@@ -330,9 +341,31 @@ export class Interaction {
       }
     }
 
+    // TODO if handling fails, should we still be pushing the token??
     const res = await this.flow.handleInteractionToken(token)
-    this.interactionMessages.push(token)
+    this.messages.push(token)
     await this.ctx.ctx.storage.store.interactionToken(token)
+
+    if (!this._transportAPI) {
+      // update transportAPI
+      // @ts-ignore
+      const { callbackURL } = token.interactionToken
+
+      if (callbackURL) {
+        const transportDesc: TransportDesc = {
+          type: InteractionTransportType.HTTP,
+          config: callbackURL,
+        }
+
+        const onMessage = async (msg: string) => {
+          // TODO throw on failure? processInteractionToken returns bool
+          await this.ctx.ctx.processJWT(msg)
+        }
+        this.transportAPI =
+          await this.ctx.ctx.sdk.transports.start(transportDesc, onMessage)
+      }
+    }
+
     return res
   }
 
@@ -468,9 +501,7 @@ export class Interaction {
    */
 
   public async send<T>(token: JSONWebToken<T>) {
-    // @ts-ignore - CredentialReceive has no callbackURL, needs fix on the lib for JWTEncodable.
-    const { callbackURL } = token.interactionToken
-    return this.transportAPI.send(token)
+    return this.transportAPI.send(token.encode())
   }
 
   private checkFlow(flow: FlowType) {

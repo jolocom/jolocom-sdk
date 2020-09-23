@@ -30,7 +30,12 @@ import { LocalDidMethod } from 'jolocom-lib/js/didMethods/local'
 import { IResolver } from 'jolocom-lib/js/didMethods/types'
 import { Identity } from 'jolocom-lib/js/identity/identity'
 import { Agent } from './agent'
+import { TransportKeeper } from './transports'
 export { Agent } from './agent'
+
+export * from './types'
+export { Interaction } from './interactionManager/interaction'
+export { FlowType } from './interactionManager/types'
 
 export interface IJolocomSDKConfig {
   storage: IStorage
@@ -51,6 +56,7 @@ export interface JolocomPlugin {
 
 export class JolocomSDK {
   public didMethods = new DidMethodKeeper()
+  public transports = new TransportKeeper()
   public storage: IStorage
   public resolver: IResolver
 
@@ -60,9 +66,28 @@ export class JolocomSDK {
       conf.eventDB || this.storage.eventDB,
     )
     this.didMethods.register('jun', localDidMethod)
+
     // FIXME the prefix bit is required just to match IResolver
     // but does anything need it at that level?
     this.resolver = { prefix: '', resolve: this.resolve.bind(this) }
+
+    // if we are running on NodeJS, then autoconfig some things if possible
+    if (process && process.version) this._autoconfigForNodeJS()
+  }
+
+  private _autoconfigForNodeJS() {
+    try {
+      const fetch = require('node-fetch')
+      this.transports.http.configure({ fetch })
+    } catch (err) {
+      // pass, it's ok
+    }
+    try {
+      const WebSocket = require('ws')
+      this.transports.ws.configure({ WebSocket })
+    } catch (err) {
+      // pass, it's ok
+    }
   }
 
   /**

@@ -8,12 +8,11 @@ import {
   createIdentityFromKeyProvider,
 } from 'jolocom-lib/js/didMethods/utils'
 import { mnemonicToEntropy } from 'jolocom-lib/js/utils/crypto'
-import { JolocomSDK, JSONWebToken } from './index'
+import { JolocomSDK, JSONWebToken, TransportAPI } from './index'
 import { IDidMethod } from 'jolocom-lib/js/didMethods/types'
 import { InteractionManager } from './interactionManager/interactionManager'
 import { ChannelKeeper } from './channels'
 import {
-  InteractionTransportType,
   AuthorizationRequest,
   AuthorizationType,
   EstablishChannelRequest,
@@ -284,7 +283,7 @@ export class Agent {
    * @throws AppError<InvalidToken> with `origError` set to the original token
    *                                validation error from the jolocom library
    */
-  public async processJWT(jwt: string): Promise<Interaction> {
+  public async processJWT(jwt: string, transportAPI?: TransportAPI): Promise<Interaction> {
     const token = JolocomLib.parse.interactionToken.fromJWT(jwt)
 
     const interaction = this.interactionManager.getInteraction(token.nonce)
@@ -293,7 +292,7 @@ export class Agent {
       await interaction.processInteractionToken(token)
       return interaction
     } else {
-      return this.interactionManager.start(InteractionTransportType.HTTP, token)
+      return this.interactionManager.start(token, transportAPI)
     }
   }
 
@@ -338,7 +337,7 @@ export class Agent {
       auth,
       await this.passwordStore.getPassword(),
     )
-    await this.interactionManager.start(InteractionTransportType.HTTP, token)
+    await this.interactionManager.start(token)
     return token.encode()
   }
 
@@ -359,7 +358,7 @@ export class Agent {
       await this.passwordStore.getPassword(),
     )
 
-    await this.interactionManager.start(InteractionTransportType.HTTP, token)
+    await this.interactionManager.start(token)
     return token.encode()
   }
 
@@ -381,7 +380,7 @@ export class Agent {
       await this.passwordStore.getPassword(),
     )
 
-    await this.interactionManager.start(InteractionTransportType.HTTP, token)
+    await this.interactionManager.start(token)
     return token.encode()
   }
 
@@ -402,7 +401,7 @@ export class Agent {
       await this.passwordStore.getPassword(),
     )
 
-    await this.interactionManager.start(InteractionTransportType.HTTP, token)
+    await this.interactionManager.start(token)
     return token.encode()
   }
 
@@ -419,7 +418,7 @@ export class Agent {
       request,
       await this.passwordStore.getPassword(),
     )
-    await this.interactionManager.start(InteractionTransportType.HTTP, token)
+    await this.interactionManager.start(token)
     return token.encode()
   }
 
@@ -438,7 +437,7 @@ export class Agent {
       offer,
       await this.passwordStore.getPassword(),
     )
-    await this.interactionManager.start(InteractionTransportType.HTTP, token)
+    await this.interactionManager.start(token)
     return token.encode()
   }
 
@@ -481,7 +480,7 @@ export class Agent {
       await this.passwordStore.getPassword(),
     )
 
-    await this.interactionManager.start(InteractionTransportType.HTTP, token)
+    await this.interactionManager.start(token)
 
     return token.encode()
   }
@@ -505,7 +504,7 @@ export class Agent {
       await this.passwordStore.getPassword(),
     )
 
-    await this.interactionManager.start(InteractionTransportType.HTTP, token)
+    await this.interactionManager.start(token)
 
     return token.encode()
   }
@@ -527,7 +526,7 @@ export class Agent {
       await this.passwordStore.getPassword(),
     )
 
-    await this.interactionManager.start(InteractionTransportType.HTTP, token)
+    await this.interactionManager.start(token)
 
     return token.encode()
   }
