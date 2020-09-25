@@ -1,0 +1,6 @@
+site_name: Jolocom SDK
+nav:
+  - index.md
+  - identity_management.md
+  - interaction_flows.md
+  - did_methods.md
