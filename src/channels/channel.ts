@@ -14,7 +14,7 @@ export interface ChannelSummary {
   interactions: InteractionSummary[]
 }
 
-interface ChannelQuery {
+interface ChannelThread {
   promise?: Promise<JSONWebToken<any>>
   resolve?: (resp: JSONWebToken<any>) => void
   reject?: (err?: Error) => void
@@ -27,7 +27,7 @@ export class Channel extends Transportable {
   public id: string
   public initialInteraction: Interaction
   public authPromise: Promise<boolean>
-  private _threads: { [id: string]: ChannelQuery } = {}
+  private _threads: { [id: string]: ChannelThread } = {}
   private _threadIdList: string[] = []
   private _started = false
   private _startedPromise: Promise<void> | null = null
@@ -170,30 +170,29 @@ export class Channel extends Transportable {
     this._started = false
   }
 
-  public async sendQuery(tokenOrJwt: Interaction | JSONWebToken<any> | string) {
+  public async startThread(tokenOrJwt: Interaction | JSONWebToken<any> | string) {
     let token: JSONWebToken<any>
     if (typeof tokenOrJwt === 'string') {
       token = JolocomLib.parse.interactionToken.fromJWT(tokenOrJwt)
     } else if (tokenOrJwt instanceof Interaction) {
-      const messages = tokenOrJwt.getMessages()
-      token = messages[messages.length - 1]
+      token = tokenOrJwt.firstMessage
     } else {
       token = tokenOrJwt
     }
     const qId = token.nonce
 
-    const query: ChannelQuery = {}
-    query.promise = new Promise((resolve, reject) => {
-      query.resolve = resolve
-      query.reject = reject
+    const thread: ChannelThread = {}
+    thread.promise = new Promise((resolve, reject) => {
+      thread.resolve = resolve
+      thread.reject = reject
       return this.send(token)
     })
 
-    this._threads[qId] = query
+    this._threads[qId] = thread
     this._threadIdList.push(qId)
 
     // TODO add expiry mechanism to reject and delete query from memory once tokens expire
 
-    return query.promise
+    return thread.promise
   }
 }
