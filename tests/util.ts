@@ -23,7 +23,6 @@ export async function createAgent(
     passwordStore,
     didMethod,
   })
-  await agent.createNewIdentity()
   return agent
 }
 
