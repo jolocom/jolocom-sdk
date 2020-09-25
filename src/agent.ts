@@ -256,25 +256,6 @@ export class Agent {
   }
 
   /**
-   * Handles a recieved interaction token
-   *
-   * @param jwt - recieved jwt, Base64 encoded
-   * @returns Promise<bool>, true: valid, false: invalid, reject: incorrect
-   */
-  public async tokenRecieved(jwt: string) {
-    const token = JolocomLib.parse.interactionToken.fromJWT(jwt)
-
-    const interaction = this.interactionManager.getInteraction(token.nonce)
-
-    if (interaction) {
-      return interaction.processInteractionToken(token)
-    } else {
-      await this.interactionManager.start(InteractionTransportType.HTTP, token)
-      return true
-    }
-  }
-
-  /**
    * Parses a recieved interaction token in JWT format and process it through
    * the interaction system, returning the corresponding Interaction
    *
@@ -302,7 +283,7 @@ export class Agent {
    * @param inp id, JWT string, or JSONWebToken object
    * @returns Promise<Interaction> the associated Interaction object
    */
-  public findInteraction(inp: string | JSONWebToken<any>): Interaction | null {
+  public findInteraction<F extends Flow<any>>(inp: string | JSONWebToken<any>): Interaction<F> | null {
     let id
     if (typeof inp === 'string') {
       try {
@@ -318,7 +299,7 @@ export class Agent {
       return null
     }
 
-    return this.interactionManager.getInteraction(id)
+    return this.interactionManager.getInteraction<F>(id)
   }
 
   /**
