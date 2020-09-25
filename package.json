@@ -6,7 +6,7 @@
     "js/"
   ],
   "scripts": {
-    "build": "rm -rf js && tsc -p .",
+    "build": "rm -rf js && tsc --rootDir src -p .",
     "prepare": "yarn build",
     "repl": "REPL=1 ts-node -P . -r ./bin/repl.ts",
     "typeorm": "ts-node -O '{\"module\": \"commonjs\"}' -r ./bin/repl.ts node_modules/.bin/typeorm",
