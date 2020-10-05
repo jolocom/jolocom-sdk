@@ -1,6 +1,16 @@
 # Document Title
 
 - [ ] Anatomy of an agent, i.e. the essential components
+
+In order for an agent to be able to fulfill it's responsibilities (e.g. interactions, credential creation, identity management), a number of interfaces / components must be provided (either upon SDK construction, or upon agent creation).
+
+The following sections will briefly outline the purpose and relationship between the various interfaces.
+
+The core components are:
+
+- **A Collection of supported DID methods** - exposed through
+
+Two arguments can be provided
   - [ ] DidMethodKeeper
     - [ ] Adding / retrieving a did method
     - [ ] SDK.resolve
@@ -15,3 +25,16 @@
   - [ ] Password Store
     [?]
 
+
+
+---
+---
+
+It might be useful to first look at the two possible way to create an `agent` instance using the Jolocom Sdk. Let's start with the simplest one first:
+
+# TODO -> jolo or did:jolo?
+```typescript
+const agent = sdk.createNewAgent("secretPassword", "jolo")
+```
+
+*Note - The snippet above assumes a configured Jolocom SDK instance (`sdk`) is defined. See section TODO for additional information on instantiating the Jolocom SDK*
