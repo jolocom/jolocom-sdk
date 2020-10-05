@@ -117,27 +117,6 @@ const bobsAuthZResponse = await bobsInteraction.createAuthorizationResponse()
 const alicesInteraction = await alice.processJWT(bobsAuthZResponse.encode())
 ```
 
-## Credential Verification
-
-| Proving a set of statements about an Identifier.
-
-The Credential Verification flow is a simple request-response message exchange between the Verifier and the Prover:
-
-#### Roles
-
-- Verifier: Agent who requests a set of Verifiable Credentials with associated requirements.
-- Prover: Agent who provides a set of Verifiable Credentials attempting to satisfy the request
-
-#### Messages
-
-1. Credential Request: The Verifier broadcasts a message containing a list of credential types, each with it's own list of requirements to be satisfied by the Prover.
-2. Credential Response: The Prover responds with a list of credentials which should satisfy the corrosponding requirements in the Credential Request.
-
-#### Examples
-
-```typescript
-```
-
 ## Verifiable Credential Issuance
 
 | Creating an authenticated statement about an Identifier.
@@ -158,4 +137,46 @@ The Issuance flow consists of a three step message exchange between two parties,
 #### Examples
 
 ```typescript
+const aliceCredOffer = await alice.credentialOffer({
+  // stuff
+})
+```
+
+## Credential Verification
+
+| Proving a set of statements about an Identifier.
+
+The Credential Verification flow is a simple request-response message exchange between the Verifier and the Prover.
+
+#### Roles
+
+- Verifier: Agent who requests a set of Verifiable Credentials with associated requirements.
+- Prover: Agent who provides a set of Verifiable Credentials attempting to satisfy the request
+
+#### Messages
+
+1. Credential Request: The Verifier broadcasts a message containing a list of credential types, each with it's own list of requirements to be satisfied by the Prover.
+2. Credential Response: The Prover responds with a list of credentials which should satisfy the corrosponding requirements in the Credential Request.
+
+#### Examples
+
+```typescript
+const aliceCredRequest = await alice.credentialRequestToken({
+  callbackURL: 'https://example.com/request',
+  credentialRequirements: [
+    {
+      type: ['SimpleExample'],
+      constraints: [greater('age', 18), is('name', 'Bob')],
+    },
+  ],
+})
+
+// ------- the request is received by Bob ------- //
+const bobsInteraction = await bob.processJWT(aliceAuthZRequest)
+const bobsAuthZResponse = await bobsInteraction.createCredentialResponse([
+  bobsCredId, // ID of the credential(s) Bob chooses to respond with. fetched from storage
+])
+
+// ------- Bob's response is received by Alice ------- //
+const alicesInteraction = await alice.processJWT(bobsAuthZResponse.encode())
 ```
