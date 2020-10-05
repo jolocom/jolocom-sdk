@@ -1,13 +1,29 @@
 # Agents
 
-Agent's are Identified by their DID
+An Agent is the core of any service built with the SDK. Each Agent possesses a DID and the capability to perform cryptographic operations with the keys associated with it's DID. Agents are suitable for all roles in any SSI interaction, and can be used for client-server or P2P style services. Common actions which Agents carry out include:
+
+A configured Jolocom SDK instance can be used to instantiate new Agents, equipped with an SSI and capable of participating in various interactions.
+
 The Agent makes use of the modules injected by the SDK to fulfill identity management related functionality. 
+
+Given an instance of the Jolocom SDK, a new agent can be instantiated in a number of ways. If we would like for a new identity (i.e. DID and set of keys) to be created for the instantiated Agent, we can do the following:
+
+```typescript
+// ...
+sdk.createNewAgent().then(agent => console.log(`did - ${agent.did}`))
+```
+
+The next snippet is an alternative way to achieve the same result:
+
+```typescript
+...
+const agent = sdk.createAgent()
+agent.createNewIdentity()
+```
+
 
 - `createAgent`
 Returns an unitialized agent. A number of methods can be used to provision the newly created agent with a DID / Wallet.
-
-- `createNewAgent`
-Returns an initialized agent. The same as calling `createAgent()` followed by `agent.createNewIdentity()`
 
 ---
 
@@ -42,25 +58,11 @@ In case deterministic identity creation is desired, the `createFromMnemonic` met
 Once the keys and the DID have been derived, the `resolver` module is used to ensure that the identity is "anchored" (the meaning and implementation of this functionality is defined by the DID Method). In case the identity can not be resolved, an error is thrown.
 
 This method can be used to "recover" control over an existing identity, given only the bip39 seed phrase (i.e. the same seed phrase used in the `createFromMnemonic` call).
-# Document Title
 
-- [ ] Anatomy of an agent, i.e. the essential components
+- [Authentication](interaction_flows.md#authentication)
+- [Authorization](interaction_flows.md#authorization)
+- Verifiable Credential Creation
+- [Issuance and Receipt of Verifiable Credentials](interaction_flows.md#verifiable)
+- [Requesting, Providing and Verifying of Verifiable Credentials](interaction_flows.md#verifiable)
 
-In order for an agent to be able to fulfill it's responsibilities (e.g. interactions, credential creation, identity management), a number of interfaces / components must be provided (either upon SDK construction, or upon agent creation).
-
-The following sections will briefly outline the purpose and relationship between the various interfaces.
-
-The core components are:
-  - [ ] DidMethodKeeper
-    - [ ] Adding / retrieving a did method
-    - [ ] SDK.resolve
-    - [ ] Setting / getting the default did method
-    - [ ] Mention additional requirements this might impose on supported interactions
-  - [ ] Storage interface
-    [?] Can we use sdk-storage-typeorm docs here?
-  - [ ] Identity Wallet
-    *Mention if it's relevant to the user, or if it's used for internal things*
-    Reference jolocom lib documentation
-    Mention it's a combination of a key provider and SSI related metadata
-  - [ ] Password Store
-    [?]
+For information on creating and managing Agents, see the [Identity Management](identity_management.md) section. For information on using Agents for services and interactions, see the section on [Interaction Flows](interaction_flows.md).
