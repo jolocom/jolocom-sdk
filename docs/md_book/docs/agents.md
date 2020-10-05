@@ -25,6 +25,8 @@ agent.createNewIdentity()
 - `createAgent`
 Returns an unitialized agent. A number of methods can be used to provision the newly created agent with a DID / Wallet.
 
+- `passwordStore` - can be used by the SDK for persisting secrets (e.g. the symmetric encryption key used to encrypt / decrypt the contents of the user's Wallet). For example implementations, check out the "Naive password store" (default for node-js) and the "React native password store" (default for react-native)
+
 ---
 
 An unitialized agent (e.g. as returned by `sdk.createAgent`) can be provisioned with an identity (e.g. a DID + a set of signing keys managed by the a wallet) in a number of ways.
