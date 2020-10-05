@@ -1,7 +1,7 @@
 import { SDKError, ErrorCode } from './errors'
 import { HTTPTransport } from './http'
 import { TransportHandler, TransportDesc, TransportMessageHandler, TransportAPI } from './types'
-import { WebSocketsTransport } from './websocket'
+import { WebSocketTransport } from './websocket'
 
 export class Transportable {
   protected _transportAPI?: TransportAPI
@@ -27,7 +27,7 @@ export class TransportKeeper {
   }
 
   http = new HTTPTransport()
-  ws = new WebSocketsTransport()
+  ws = new WebSocketTransport()
 
   constructor() {
     this._transportHandlers = {

@@ -3,18 +3,21 @@ import { TransportDesc, TransportMessageHandler, TransportAPI, ChannelTransportT
 type WebSocketEventName = 'open' | 'close' | 'error' | 'message'
 
 interface WebSocket {
-  new(url: string): WebSocket
   addEventListener(name: WebSocketEventName, handler: (ev: any) => void): void
   send(data: string): void
   close(): void
 }
 
-export class WebSocketsTransport {
+interface WebSocketConstructor {
+  new(url: string): WebSocket
+}
+
+export class WebSocketTransport {
   type = ChannelTransportType.WebSockets
 
-  private _WS!: WebSocket
+  private _WS!: WebSocketConstructor
 
-  configure({ WebSocket }: { WebSocket: WebSocket }) {
+  configure({ WebSocket }: { WebSocket: WebSocketConstructor }) {
     this._WS = WebSocket
   }
 
