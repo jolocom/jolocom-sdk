@@ -27,7 +27,7 @@ export abstract class Flow<T> {
       await this.ctx.ctx.ctx.identityWallet.validateJWT(
         token,
         last(this.history),
-        this.ctx.ctx.ctx.resolver,
+        this.ctx.ctx.ctx.sdk.resolver,
       )
       this.history.push(token)
       return this.onValidMessage(token.interactionToken, token.interactionType)

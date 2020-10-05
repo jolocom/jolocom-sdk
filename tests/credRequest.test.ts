@@ -1,19 +1,17 @@
 import { claimsMetadata } from 'jolocom-lib'
-import { JolocomSDK } from '../'
+import { Agent } from '../src'
 import { createAgent, destroyAgent, meetAgent } from './util'
 
 const conn1Name = 'share1'
 const conn2Name = 'share2'
 
-let alice: JolocomSDK, bob: JolocomSDK
+let alice: Agent, bob: Agent
 
 beforeEach(async () => {
   alice = await createAgent(conn1Name)
-  alice.setDefaultDidMethod('jun')
   await alice.createNewIdentity()
 
   bob = await createAgent(conn2Name)
-  bob.setDefaultDidMethod('jun')
   await bob.createNewIdentity()
 })
 
@@ -25,7 +23,6 @@ afterEach(async () => {
 test('Credential Request interaction', async () => {
   // making them mutually resolvable
   await meetAgent(alice, bob)
-  await meetAgent(bob, alice)
 
   // ensure bob is resolvable by alice
   await expect(alice.resolve(bob.idw.did)).resolves.toMatchObject(
@@ -47,7 +44,7 @@ test('Credential Request interaction', async () => {
     },
   })
 
-  await bob.storageLib.store.verifiableCredential(bobSelfSignedCred)
+  await bob.storage.store.verifiableCredential(bobSelfSignedCred)
 
   const aliceCredReq = await alice.credRequestToken({
     callbackURL: 'nowhere',

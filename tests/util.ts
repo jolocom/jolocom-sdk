@@ -1,21 +1,29 @@
-import {
-  createConnection,
-  getConnection,
-  Connection,
-  ConnectionOptions,
-} from 'typeorm'
+import { createConnection, getConnection, ConnectionOptions } from 'typeorm'
 
 import { JolocomTypeormStorage } from '@jolocom/sdk-storage-typeorm'
-import { InternalDb } from '@jolocom/local-resolver-registrar/js/db'
 
-import { JolocomSDK, NaivePasswordStore } from '../'
+import { Agent, JolocomSDK, NaivePasswordStore } from '../src'
 
 const defaultAgentName = 'j'
+const defaultDidMethodName = 'jun'
 
-export async function createAgent(name = defaultAgentName) {
-  const connConfig = getConnectionConfig(name) as ConnectionOptions
-  const conn = await createConnection(connConfig)
-  return getSdk(conn)
+export async function createAgent(
+  name = defaultAgentName,
+  didMethodName = defaultDidMethodName,
+  pass?: string,
+) {
+  const sdk = await getSdk(name)
+
+  const didMethod = sdk.didMethods.get(didMethodName)
+  const passwordStore = pass
+    ? { getPassword: async () => pass }
+    : new NaivePasswordStore()
+  const agent = new Agent({
+    sdk,
+    passwordStore,
+    didMethod,
+  })
+  return agent
 }
 
 export async function destroyAgent(name = defaultAgentName) {
@@ -33,19 +41,22 @@ export const getConnectionConfig = (name: string) => ({
   logging: false,
 })
 
-export const getSdk = (connection: Connection, eDB?: InternalDb) =>
-  new JolocomSDK({
-    passwordStore: new NaivePasswordStore(),
-    storage: new JolocomTypeormStorage(connection),
-    eventDB: eDB,
+export const getSdk = async (name: string) => {
+  const connConfig = getConnectionConfig(name) as ConnectionOptions
+  const conn = await createConnection(connConfig)
+  return new JolocomSDK({
+    storage: new JolocomTypeormStorage(conn),
   })
+}
 
 /**
  * Allow alice to resolve bob
  */
-export async function meetAgent(alice: JolocomSDK, bob: JolocomSDK) {
+export async function meetAgent(alice: Agent, bob: Agent, both = true) {
   const bobId = bob.idw.did.split(':')[2]
-  const bobEL = await bob.storageLib.eventDB.read(bobId)
+  const bobEL = await bob.storage.eventDB.read(bobId)
 
-  await alice.didMethods.getDefault().registrar.encounter(bobEL)
+  await alice.didMethod.registrar.encounter(bobEL)
+
+  if (both) await meetAgent(bob, alice, false)
 }

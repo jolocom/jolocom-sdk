@@ -1,17 +1,14 @@
-import { JolocomSDK } from '../'
+import { Agent } from '../src'
 import { createAgent, destroyAgent, meetAgent } from './util'
 
 const conn1Name = 'auth1'
 const conn2Name = 'auth2'
-let alice: JolocomSDK, bob: JolocomSDK
+let alice: Agent, bob: Agent
 
 beforeEach(async () => {
-  alice = await createAgent(conn1Name)
-  alice.setDefaultDidMethod('jun')
+  alice = await createAgent(conn1Name, 'jun')
   await alice.createNewIdentity()
-
-  bob = await createAgent(conn2Name)
-  bob.setDefaultDidMethod('jun')
+  bob = await createAgent(conn2Name, 'jun')
   await bob.createNewIdentity()
 })
 
@@ -23,7 +20,6 @@ afterEach(async () => {
 test('Authentication interaction', async () => {
   // making them mutually resolvable
   await meetAgent(alice, bob)
-  await meetAgent(bob, alice)
 
   const aliceAuthRequest = await alice.authRequestToken({
     callbackURL: 'nowhere',

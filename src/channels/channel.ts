@@ -4,15 +4,17 @@ import {
 } from '../interactionManager/types'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { Interaction } from '../interactionManager/interaction'
-import { ChannelTransportAPI, ChannelKeeper } from './channelKeeper'
+import { ChannelKeeper } from './channelKeeper'
 import { JolocomLib } from 'jolocom-lib'
+import { TransportAPI } from '../types'
+import { Transportable } from '../transports'
 
 export interface ChannelSummary {
   initialInteraction: InteractionSummary
   interactions: InteractionSummary[]
 }
 
-interface ChannelQuery {
+interface ChannelThread {
   promise?: Promise<JSONWebToken<any>>
   resolve?: (resp: JSONWebToken<any>) => void
   reject?: (err?: Error) => void
@@ -20,14 +22,13 @@ interface ChannelQuery {
   response?: JSONWebToken<any>
 }
 
-export class Channel {
+export class Channel extends Transportable {
   public ctx: ChannelKeeper
   public id: string
   public initialInteraction: Interaction
   public authPromise: Promise<boolean>
-  private _threads: { [id: string]: ChannelQuery } = {}
+  private _threads: { [id: string]: ChannelThread } = {}
   private _threadIdList: string[] = []
-  private _transportAPI?: ChannelTransportAPI
   private _started = false
   private _startedPromise: Promise<void> | null = null
   private _resolveAuthPromise!: (value?: boolean) => void
@@ -35,12 +36,12 @@ export class Channel {
   public constructor(
     ctx: ChannelKeeper,
     initialInteraction: Interaction,
-    transportAPI?: ChannelTransportAPI,
+    transportAPI?: TransportAPI,
   ) {
+    super(transportAPI)
     this.ctx = ctx
     this.id = initialInteraction.id
     this.initialInteraction = initialInteraction
-    this._transportAPI = transportAPI
 
     this.authPromise = new Promise<boolean>(resolve => {
       this._resolveAuthPromise = resolve
@@ -72,21 +73,12 @@ export class Channel {
     }
   }
 
-  get transportAPI() {
-    if (!this._transportAPI) throw new Error('no channel transport')
-    return this._transportAPI
+  public send(msg: JSONWebToken<any>) {
+    return this.transportAPI.send(msg.encode())
   }
 
-  set transportAPI(api: ChannelTransportAPI) {
-    this._transportAPI = api
-  }
-
-  public send(msg: string) {
-    return this.transportAPI.send(msg)
-  }
-
-  public async processJWT(jwt: string) {
-    const interxn = await this.ctx.ctx.processJWT(jwt)
+  public async processJWT(jwt: string, transportAPI?: TransportAPI) {
+    const interxn = await this.ctx.ctx.processJWT(jwt, transportAPI)
     if (interxn.id === this.id) {
       // this is the channel establishment response, update if necessary
       this.initialInteraction = interxn
@@ -139,19 +131,34 @@ export class Channel {
   }
 
   public async start(onInterxnCb?: (interxn: Interaction) => Promise<void>) {
-    this._ensureAuthenticated()
+    if (this._started) throw new Error('channel already started')
 
-    if (!this._started) {
-      this._started = true
-      this._startedPromise = new Promise(async resolve => {
-        while (this._started) {
-          const msg = await this.transportAPI.receive()
-          const interxn = await this.processJWT(msg)
-          onInterxnCb && onInterxnCb(interxn)
+    this._startedPromise = (async () => {
+      try {
+        this._started = true
+
+        if (!this._transportAPI) {
+          const flowState =
+            this.initialInteraction.flow.getState() as EstablishChannelFlowState
+          const transportConfig = flowState.transport
+          if (!transportConfig) throw new Error('no transport')
+
+
+          this.transportAPI = await this.ctx.ctx.sdk.transports.start(
+            transportConfig,
+            async msg => {
+              const interxn = await this.processJWT(msg, this.transportAPI)
+              onInterxnCb && onInterxnCb(interxn)
+            }
+          )
         }
-        resolve()
-      })
-    }
+
+        if (this.transportAPI.ready) await this.transportAPI.ready
+      } catch (err) {
+        this._started = false
+        throw err
+      }
+    })()
 
     return this._startedPromise
   }
@@ -159,33 +166,33 @@ export class Channel {
   public stop() {
     if (!this._started) return
 
-    this.transportAPI.stop()
+    this.transportAPI.stop && this.transportAPI.stop()
     this._started = false
   }
 
-  public async sendQuery<T>(tokenOrJwt: JSONWebToken<T> | string) {
-    let token: JSONWebToken<T>, jwt: string
+  public async startThread(tokenOrJwt: Interaction | JSONWebToken<any> | string) {
+    let token: JSONWebToken<any>
     if (typeof tokenOrJwt === 'string') {
-      jwt = tokenOrJwt
       token = JolocomLib.parse.interactionToken.fromJWT(tokenOrJwt)
+    } else if (tokenOrJwt instanceof Interaction) {
+      token = tokenOrJwt.firstMessage
     } else {
       token = tokenOrJwt
-      jwt = token.encode()
     }
     const qId = token.nonce
 
-    const query: ChannelQuery = {}
-    query.promise = new Promise((resolve, reject) => {
-      query.resolve = resolve
-      query.reject = reject
-      return this.send(jwt)
+    const thread: ChannelThread = {}
+    thread.promise = new Promise((resolve, reject) => {
+      thread.resolve = resolve
+      thread.reject = reject
+      return this.send(token)
     })
 
-    this._threads[qId] = query
+    this._threads[qId] = thread
     this._threadIdList.push(qId)
 
     // TODO add expiry mechanism to reject and delete query from memory once tokens expire
 
-    return query.promise
+    return thread.promise
   }
 }

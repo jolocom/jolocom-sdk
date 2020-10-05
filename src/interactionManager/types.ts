@@ -5,8 +5,7 @@ import {
 import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
 import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRequest'
 import { CredentialResponse } from 'jolocom-lib/js/interactionTokens/credentialResponse'
-import { ChannelTransport } from '../channels'
-import { IdentitySummary } from '../types'
+import { IdentitySummary, ChannelTransportDesc } from '../types'
 import { FlowState } from './flow'
 
 export enum InteractionRole {
@@ -14,18 +13,9 @@ export enum InteractionRole {
   Responder = 'responder',
 }
 
-// TODO define and refactor how the UI components/containers handle the InteractionSummary.
 export interface InteractionSummary {
   initiator: IdentitySummary
   state: FlowState
-}
-
-export enum InteractionTransportType {
-  QR = 'QR',
-  Deeplink = 'Deeplink',
-  HTTP = 'HTTP',
-  Bluetooth = 'Bluetooth',
-  NFC = 'NFC',
 }
 
 export enum FlowType {
@@ -46,7 +36,7 @@ export enum EstablishChannelType {
 }
 export interface EstablishChannelRequest {
   description: string
-  transports: ChannelTransport[]
+  transports: ChannelTransportDesc[]
 }
 export interface EstablishChannelResponse {
   transportIdx: number
@@ -54,8 +44,8 @@ export interface EstablishChannelResponse {
 export interface EstablishChannelFlowState {
   description: string
   established: boolean
-  transports?: ChannelTransport[]
-  transport?: ChannelTransport
+  transports?: ChannelTransportDesc[]
+  transport?: ChannelTransportDesc
 }
 
 export enum AuthorizationType {

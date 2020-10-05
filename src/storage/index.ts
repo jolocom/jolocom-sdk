@@ -1,13 +1,9 @@
 import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
 import { DidDocument } from 'jolocom-lib/js/identity/didDocument/didDocument'
-import {
-  CredentialOfferMetadata,
-  CredentialOfferRenderInfo,
-} from 'jolocom-lib/js/interactionTokens/interactionTokens.types'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { InternalDb } from '@jolocom/local-resolver-registrar/js/db'
 
-import { IdentitySummary } from '../types'
+import { IdentitySummary, CredentialMetadataSummary } from '../types'
 
 export interface EncryptedSeedAttributes {
   encryptedEntropy: string
@@ -18,16 +14,6 @@ export interface EncryptedWalletAttributes {
   id: string
   encryptedWallet: string
   timestamp: number
-}
-
-export interface CredentialMetadataSummary extends CredentialMetadata {
-  issuer: IdentitySummary
-}
-
-export interface CredentialMetadata {
-  type: string
-  renderInfo?: CredentialOfferRenderInfo
-  metadata?: CredentialOfferMetadata
 }
 
 /**
@@ -41,7 +27,9 @@ export interface IStorageStore {
   setting(key: string, value: any): Promise<void>
   verifiableCredential(vCred: SignedCredential): Promise<void>
   encryptedWallet(args: EncryptedWalletAttributes): Promise<void>
-  credentialMetadata(credentialMetadata: CredentialMetadataSummary): Promise<void>
+  credentialMetadata(
+    credentialMetadata: CredentialMetadataSummary,
+  ): Promise<void>
   issuerProfile(issuer: IdentitySummary): Promise<void>
   didDoc(doc: DidDocument): Promise<void>
   interactionToken(token: JSONWebToken<any>): Promise<void>
@@ -79,7 +67,6 @@ export interface IStorage {
 }
 
 export interface IPasswordStore {
-  savePassword: (password: string) => Promise<void>
   getPassword: () => Promise<string>
 }
 
@@ -92,9 +79,5 @@ export class NaivePasswordStore implements IPasswordStore {
 
   public async getPassword() {
     return this._pass
-  }
-
-  public async savePassword(pass: string) {
-    this._pass = pass
   }
 }

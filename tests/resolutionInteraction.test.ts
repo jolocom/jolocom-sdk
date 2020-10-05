@@ -1,17 +1,15 @@
-import { JolocomSDK } from '../'
+import { Agent } from '../src'
 
 import { createAgent, destroyAgent, meetAgent } from './util'
 const conn1Name = 'resolution1'
 const conn2Name = 'resolution2'
-let service: JolocomSDK, user: JolocomSDK
+let service: Agent, user: Agent
 
 beforeEach(async () => {
-  service = await createAgent(conn1Name)
-  service.setDefaultDidMethod('jun')
+  service = await createAgent(conn1Name, 'jun')
   await service.createNewIdentity()
 
-  user = await createAgent(conn2Name)
-  user.setDefaultDidMethod('jun')
+  user = await createAgent(conn2Name, 'jun')
   await user.createNewIdentity()
 })
 
@@ -22,7 +20,7 @@ afterEach(async () => {
 
 test('Resolution interaction', async () => {
   // insert the service's KEL to the user DB (make the service resolvable)
-  await meetAgent(user, service)
+  await meetAgent(user, service, false)
 
   // ensure the service is resolvable by the user
   await expect(user.resolve(service.idw.did)).resolves.toBeTruthy()
