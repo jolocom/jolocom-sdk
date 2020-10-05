@@ -27,155 +27,22 @@ Interested in our vision? Take a look at our [whitepaper](https://jolocom.io/wp-
 
 <!-- markdown-toc end -->
 
-## Prerequisites
+# Jolocom SDK
 
-- Set-up requires [Node.js](https://nodejs.org/en/download/) v10 to be installed on your computer.
-- We use [Yarn](https://yarnpkg.com) as our package manager.
+The Jolocom SDK is a toolkit for managing SSI Agents and the interactions carried out between them, allowing services and clients to work together seamlessly with minimal trust assumptions and maximum security. For optimal utility and interoperability, the SDK builds upon implementations of the following specifications:
 
-## Installation
+- [W3C Decentralized Identifiers (DIDs)](https://www.w3.org/TR/did-core/): To provide identifiers for Agents managed by the SDK.
+- [W3C Verifiable Credentials (VCs)](https://www.w3.org/TR/vc-data-model/): To allow for verifiable attestations to be exchanged and utilised by Agents.
 
-### In another project
-
-1. use `npm i jolocom-sdk jolocom-lib` or `yarn add jolocom-sdk jolocom-lib`
-2. `import { JolocomSDK } from 'jolocom-sdk'`
-
-An instance of an agent can be instantiated with crypto material in a variety of
-ways:
-
-- `JolocomSDK.fromMnemonic` BIP39 12 word seed phrase
-- `JolocomSDK.fromStore` Connection to a database with seed material
-- `JolocomSDK.newDIDFromSeed`Buffer of arbitrary seed entropy
-
-NOTE: using the arbitrary input buffer registers a new identity on the Jolocom
-DID Method
-
-## Usage
+The SDK is composed of a few core concepts which work together to provide a framework for making use of Decentralized Identities.
 
 The SDK provides an interface to the SSI ecosystem via Agents and Interactions. It is designed to streamline the creation, validation, authentication and processing of signed messages in order to facilitate different protocols enacted between Agents. Messages created by Agents are secured by the security mechanism of their chosen [DID Method](https://w3c.github.io/did-core/).
 
-### Authentication
+The SDK itself functions as an Agent Factory. It manages a storage connection and a collection of registered DID Methods, providing storage access and resolution capabilities to the Agents which it creates.
 
-An authentication flow is a simple protocol where one party requests that another party authenticate themselves:
+// TODO add links
+For instructions on how to install the Jolocom SDK, check out the [Installation and Configuration](./docs/md_book/docs/sdk_install_conf.md) section in the documentation folder. For details on how to use the SDK to create "Agents" and subsequently participate in interactions, see the [Agents](./docs/md_book/docs/agents.md) and the [Interactions](./docs/md_book/docs/interaction_flows.md) sections. For API documentation, see the API docs.
 
-```typescript
-// Hello Alice!
-const alice = new JolocomSDK(optionsForAlice)
-await alice.init()
-
-// Hello Bob!
-const bob = new JolocomSDK(optionsForBob)
-await bob.init()
-
-// Alice would like to know that Bob is indeed Bob
-// so she asks him!
-const authRequest = await alice.authRequest({
-  callbackURL: myCallbackURL,
-  description: 'are you bob?',
-})
-
-// Bob hears her ask
-const bobsInteraction = await bob.processJWT(authRequest)
-
-// and decides to respond to her question
-const bobsAuthResponse = await bobsInteraction.createAuthenticationResponse()
-
-// Alice hears his answer, and knows that he is indeed Bob!
-const alicesInteraction = await alice.processJWT(bobsAuthResponse.encode())
-```
-
-### Credential Request
-
-A Credential Request is a message requesting a set of [Verifiable Credentials](https://www.w3.org/TR/vc-data-model/), each of which may have a set of requirements:
-
-```typescript
-// Hello Alice!
-const alice = new JolocomSDK(optionsForAlice)
-await alice.init()
-
-// Hello Bob!
-const bob = new JolocomSDK(optionsForBob)
-await bob.init()
-
-// Alice would like to know Bob's name, and that he is older than 18 years
-// so she asks him!
-const authRequest = await alice.credRequestToken({
-  callbackURL: myCallbackURL,
-  credentialRequirements: [
-    {
-      type: ['Name'],
-      constraints: [],
-    },
-    {
-      type: ['Age'],
-      constraints: [constraintFunctions.greater('age', '18')],
-    },
-  ],
-})
-
-// Bob hears her ask
-const bobsInteraction = await bob.processJWT(authRequest)
-
-// and decides to respond to her question
-const bobsAuthResponse = await bobsInteraction.createCredentialResponse([
-  ...bobsCredentials,
-])
-
-// Alice hears his answer, and knows that he is indeed over 18, and that his name is Bob!
-const alicesInteraction = await alice.processJWT(bobsAuthResponse.encode())
-```
-
-### Credential Issance
-
-A Credential Issuance is a process of issuing a set of [Verifiable Credentials](https://www.w3.org/TR/vc-data-model/), potentially based on a set of required credentials:
-
-```typescript
-// Hello Alice!
-const alice = new JolocomSDK(optionsForAlice)
-await alice.init()
-
-// Hello Bob!
-const bob = new JolocomSDK(optionsForBob)
-await bob.init()
-
-// Alice would like to give bob a Happy Birthday credential
-// so she offers him one!
-const credOffer = await alice.credOfferToken({
-  callbackURL: myCallbackURL,
-  offeredCredentials: [{
-    type: 'HappyBirthdayCredential',
-  }],
-})
-
-// Bob hears her ask
-const bobsInteraction = await bob.processJWT(credOffer)
-
-// and decides to accept the birthday card
-const bobsAuthResponse = await bobsInteraction.createCredentialOfferResponseToken([
-  {type: 'HappyBirthdayCredential'}
-])
-
-// Alice hears his answer
-const alicesInteraction = await alice.processJWT(bobsAuthResponse.encode())
-
-// Creates an issuance token with a new credential
-const alicesIssuence = await alicesInteraction.createCredentialReceiveToken([
-  await alice.signedCredential({
-    metadata: {
-      type: ['Credential', 'HappyBirthdayCredential'],
-      name: 'Birthday Card',
-      context: [{
-        HappyBirthdayCredential: 'https://identity.jolocom.com/terms/HappyBirthdayCredential',
-        schema: 'https://schema.org/',
-      }]
-    },
-    subject: bob.idw.did,
-    claim: {},
-  }),
-])
-
-// And responds with the newly issued Birthday Card credential
-const bobReceives = await bob.processJWT(alicesIssuence.encode())
-```
 
 ## Development
 

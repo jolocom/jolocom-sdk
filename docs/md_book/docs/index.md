@@ -1,17 +1,8 @@
-# Introduction
+- Readme : general introduction to the sdk, specifically it's purpose and general idea
+- Installation & Configuration : How to install, what is required, how to instantiate. How to configure DID Methods and register plugins on an instance
+- Agents : How to instantiate agents given a configured / non-configured SDK instance. What do they inherit from the SDK
+- Interactions ...
 
-The Jolocom SDK is a toolkit for managing SSI Agents and the interactions carried out between them, allowing services and clients to work together seamlessly with minimal trust assumptions and maximum security. For optimal utility and interoperability, the SDK builds upon implementations of the following specifications:
-
-- [W3C Decentralized Identifiers (DIDs)](https://www.w3.org/TR/did-core/): To provide identifiers for Agents managed by the SDK.
-- [W3C Verifiable Credentials (VCs)](https://www.w3.org/TR/vc-data-model/): To allow for verifiable attestations to be exchanged and utilised by Agents.
-
-The SDK is composed of a few core concepts which work together to provide a framework for making use of Decentralized Identities.
-
-## Jolocom SDK
-
-The SDK itself functions as an Agent Factory. It manages a storage connection and a collection of registered DID Methods, providing storage access and resolution capabilities to the Agents which it creates.
-
-For more details, see the [Identity Management](identity_management.md) section. For API documentation, see the API docs.
 
 ## Agents
 
