@@ -10,9 +10,13 @@ Each interaction is defined by:
 
 ## Peer Resolution
 
-| Using another Agent as a Resolver
+> Using another Agent as a Resolver
 
 Peer resolution consists of a simple request-response message exchange, where the Requester asks the Resolver to perform [DID resolution](https://w3c-ccg.github.io/did-resolution/) and return the result.
+
+Peer resolution allows for the resolution of Identifiers which rely on a local state proof (e.g. KERI/`did:jun` and `did:peer`) instead of a globally resolvable state. The successful result of resolving such Identifiers is cached by default by the SDK, and they are resolvable by any Agent instance which shares the same EventDB. Think of such a protocol as an "introduction" or "onboarding" of a private DID into a backend system.
+
+Services which are intended for consumption by natural persons are encouraged to provide at least one method for Agents to resolve themselves using this flow, as these "local" Identifiers are designed to solve critical GDPR and User privacy issues affecting DID methods which rely on a global shared state like Blockchains.
 
 #### Roles
 
@@ -28,28 +32,32 @@ Peer resolution consists of a simple request-response message exchange, where th
 
 A simple Peer Resolution flow between our two Agents from the [Identity Management example](./agents.md#examples) looks as follows:
 
+Alice creates a resolution request:
+
 ```typescript
 const aliceResRequest = await alice.createResolutionRequest({
   description: 'introduce yourself',
   callbackURL: 'https://example.com/onboarding',
 })
+```
 
-// ------- the request is received by Bob ------- //
+Alices request is received by Bob (by some means, e.g. QR code) and processed:
+
+```typescript
 const bobsInteraction = await bob.processJWT(aliceResRequest)
 const bobsResResponse = await bobsInteraction.createResolutionResponse()
+```
 
-// ------- Bob's response is received by Alice ------- //
+Bob's response is received by Alice (e.g. via POSTing to the `callbackURL`):
+
+```typescript
 // this adds Bob's identity data (a Key Event Log) to Alice's storage, such that she can now resolve his DID and verify signatures made by him
 const alicesInteraction = await alice.processJWT(bobsResResponse.encode())
 ```
 
-Peer resolution allows for the resolution of Identifiers which rely on a local state proof (e.g. KERI/`did:jun` and `did:peer`) instead of a globally resolvable state. The successful result of resolving such Identifiers is cached by default by the SDK, and they are resolvable by any Agent instance which shares the same EventDB. Think of such a protocol as an "introduction" or "onboarding" of a private DID into a backend system.
-
-Services which are intended for consumption by natural persons are encouraged to provide at least one method for Agents to resolve themselves using this flow, as these "local" Identifiers are designed to solve critical GDPR and User privacy issues affecting DID methods which rely on a global shared state like Blockchains.
-
 ## Authentication
 
-| Proving control over an Identifier.
+> Proving control over an Identifier.
 
 The Authentication flow consists of a simple request-response message exchange, where the contents of the response must match those of the request. Because all Messages are signed and authenticated, the response functions as proof of control by nature of being correctly signed by the keys listed in the DID Document of the issuer. Because of this, in scenarios where a more complex functionality (e.g. Credential Verification) is needed, an additional Authentication flow is not necessary.
 
@@ -67,23 +75,32 @@ The Authentication flow consists of a simple request-response message exchange, 
 
 A simple Authentication flow between our two Agents looks as follows:
 
+Alice creates an Authentication request:
+
 ```typescript
 const authRequest = await alice.authRequest({
   callbackURL: 'https://example.com/auth',
   description: 'are you bob?',
 })
+```
 
+Alices request is broadcast and received and processed by Bob:
+
+```typescript
 // ------- the request is received by Bob ------- //
 const bobsInteraction = await bob.processJWT(authRequest)
 const bobsAuthResponse = await bobsInteraction.createAuthenticationResponse()
+```
 
-// ------- Bob's response is received by Alice ------- //
+Bob's response is received and processed by Alice:
+
+```typescript
 const alicesInteraction = await alice.processJWT(bobsAuthResponse.encode())
 ```
 
 ## Authorization
 
-| Giving consent or permission.
+> Giving consent or permission.
 
 The Authorization flow consists of a simple request-response message exchange, where the Initiator requests authorization from the Authorizer to carry out some action. It is similar to the Authentication flow in structure, however the intent of the interaction is different, and it will render differently in the Jolocom Smartwallet. Authentication is about _proving_ the Identity of an agent (e.g. SSO), while Authorization is about _giving permission or privilege_ for a service to act on an agents behalf.
 
@@ -101,6 +118,8 @@ The Authorization flow consists of a simple request-response message exchange, w
 
 A simple Authorization flow between our two Agents from before looks as follows:
 
+Alice creates an Authorization request:
+
 ```typescript
 const aliceAuthZRequest = await alice.authorizationRequestToken({
   description: 'Front Door',
@@ -108,18 +127,24 @@ const aliceAuthZRequest = await alice.authorizationRequestToken({
   action: 'Open the door',
   callbackURL: 'https://example.com/authz/',
 })
+```
 
-// ------- the request is received by Bob ------- //
+Alices request is broadcast and received and processed by Bob:
+
+```typescript
 const bobsInteraction = await bob.processJWT(aliceAuthZRequest)
 const bobsAuthZResponse = await bobsInteraction.createAuthorizationResponse()
+```
 
-// ------- Bob's response is received by Alice ------- //
+Bob's response is received and processed by Alice:
+
+```typescript
 const alicesInteraction = await alice.processJWT(bobsAuthZResponse.encode())
 ```
 
 ## Verifiable Credential Issuance
 
-| Creating an authenticated statement about an Identifier.
+> Creating an authenticated statement about an Identifier.
 
 The Issuance flow consists of a three step message exchange between two parties, the Issuer and the Holder.
 
@@ -138,6 +163,8 @@ The Issuance flow consists of a three step message exchange between two parties,
 
 In this simple example, Alice is issuing Bob the Credential she created for him in the [Verifiable Credentials](./credentials.md) section:
 
+Alice creates a Credential Offer:
+
 ```typescript
 const aliceCredOffer = await alice.credentialOffer({
   callbackURL: 'https://example.com/issuance',
@@ -147,27 +174,36 @@ const aliceCredOffer = await alice.credentialOffer({
     },
   ],
 })
+```
 
-// ------- the offer is received by Bob ------- //
+Alices offer is broadcast and received and processed by Bob:
+
+```typescript
 const bobsInteraction = await bob.processJWT(aliceCredOffer)
 const bobsCredSelection = await bobsInteraction.createCredentialOfferResponseToken(
   [{ type: 'SimpleExampleCredential' }],
 )
+```
 
-// ------- Bob's selection is received by Alice ------- //
+Bob's response is received and processed by Alice:
+
+```typescript
 const alicesInteraction = await alice.processJWT(bobsCredSelection.encode())
 const alicesIssuance = await alicesInteraction.createCredentialReceiveToken(
   alicesCredAboutBob,
 )
+```
 
-// ------- Bob Receives and stores the newly issued Credential ------- //
-// Note that storage of the credential is handled automatically by the SDK
+Bob receives Alice's second message, the issuance, and stores the issued Credentials.
+Note that storage of the credential is handled automatically by the Agent.
+
+```typescript
 const bobReceives = await bob.processJWT(alicesIssuence.encode())
 ```
 
 ## Credential Verification
 
-| Proving a set of statements about an Identifier.
+> Proving a set of statements about an Identifier.
 
 The Credential Verification flow is a simple request-response message exchange between the Verifier and the Prover.
 
@@ -185,6 +221,8 @@ The Credential Verification flow is a simple request-response message exchange b
 
 In this example, Alice is requesting from Bob the same type of Credential she issued for him in the [Credential Issuance](#verifiable-credential-issuance) section:
 
+Alice creates a Credential Offer:
+
 ```typescript
 import { JolocomLib } from '@jolocom/sdk'
 
@@ -200,14 +238,20 @@ const aliceCredRequest = await alice.credentialRequestToken({
     },
   ],
 })
+```
 
-// ------- the request is received by Bob ------- //
+Alices request is broadcast and received and processed by Bob:
+
+```typescript
 const bobsInteraction = await bob.processJWT(aliceCredRequest)
 const bobsCredResponse = await bobsInteraction.createCredentialResponse([
   alicesCredAboutBob.id, // use the ID from the aliceCredAboutBob instance
 ])
+```
 
-// ------- Bob's response is received by Alice ------- //
+Bob's response is received and verified by Alice:
+
+```typescript
 const alicesInteraction = await alice.processJWT(bobsCredResponse.encode())
 ```
 
