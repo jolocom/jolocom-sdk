@@ -3,16 +3,15 @@
 - Agents : How to instantiate agents given a configured / non-configured SDK instance. What do they inherit from the SDK
 - Interactions ...
 
-
 ## Agents
 
 An Agent is the core of any service built with the SDK. Each Agent possesses a DID and the capability to perform cryptographic operations with the keys associated with it's DID. Agents are suitable for all roles in any SSI interaction, and can be used for client-server or P2P style services. Common actions which Agents carry out include:
 
 - [Authentication](interaction_flows.md#authentication)
 - [Authorization](interaction_flows.md#authorization)
-- Verifiable Credential Creation
-- [Issuance and Receipt of Verifiable Credentials](interaction_flows.md#verifiable)
-- [Requesting, Providing and Verifying of Verifiable Credentials](interaction_flows.md#verifiable)
+- [Verifiable Credential Creation](credentials.md)
+- [Issuance and Receipt of Verifiable Credentials](interaction_flows.md#verifiable-credential-issuance)
+- [Requesting, Providing and Verifying of Verifiable Credentials](interaction_flows.md#credential-verification)
 
 For information on creating and managing Agents, see the [Identity Management](identity_management.md) section. For information on using Agents for services and interactions, see the section on [Interaction Flows](interaction_flows.md).
 

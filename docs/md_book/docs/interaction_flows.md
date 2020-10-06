@@ -26,7 +26,7 @@ Peer resolution consists of a simple request-response message exchange, where th
 
 #### Examples
 
-A simple Peer Resolution flow between two Agents looks as follows:
+A simple Peer Resolution flow between our two Agents from the [Identity Management example](./agents.md#examples) looks as follows:
 
 ```typescript
 const aliceResRequest = await alice.createResolutionRequest({
@@ -43,7 +43,7 @@ const bobsResResponse = await bobsInteraction.createResolutionResponse()
 const alicesInteraction = await alice.processJWT(bobsResResponse.encode())
 ```
 
-Peer resolution allows for the resolution of Identifiers which rely on a local state proof (e.g. KERI and `did:peer`) instead of a globally resolvable state. The successful result of resolving such Identifiers is cached by default by the SDK, and they are resolvable by any Agent instance which shares the same EventDB. Think of such a protocol as an "introduction" or "onboarding" of a private DID into a backend system.
+Peer resolution allows for the resolution of Identifiers which rely on a local state proof (e.g. KERI/`did:jun` and `did:peer`) instead of a globally resolvable state. The successful result of resolving such Identifiers is cached by default by the SDK, and they are resolvable by any Agent instance which shares the same EventDB. Think of such a protocol as an "introduction" or "onboarding" of a private DID into a backend system.
 
 Services which are intended for consumption by natural persons are encouraged to provide at least one method for Agents to resolve themselves using this flow, as these "local" Identifiers are designed to solve critical GDPR and User privacy issues affecting DID methods which rely on a global shared state like Blockchains.
 
@@ -199,7 +199,7 @@ const aliceCredRequest = await alice.credentialRequestToken({
 // ------- the request is received by Bob ------- //
 const bobsInteraction = await bob.processJWT(aliceAuthZRequest)
 const bobsAuthZResponse = await bobsInteraction.createCredentialResponse([
-  alicesCredAboutBob.id,
+  alicesCredAboutBob.id, // use the ID from the aliceCredAboutBob instance
 ])
 
 // ------- Bob's response is received by Alice ------- //

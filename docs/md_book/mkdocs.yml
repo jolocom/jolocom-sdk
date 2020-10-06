@@ -1,6 +1,7 @@
 site_name: Jolocom SDK
 nav:
   - index.md
-  - identity_management.md
+  - sdk_install_conf.md
+  - agents.md
   - interaction_flows.md
-  - did_methods.md
+  - credentials.md
