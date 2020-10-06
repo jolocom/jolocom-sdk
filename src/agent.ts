@@ -156,18 +156,6 @@ export class Agent {
   }
 
   /**
-   * Loads an Identity if one is not already instantiated
-   *
-   * @param did - DID of Identity to be loaded from DB
-   * @returns Identity An identity corrosponding to the given DID
-   */
-  public async prepareIdentityWallet(did?: string): Promise<IdentityWallet> {
-    if (this._identityWallet) return this._identityWallet
-
-    return this.loadIdentity(did)
-  }
-
-  /**
    * Loads an Identity based on a buffer of entropy.
    *
    * @param entropy - Buffer of private entropy to generate keys with
