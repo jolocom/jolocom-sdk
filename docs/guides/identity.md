@@ -10,9 +10,9 @@ To provision an Agent with a new random identity (i.e. DID and set of keys), the
 sdk.createNewAgent('demoPassword', 'jolo')
 ```
 
-Based on the DID Method the Agent is configured to use, the appropriate identity creation / "anchoring" operations are executed (e.g. creating and broadcasting Blockchain transactions, interfacing with various distributed storage backends, etc.). If succesfull, the function should return the DID Document, and the corresponding signing keys, for the newly created identity.
+Based on the DID Method the Agent is configured to use, the appropriate identity creation / "anchoring" operations are executed (e.g. creating and broadcasting Blockchain transactions, interfacing with various distributed storage backends, etc.). If succesfull, the function returns the DID Document, and the corresponding signing keys, for the newly created identity.
 
-Besides returning the data associated with the new identity, the Agent will also persist the created encrypted wallet (containing keys associated with the identity) and DID Document locally (allowing for the identity to be reused at later points), using the storage backend.
+The Agent will also persist the created encrypted wallet (containing keys associated with the identity) and DID Document locally (allowing for the identity to be reused at later points), using the storage backend.
 
 Two optional arguments can be provided to the `createNewAgent` function:
 
@@ -21,6 +21,10 @@ Two optional arguments can be provided to the `createNewAgent` function:
 - `didMethodName` - The DID Method used by the Agent. This DID Method will be used when creating an identity for the agent, as well as when recovering an identity from seed material. The Agent will still retain the ability to resolve across all DID Methods supported by the SDK. In case no argument is provided the DID Method registered as default on the SDK instance is used.
 
 ### Create an Agent based on a BIP39 mnemonic
+
+In the previous section, the created Agent was provisioned with a newly created DID, as well as a set of signing keys. The only way to reuse an identity created this way is by exporting and later reusing the returned Encrypted Wallet.
+
+In case deterministic identity creation is desired, the `agent.createFromMnemonic` method can be used as follows:
 
 ```typescript
 // the returned Agent instsance is not yet provisioned with an identity
@@ -31,16 +35,21 @@ agent.createFromMnemonic(
 )
 ```
 
-In case deterministic identity creation is desired, the `agent.createFromMnemonic` method can be used. This function allows for the deterministic creation of a DID, and the associated keys. A BIP39 compliant mnemonic can be passed in. In case the used `registrar` does not implement the `recoverFromSeed` method, an error is thrown. The deterministic derivation of keys from a seed is delegated to the `registrar` implementation. Internally, BIP32, SLIP0010, or other specifications can be used. The `registrar` implementation encapsulates the specification, as well as the metadata required for derivation (e.g. paths, indexes, etc.)
+This function allows for the deterministic creation of a DID, and the associated keys. A BIP39 compliant mnemonic is expected as an argument. In case the used `registrar` does not implement the `recoverFromSeed` method, an error is thrown. The deterministic derivation of keys from a seed is delegated to the `registrar` implementation. Internally, BIP32, SLIP0010, or other specifications can be used. The `registrar` implementation encapsulates the specification, as well as the metadata required for derivation (e.g. paths, indexes, etc.)
 
-In case the identity is already registered, an error is thrown (in order to prevent accidental identity updates).
-In case the desired functionality is to register the identity regardless of whether it's already created / anchored (as defined by the DID Method), a second boolean argument `shouldOverwrite` can be set to `true`.
+Based on the DID Method the Agent is configured to use, the appropriate identity creation / "anchoring" operations are then executed (e.g. creating and broadcasting Blockchain transactions, interfacing with various distributed storage backends, etc.). If succesfull, the function returns the DID Document, and the corresponding signing keys, for the recovered identity.
 
-*Note, the `createFromMnemonic` function will be exposed at the sdk level in a future update*
+The Agent will also persist the recovered encrypted wallet (containing the recovered keys) and DID Document locally (allowing for the identity to be reused at later points), using the storage backend.
+
+*In case the identity is already registered, an error is thrown (in order to prevent accidental identity updates). In case the desired functionality is to register the identity and overwrite any existing entries (as defined by the DID Method) a second boolean argument `shouldOverwrite` can be set to `true`.*
+
+*Note - the `createFromMnemonic` function will be exposed at the sdk level in a future update*
 
 ### Loading an existing identity
 
-To provision the Agent with a previously created identity, the following function can be used:
+As mentioned in the previous sections, using `sdk.createNewIdentity` or `agent.createFromMnemonic` will persist the created / recovered encrypted wallet data using the `storage` backend the SDK was configured with.
+
+To provision the Agent with an identity persisted in the `storage` backend the following function can be used:
 
 ```typescript
 sdk.loadIdentity('demoPassword', 'did:jolo:aaa...fff')
