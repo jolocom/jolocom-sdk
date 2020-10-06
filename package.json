@@ -12,7 +12,8 @@
     "typeorm": "ts-node -O '{\"module\": \"commonjs\"}' -r ./bin/repl.ts node_modules/.bin/typeorm",
     "lint": "eslint --ext .ts --ext .tsx .",
     "format": "yarn lint --fix",
-    "test": "jest"
+    "test": "jest",
+    "docs": "rm -rf docs/api; typedoc"
   },
   "private": false,
   "devDependencies": {
@@ -53,6 +54,7 @@
     "ts-loader": "3.5.0",
     "ts-node": "^9.0.0",
     "tslib": "^1.7.1",
+    "typedoc": "^0.19.2",
     "typeorm": "^0.2.25",
     "typescript": "^3.7.5",
     "yarn": "^1.22.0"

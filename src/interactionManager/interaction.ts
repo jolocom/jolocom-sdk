@@ -61,12 +61,6 @@ import { last } from 'ramda'
 import { TransportAPI, TransportDesc, InteractionTransportType } from '../types'
 import { Transportable } from '../transports'
 
-/***
- * - initiated by InteractionManager when an interaction starts
- * - handles the communication channel of the interaction
- * - holds the instance of the particular interaction (e.g. CredentialOffer, Authentication)
- */
-
 const interactionFlowForMessage = {
   [InteractionType.CredentialOfferRequest]: CredentialOfferFlow,
   [InteractionType.CredentialRequest]: CredentialRequestFlow,
@@ -79,18 +73,50 @@ const interactionFlowForMessage = {
   [SigningType.SigningRequest]: SigningFlow,
 }
 
+/**
+ * This class is instantiated by the {@link InteractionManager} when it needs to
+ * keep track of an ongoing interaction with another identity. It provides the
+ * main API to respond to and get information about an ongoing interaction.
+ *
+ * Two identities interact by sending each other signed messages wrapped in
+ * {@link JSONWebToken}. The messages have to have correct types and
+ * follow the sequence expected by one of the predefined {@link Flow}s.
+ *
+ * {@link Interaction} objects hold a list of tokens exchanged in the
+ * interaction, and an instance of the appropriate {@link Flow} class to handle
+ * this interaction. Consumers of this object should generally not need to
+ * directly interaction with the {@link Flow} instance.
+ *
+ */
 export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable {
   private messages: Array<JSONWebToken<any>> = []
+
+  /**
+   * The `id` is currently the {@link JSONWebToken.nonce} of the first token
+   */
   public id: string
   public ctx: InteractionManager
   public flow: F
 
+  /**
+   * A map of all interaction participants to {@link jolocom-lib/js/identity/identity#Identity} objects. This is
+   * incrementally built up as the interaction receives new messages.
+   */
   public participants: {
     [k in InteractionRole]?: Identity
   } = {}
 
   role?: InteractionRole
 
+  /**
+   * @param ctx - The manager of this interaction
+   * @param transportAPI - reference to an open transport to reach the
+   *                       {@link Interaction.participants}
+   * @param id - A unique identifier for this interaction
+   * @param interactionType - the {@link InteractionType} of this interaction,
+   *    which must match one of the known initial flow message types registered
+   *    in {@link interactionFlowForMessage}
+   */
   public constructor(
     ctx: InteractionManager,
     id: string,
@@ -135,6 +161,10 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
 
 
   // TODO Try to write a respond function that collapses these
+
+  /**
+   * @category Auth
+   */
   public async createAuthenticationResponse() {
     const request = this.findMessageByType(
       InteractionType.Authentication,
@@ -151,6 +181,9 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     )
   }
 
+  /**
+   * @category Establish Channel
+   */
   public async createEstablishChannelResponse(transportIdx: number) {
     const request = this.findMessageByType(
       EstablishChannelType.EstablishChannelRequest,
@@ -200,6 +233,9 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     )
   }
 
+  /**
+   * @category Auth
+   */
   public async createAuthorizationResponse() {
     const request = this.findMessageByType(
       AuthorizationType.AuthorizationRequest,
@@ -222,6 +258,9 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     )
   }
 
+  /**
+   * @category Credential Share
+   */
   public async createCredentialResponse(selectedCredentials: string[]) {
     const request = this.findMessageByType(
       InteractionType.CredentialRequest,
@@ -243,6 +282,9 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     )
   }
 
+  /**
+   * @category Credential Offer
+   */
   public async createCredentialOfferResponseToken(
     selectedOffering: CredentialOfferResponseSelection[],
   ) {
@@ -262,6 +304,9 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     )
   }
 
+  /**
+   * @category Credential Offer
+   */
   public async issueSelectedCredentials(offerMap?: {
     [k: string]: (
       inp?: any,
@@ -290,6 +335,9 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     )
   }
 
+  /**
+   * @category Credential Offer
+   */
   public async createCredentialReceiveToken(customCreds?: SignedCredential[]) {
     const creds = customCreds || (await this.issueSelectedCredentials())
 
@@ -308,12 +356,14 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
 
   /**
    * Validate an interaction token and process it to update the interaction
-   * state (via the associated InteractionFlow)
+   * state (via the associated {@link Flow})
    *
-   * @param token JSONWebToken the token to
+   * @param token - the token to
    * @returns Promise<boolean> whether or not processing was successful
    * @throws AppError<InvalidToken> with `origError` set to the original token
    *                                validation error from the jolocom library
+   * @category Basic
+   *
    */
   public async processInteractionToken<T>(
     token: JSONWebToken<T>,
@@ -369,6 +419,9 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     return res
   }
 
+  /**
+   * @category Asymm Crypto
+   */
   public async createEncResponseToken(): Promise<
     JSONWebToken<EncryptionResponse>
   > {
@@ -415,6 +468,9 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     )
   }
 
+  /**
+   * @category Asymm Crypto
+   */
   public async createDecResponseToken(): Promise<
     JSONWebToken<DecryptionResponse>
   > {
@@ -442,6 +498,9 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     )
   }
 
+  /**
+   * @category Asymm Crypto
+   */
   public async createSigningResponseToken(): Promise<
     JSONWebToken<SigningResponse>
   > {
@@ -491,6 +550,8 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
   }
 
   /**
+   * @category Basic
+   *
    * @dev This will crash with a credential receive because it doesn't contain a callbackURL
    * @todo This should probably come from the transport / channel handler
    * @todo Can this use the HttpAgent exported from instead of fetch? http.ts?
@@ -508,6 +569,9 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     if (this.flow.type !== flow) throw new SDKError(ErrorCode.WrongFlow)
   }
 
+  /**
+   * @category Credential Offer
+   */
   public async storeSelectedCredentials() {
     this.checkFlow(FlowType.CredentialOffer)
 
@@ -527,6 +591,9 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     )
   }
 
+  /**
+   * @category Credential Offer
+   */
   public async storeCredentialMetadata() {
     this.checkFlow(FlowType.CredentialOffer)
 

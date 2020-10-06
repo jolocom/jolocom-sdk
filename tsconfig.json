@@ -71,5 +71,12 @@
     "skipLibCheck": true,
   },
   "exclude": [],
-  "include": ["./src/**/*"]
+  "include": ["./src/**/*"],
+
+  "typedocOptions": {
+    "mode": "library",
+    "excludeNotExported": true,
+    "includeVersion": true,
+    "out": "docs/api"
+  }
 }

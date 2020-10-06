@@ -4,15 +4,20 @@ import { Agent } from '../agent'
 import { Flow } from './flow'
 import { TransportAPI } from '../types'
 
-/***
- * - initiated inside BackendMiddleware
- * - has access to identityWallet / registry ?? (or should be inside Interaction)
- * - holds a map of all interactions:
- *    - {nonce: token or interaction instance} ??
- * - can start / end an interaction
+/**
+ * The {@link InteractionManager} is an entry point to dealing with {@link
+ * Interaction}s. It also manages {@link InteractionTransport}s by extending
+ * {@link Transportable}.  It is meant to be instantiated in context of a {@link
+ * JolocomSDK} instance.
  *
+ * Interactions are not serialized or fetched from storage, only the
+ * interaction tokens ({@link JSONWebToken}). Currently the `InteractionManager`
+ * holds a map of all interactions in memory, keyed by ID (which is just the
+ * nonce of the first {@link JSONWebToken}).
+ *
+ *
+ * @category Interactions
  */
-
 export class InteractionManager{
   public readonly ctx: Agent
 

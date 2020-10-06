@@ -9,7 +9,7 @@ import {
 } from 'jolocom-lib/js/didMethods/utils'
 import { mnemonicToEntropy } from 'jolocom-lib/js/utils/crypto'
 import { JolocomSDK, JSONWebToken, TransportAPI } from './index'
-import { IDidMethod } from 'jolocom-lib/js/didMethods/types'
+import { IDidMethod, IResolver } from 'jolocom-lib/js/didMethods/types'
 import { InteractionManager } from './interactionManager/interactionManager'
 import { ChannelKeeper } from './channels'
 import {
@@ -31,11 +31,26 @@ import {
 import { BaseMetadata } from '@jolocom/protocol-ts'
 import { ISignedCredCreationArgs } from 'jolocom-lib/js/credentials/signedCredential/types'
 import { Flow } from './interactionManager/flow'
+import { Identity } from 'jolocom-lib/js/identity/identity'
 
+/**
+ * The `Agent` class mainly provides an abstraction around the {@link
+ * IdentityWallet} and {@link InteractionManager} components. It provides glue
+ * code for:
+ * - Identities: create and load identities
+ * - Interactions: find interactions, and process incoming tokens
+ * - Interaction Requests: start interactions by creating a new request message
+ * - Credential Issuance: issue credentials
+ *
+ *
+ * The {@link JolocomSDK} has further convenience methods for Agent
+ * construction: {@link JolocomSDK.createNewAgent},
+ * {@link JolocomSDK.loadAgent}, {@link JolocomSDK.initAgent}
+ */
 export class Agent {
-  /**
-   * TODO: use the Keeper pattern
-   *       so we can do sdk.identities.create()
+  /*
+    TODO: use the Keeper pattern
+          so we can do sdk.identities.create()
                         sdk.interactions.create()
                         sdk.interactions.find()
                         etc
@@ -43,7 +58,7 @@ export class Agent {
   identities: IdentityKeeper
   interactions: InteractionKeeper
 
-  /**/
+  */
 
   public interactionManager = new InteractionManager(this)
   public channels = new ChannelKeeper(this)
@@ -54,8 +69,8 @@ export class Agent {
   public sdk: JolocomSDK
 
   private _didMethod?: IDidMethod
-  public resolve: typeof JolocomSDK.prototype.resolve
-  public resolver: typeof JolocomSDK.prototype.resolver
+  public resolve: (did: string) => Promise<Identity>
+  public resolver: IResolver
   public storage: IStorage
 
   public constructor({
@@ -75,24 +90,48 @@ export class Agent {
     this.storage = this.sdk.storage
   }
 
+  /**
+   * The DID method that this Agent was constructed with, or otherwise the SDK's
+   * default DID method
+   */
   public get didMethod() {
     return this._didMethod || this.sdk.didMethods.getDefault()
   }
 
+  /**
+   * The Agent's IdentityWallet instance.
+   *
+   * @throws SDKError(ErrorCode.NoWallet) if there is none
+   */
   public get identityWallet(): IdentityWallet {
     if (this._identityWallet) return this._identityWallet
     throw new SDKError(ErrorCode.NoWallet)
   }
 
+  /**
+   * Shortcut for {@link identityWallet}
+   */
   public get idw(): IdentityWallet {
     return this.identityWallet
   }
 
+  /**
+   * The Agent's KeyProvider instance.
+   *
+   * @throws SDKError(ErrorCode.NoKeyProvider) if there is none
+   */
   public get keyProvider(): SoftwareKeyProvider {
     if (this._keyProvider) return this._keyProvider
     throw new SDKError(ErrorCode.NoKeyProvider)
   }
 
+  /**
+   * Create and store new Identity using the Agent's {@link didMethod}
+   *
+   * @returns the newly created {@link IdentityWallet}
+   *
+   * @category Identity Management
+   */
   public async createNewIdentity(): Promise<IdentityWallet> {
     const pass = await this.passwordStore.getPassword()
     this._keyProvider = await SoftwareKeyProvider.newEmptyWallet(
@@ -118,6 +157,16 @@ export class Agent {
     return this._identityWallet
   }
 
+  /**
+   * Load an Identity from storage, given its DID.
+   *
+   * If no DID is specified, the first Identity found in storage will be loaded.
+   *
+   * @param did - DID of Identity to be loaded from DB
+   * @returns An IdentityWallet corrosponding to the given DID
+   *
+   * @category Identity Management
+   */
   public async loadIdentity(did?: string): Promise<IdentityWallet> {
     const encryptedWalletInfo = await this.sdk.storage.get.encryptedWallet(did)
     if (!encryptedWalletInfo) {
@@ -156,22 +205,11 @@ export class Agent {
   }
 
   /**
-   * Loads an Identity if one is not already instantiated
-   *
-   * @param did - DID of Identity to be loaded from DB
-   * @returns Identity An identity corrosponding to the given DID
-   */
-  public async prepareIdentityWallet(did?: string): Promise<IdentityWallet> {
-    if (this._identityWallet) return this._identityWallet
-
-    return this.loadIdentity(did)
-  }
-
-  /**
    * Loads an Identity based on a buffer of entropy.
    *
    * @param entropy - Buffer of private entropy to generate keys with
    * @returns An identity corrosponding to the entropy
+   * @category Identity Management
    */
 
   public async loadFromMnemonic(mnemonic: string): Promise<IdentityWallet> {
@@ -213,6 +251,9 @@ export class Agent {
     return identityWallet
   }
 
+  /**
+   * @category Identity Management
+   */
   public async createFromMnemonic(
     mnemonic: string,
     shouldOverwrite?: boolean,
@@ -264,6 +305,8 @@ export class Agent {
    * @returns Promise<Interaction> the associated Interaction object
    * @throws AppError<InvalidToken> with `origError` set to the original token
    *                                validation error from the jolocom library
+   *
+   * @category Interaction Management
    */
   public async processJWT(jwt: string, transportAPI?: TransportAPI): Promise<Interaction> {
     const token = JolocomLib.parse.interactionToken.fromJWT(jwt)
@@ -283,6 +326,7 @@ export class Agent {
    *
    * @param inp id, JWT string, or JSONWebToken object
    * @returns Promise<Interaction> the associated Interaction object
+   * @category Interaction Management
    */
   public findInteraction<F extends Flow<any>>(inp: string | JSONWebToken<any>): Interaction<F> | null {
     let id
@@ -310,6 +354,7 @@ export class Agent {
    * @param callbackURL - the callbackURL to which the Authentication Response
    *                      should be sent
    * @returns Base64 encoded signed Authentication Request
+   * @category Interaction Requests
    */
   public async authRequestToken(auth: {
     callbackURL: string
@@ -328,6 +373,7 @@ export class Agent {
    *
    * @param uri - URI to request resolution for
    * @returns Base64 encoded signed Resolution Request
+   * @category Interaction Requests
    */
   public async resolutionRequestToken(
     req: { description?: string; uri?: string; callbackURL?: string } = {},
@@ -350,6 +396,7 @@ export class Agent {
    *
    * @param request - Authrization Request Attributes
    * @returns Base64 encoded signed Authentication Request
+   * @category Interaction Requests
    */
   public async authorizationRequestToken(
     request: AuthorizationRequest,
@@ -371,6 +418,7 @@ export class Agent {
    *
    * @param request - EstablishChannelRequest Attributes
    * @returns Base64 encoded signed EstablishChannelRequest
+   * @category Interaction Requests
    */
   public async establishChannelRequestToken(
     request: EstablishChannelRequest,
@@ -392,6 +440,7 @@ export class Agent {
    *
    * @param request - Credential Request Attributes
    * @returns Base64 encoded signed credential request
+   * @category Interaction Requests
    */
   public async credRequestToken(
     request: ICredentialRequestAttrs,
@@ -411,6 +460,7 @@ export class Agent {
    * @param offer - credential offer attributes
    * @returns A base64 encoded signed credential offer token offering
    * credentials according to `offer`
+   * @category Interaction Requests
    */
   public async credOfferToken(
     offer: CredentialOfferRequestAttrs,
@@ -431,6 +481,7 @@ export class Agent {
    * @param selection - base64 encoded credential offer response token
    * @returns A base64 encoded signed issuance token containing verifiable
    * credentials
+   * @category Credential Management
    */
   public async credIssuanceToken(
     issuance: ICredentialsReceiveAttrs,
@@ -445,6 +496,9 @@ export class Agent {
     return token.encode()
   }
 
+  /**
+   * @category Interaction Requests
+   */
   public async rpcDecRequest(req: {
     toDecrypt: Buffer
     callbackURL: string
@@ -467,6 +521,9 @@ export class Agent {
     return token.encode()
   }
 
+  /**
+   * @category Interaction Requests
+   */
   public async rpcEncRequest(req: {
     toEncrypt: Buffer
     target: string
@@ -491,6 +548,9 @@ export class Agent {
     return token.encode()
   }
 
+  /**
+   * @category Interaction Requests
+   */
   public async signingRequest(req: {
     toSign: Buffer
     callbackURL: string
@@ -518,6 +578,7 @@ export class Agent {
    *
    * @param credParams - credential attributes
    * @returns SignedCredential instance
+   * @category Credential Management
    */
   public async signedCredential<T extends BaseMetadata>(
     credParams: ISignedCredCreationArgs<T>,
