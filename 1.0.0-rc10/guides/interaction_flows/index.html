@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Interaction Flows - Jolocom SDK</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
+            <div class="container">
+                <a class="navbar-brand" href="../..">Jolocom SDK</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Overview <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../.." class="dropdown-item">Introduction</a>
+</li>
+                                    
+<li>
+    <a href="../sdk_install_conf/" class="dropdown-item">Installation and configuration</a>
+</li>
+                                    
+<li>
+    <a href="../agents/" class="dropdown-item">Agents</a>
+</li>
+                                    
+<li>
+    <a href="../credentials/" class="dropdown-item">Verifiable Credentials</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Identity <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../identity/#creating-an-identity" class="dropdown-item">Creating an Identity</a>
+</li>
+                                    
+<li>
+    <a href="../identity/#loading-an-identity" class="dropdown-item">Loading an Identity</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="dropdown active">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Interactions <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="./" class="dropdown-item active">Interaction Flows</a>
+</li>
+                                    
+<li>
+    <a href="#peer-resolution" class="dropdown-item">Peer Resolution</a>
+</li>
+                                    
+<li>
+    <a href="#authentication" class="dropdown-item">Authentication</a>
+</li>
+                                    
+<li>
+    <a href="#authorization" class="dropdown-item">Authorization</a>
+</li>
+                                    
+<li>
+    <a href="#verifiable-credential-issuance" class="dropdown-item">Credential Issuance</a>
+</li>
+                                    
+<li>
+    <a href="#credential-verification" class="dropdown-item">Credential Request</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="navitem">
+                                <a href="../../api/" class="nav-link">API</a>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Versions <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="/1.0.0-rc10/" class="dropdown-item">1.0.0</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../credentials/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../../api/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#interaction-flows" class="nav-link">Interaction Flows</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#peer-resolution" class="nav-link">Peer Resolution</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#authentication" class="nav-link">Authentication</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#authorization" class="nav-link">Authorization</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#verifiable-credential-issuance" class="nav-link">Verifiable Credential Issuance</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#credential-verification" class="nav-link">Credential Verification</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="interaction-flows">Interaction Flows</h1>
+<p>Interaction Flows are the protocols which Agents use to communicate with each other. With them, services can be easily provided and consumed. In practice, they work by using Agents to produce and consume messages, with an Interaction Manager within each Agent handling the validation and storage for each Interaction.</p>
+<p>Each interaction is defined by:</p>
+<ul>
+<li>The Roles played by Agents participating in the interaction</li>
+<li>The set of Message types associated with the type of interaction</li>
+<li>The set of rules associated with the type of interaction which determine the validity of new messages given the previous messages</li>
+</ul>
+<h2 id="peer-resolution">Peer Resolution</h2>
+<p>| Using another Agent as a Resolver</p>
+<p>Peer resolution consists of a simple request-response message exchange, where the Requester asks the Resolver to perform <a href="https://w3c-ccg.github.io/did-resolution/">DID resolution</a> and return the result.</p>
+<h4 id="roles">Roles</h4>
+<ul>
+<li>Requester: Agent who requests the resolution of a DID</li>
+<li>Resolver: Agent who resolves the given DID (or their own) and returns the result</li>
+</ul>
+<h4 id="messages">Messages</h4>
+<ol>
+<li>Resolution Request: The Requester broadcasts a message which may or may not contain a DID.</li>
+<li>Resolution Result: If the message contains a DID, the Resolver resolves the DID and returns the <a href="https://w3c-ccg.github.io/did-resolution/#did-resolution-result">DID Resolution Result</a>. Otherwise, the Resolver returns the result of resolving it's own DID. This is intended for the special case of "local" DID methods, which do not have a globally resolvable state.</li>
+</ol>
+<h4 id="examples">Examples</h4>
+<p>A simple Peer Resolution flow between our two Agents from the <a href="../agents/#examples">Identity Management example</a> looks as follows:</p>
+<pre><code class="typescript">const aliceResRequest = await alice.createResolutionRequest({
+  description: 'introduce yourself',
+  callbackURL: 'https://example.com/onboarding',
+})
+
+// ------- the request is received by Bob ------- //
+const bobsInteraction = await bob.processJWT(aliceResRequest)
+const bobsResResponse = await bobsInteraction.createResolutionResponse()
+
+// ------- Bob's response is received by Alice ------- //
+// this adds Bob's identity data (a Key Event Log) to Alice's storage, such that she can now resolve his DID and verify signatures made by him
+const alicesInteraction = await alice.processJWT(bobsResResponse.encode())
+</code></pre>
+
+<p>Peer resolution allows for the resolution of Identifiers which rely on a local state proof (e.g. KERI/<code>did:jun</code> and <code>did:peer</code>) instead of a globally resolvable state. The successful result of resolving such Identifiers is cached by default by the SDK, and they are resolvable by any Agent instance which shares the same EventDB. Think of such a protocol as an "introduction" or "onboarding" of a private DID into a backend system.</p>
+<p>Services which are intended for consumption by natural persons are encouraged to provide at least one method for Agents to resolve themselves using this flow, as these "local" Identifiers are designed to solve critical GDPR and User privacy issues affecting DID methods which rely on a global shared state like Blockchains.</p>
+<h2 id="authentication">Authentication</h2>
+<p>| Proving control over an Identifier.</p>
+<p>The Authentication flow consists of a simple request-response message exchange, where the contents of the response must match those of the request. Because all Messages are signed and authenticated, the response functions as proof of control by nature of being correctly signed by the keys listed in the DID Document of the issuer. Because of this, in scenarios where a more complex functionality (e.g. Credential Verification) is needed, an additional Authentication flow is not necessary.</p>
+<h4 id="roles_1">Roles</h4>
+<ul>
+<li>Verifier: Agent who requests and verifies the Authenticity of the Authenticator</li>
+<li>Authenticator: Agent who proves control over their Identifier</li>
+</ul>
+<h4 id="messages_1">Messages</h4>
+<ol>
+<li>Authentication Request: The Verifier broadcasts containing only an optional description of the purpose of the authentication.</li>
+<li>Authentication Response: Contains the same content as the Request.</li>
+</ol>
+<h4 id="examples_1">Examples</h4>
+<p>A simple Authentication flow between our two Agents looks as follows:</p>
+<pre><code class="typescript">const authRequest = await alice.authRequest({
+  callbackURL: 'https://example.com/auth',
+  description: 'are you bob?',
+})
+
+// ------- the request is received by Bob ------- //
+const bobsInteraction = await bob.processJWT(authRequest)
+const bobsAuthResponse = await bobsInteraction.createAuthenticationResponse()
+
+// ------- Bob's response is received by Alice ------- //
+const alicesInteraction = await alice.processJWT(bobsAuthResponse.encode())
+</code></pre>
+
+<h2 id="authorization">Authorization</h2>
+<p>| Giving consent or permission.</p>
+<p>The Authorization flow consists of a simple request-response message exchange, where the Initiator requests authorization from the Authorizer to carry out some action. It is similar to the Authentication flow in structure, however the intent of the interaction is different, and it will render differently in the Jolocom Smartwallet. Authentication is about <em>proving</em> the Identity of an agent (e.g. SSO), while Authorization is about <em>giving permission or privilege</em> for a service to act on an agents behalf.</p>
+<h4 id="roles_2">Roles</h4>
+<ul>
+<li>Authorized: Agent requesting Authorization to perform some action</li>
+<li>Authorizer: Agent granting Authorization to the Authorized</li>
+</ul>
+<h4 id="messages_2">Messages</h4>
+<ol>
+<li>Authorization Request: The Authorized broadcasts a message representing the intent of the action which permission is required for.</li>
+<li>Authorization Response: The Authorizer responds with a message containing the same contents as the Request as consent.</li>
+</ol>
+<h4 id="examples_2">Examples</h4>
+<p>A simple Authorization flow between our two Agents from before looks as follows:</p>
+<pre><code class="typescript">const aliceAuthZRequest = await alice.authorizationRequestToken({
+  description: 'Front Door',
+  imageURL: 'https://example.com/lockImage.png',
+  action: 'Open the door',
+  callbackURL: 'https://example.com/authz/',
+})
+
+// ------- the request is received by Bob ------- //
+const bobsInteraction = await bob.processJWT(aliceAuthZRequest)
+const bobsAuthZResponse = await bobsInteraction.createAuthorizationResponse()
+
+// ------- Bob's response is received by Alice ------- //
+const alicesInteraction = await alice.processJWT(bobsAuthZResponse.encode())
+</code></pre>
+
+<h2 id="verifiable-credential-issuance">Verifiable Credential Issuance</h2>
+<p>| Creating an authenticated statement about an Identifier.</p>
+<p>The Issuance flow consists of a three step message exchange between two parties, the Issuer and the Holder.</p>
+<h4 id="roles_3">Roles</h4>
+<ul>
+<li>Issuer: Agent who offers and issues one or more Verifiable Credentials</li>
+<li>Holder: Agent who selects and receives one or more Verifiable Credentials</li>
+</ul>
+<h4 id="messages_3">Messages</h4>
+<ol>
+<li>Credential Offer: The Issuer broadcasts a message containing a list of credential types offered for issuance in this interaction, each with it's own list of requirements which must be satisfied by the Holder in order to qualify for the credential.</li>
+<li>Credential Selection: The Holder responds with a message containing a list of selected credentials with associated data for satisfying requirements.</li>
+<li>Credential Issuance: The Issuer responds with a message containing a list of newly issued credentials corrosponding to the selected set.</li>
+</ol>
+<h4 id="examples_3">Examples</h4>
+<p>In this simple example, Alice is issuing Bob the Credential she created for him in the <a href="../credentials/">Verifiable Credentials</a> section:</p>
+<pre><code class="typescript">const aliceCredOffer = await alice.credentialOffer({
+  callbackURL: 'https://example.com/issuance',
+  offeredCredentials: [
+    {
+      type: 'SimpleExampleCredential',
+    },
+  ],
+})
+
+// ------- the offer is received by Bob ------- //
+const bobsInteraction = await bob.processJWT(aliceCredOffer)
+const bobsCredSelection = await bobsInteraction.createCredentialOfferResponseToken(
+  [{ type: 'SimpleExampleCredential' }],
+)
+
+// ------- Bob's selection is received by Alice ------- //
+const alicesInteraction = await alice.processJWT(bobsCredSelection.encode())
+const alicesIssuance = await alicesInteraction.createCredentialReceiveToken(
+  alicesCredAboutBob,
+)
+
+// ------- Bob Receives and stores the newly issued Credential ------- //
+// Note that storage of the credential is handled automatically by the SDK
+const bobReceives = await bob.processJWT(alicesIssuence.encode())
+</code></pre>
+
+<h2 id="credential-verification">Credential Verification</h2>
+<p>| Proving a set of statements about an Identifier.</p>
+<p>The Credential Verification flow is a simple request-response message exchange between the Verifier and the Prover.</p>
+<h4 id="roles_4">Roles</h4>
+<ul>
+<li>Verifier: Agent who requests a set of Verifiable Credentials with associated requirements.</li>
+<li>Prover: Agent who provides a set of Verifiable Credentials attempting to satisfy the request</li>
+</ul>
+<h4 id="messages_4">Messages</h4>
+<ol>
+<li>Credential Request: The Verifier broadcasts a message containing a list of credential types, each with it's own list of requirements to be satisfied by the Prover.</li>
+<li>Credential Response: The Prover responds with a list of credentials which should satisfy the corrosponding requirements in the Credential Request.</li>
+</ol>
+<h4 id="examples_4">Examples</h4>
+<p>In this example, Alice is requesting from Bob the same type of Credential she issued for him in the <a href="#verifiable-credential-issuance">Credential Issuance</a> section:</p>
+<pre><code class="typescript">const aliceCredRequest = await alice.credentialRequestToken({
+  callbackURL: 'https://example.com/request',
+  credentialRequirements: [
+    {
+      type: ['SimpleExampleCredential'],
+      constraints: [greater('age', 18), is('name', 'Bob')],
+    },
+  ],
+})
+
+// ------- the request is received by Bob ------- //
+const bobsInteraction = await bob.processJWT(aliceAuthZRequest)
+const bobsAuthZResponse = await bobsInteraction.createCredentialResponse([
+  alicesCredAboutBob.id, // use the ID from the aliceCredAboutBob instance
+])
+
+// ------- Bob's response is received by Alice ------- //
+const alicesInteraction = await alice.processJWT(bobsAuthZResponse.encode())
+</code></pre>
+
+<p>Note that the response argument is a list of Credential IDs. Each Credential has an ID which is a hash of the credential. The response creation will fetch each credential referenced in the list from the Agent Storage and include them in the response.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
