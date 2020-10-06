@@ -136,10 +136,33 @@ The Issuance flow consists of a three step message exchange between two parties,
 
 #### Examples
 
+In this simple example, Alice is issuing Bob the Credential she created for him in the [Verifiable Credentials](./credentials.md) section:
+
 ```typescript
 const aliceCredOffer = await alice.credentialOffer({
-  // stuff
+  callbackURL: 'https://example.com/issuance',
+  offeredCredentials: [
+    {
+      type: 'SimpleExampleCredential',
+    },
+  ],
 })
+
+// ------- the offer is received by Bob ------- //
+const bobsInteraction = await bob.processJWT(aliceCredOffer)
+const bobsCredSelection = await bobsInteraction.createCredentialOfferResponseToken(
+  [{ type: 'SimpleExampleCredential' }],
+)
+
+// ------- Bob's selection is received by Alice ------- //
+const alicesInteraction = await alice.processJWT(bobsCredSelection.encode())
+const alicesIssuance = await alicesInteraction.createCredentialReceiveToken(
+  alicesCredAboutBob,
+)
+
+// ------- Bob Receives and stores the newly issued Credential ------- //
+// Note that storage of the credential is handled automatically by the SDK
+const bobReceives = await bob.processJWT(alicesIssuence.encode())
 ```
 
 ## Credential Verification
@@ -160,12 +183,14 @@ The Credential Verification flow is a simple request-response message exchange b
 
 #### Examples
 
+In this example, Alice is requesting from Bob the same type of Credential she issued for him in the [Credential Issuance](#verifiable-credential-issuance) section:
+
 ```typescript
 const aliceCredRequest = await alice.credentialRequestToken({
   callbackURL: 'https://example.com/request',
   credentialRequirements: [
     {
-      type: ['SimpleExample'],
+      type: ['SimpleExampleCredential'],
       constraints: [greater('age', 18), is('name', 'Bob')],
     },
   ],
@@ -174,9 +199,11 @@ const aliceCredRequest = await alice.credentialRequestToken({
 // ------- the request is received by Bob ------- //
 const bobsInteraction = await bob.processJWT(aliceAuthZRequest)
 const bobsAuthZResponse = await bobsInteraction.createCredentialResponse([
-  bobsCredId, // ID of the credential(s) Bob chooses to respond with. fetched from storage
+  alicesCredAboutBob.id,
 ])
 
 // ------- Bob's response is received by Alice ------- //
 const alicesInteraction = await alice.processJWT(bobsAuthZResponse.encode())
 ```
+
+Note that the response argument is a list of Credential IDs. Each Credential has an ID which is a hash of the credential. The response creation will fetch each credential referenced in the list from the Agent Storage and include them in the response.
