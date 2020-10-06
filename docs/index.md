@@ -16,4 +16,4 @@ The SDK itself functions as an Agent Factory. It manages a storage connection an
 - [Use an instance of the Jolocom SDK to create Agents](agents.md)
 - [Use the created Agents to participate in various SSI interactions](interaction_flows.md) and / or [create Verifiable Credentials](credentials.md)
 
-For API documentation, see the API docs.
+For API documentation, see the [API docs](api/).
