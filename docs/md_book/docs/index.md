@@ -1,26 +1,19 @@
-- Readme : general introduction to the sdk, specifically it's purpose and general idea
-- Installation & Configuration : How to install, what is required, how to instantiate. How to configure DID Methods and register plugins on an instance
-- Agents : How to instantiate agents given a configured / non-configured SDK instance. What do they inherit from the SDK
-- Interactions ...
+# Introduction
 
-## Agents
+[Jolocom](https://jolocom.io) Software Development Kit - Facilitating applications to manage and
+interact with digital identities.
 
-An Agent is the core of any service built with the SDK. Each Agent possesses a DID and the capability to perform cryptographic operations with the keys associated with it's DID. Agents are suitable for all roles in any SSI interaction, and can be used for client-server or P2P style services. Common actions which Agents carry out include:
+The Jolocom SDK is a toolkit for managing SSI Agents and the interactions carried out between them, allowing services and clients to work together seamlessly with minimal trust assumptions and maximum security. For optimal utility and interoperability, the SDK builds upon implementations of the following specifications:
 
-- [Authentication](interaction_flows.md#authentication)
-- [Authorization](interaction_flows.md#authorization)
-- [Verifiable Credential Creation](credentials.md)
-- [Issuance and Receipt of Verifiable Credentials](interaction_flows.md#verifiable-credential-issuance)
-- [Requesting, Providing and Verifying of Verifiable Credentials](interaction_flows.md#credential-verification)
+- [W3C Decentralized Identifiers (DIDs)](https://www.w3.org/TR/did-core/): To provide identifiers for Agents managed by the SDK.
+- [W3C Verifiable Credentials (VCs)](https://www.w3.org/TR/vc-data-model/): To allow for verifiable attestations to be exchanged and utilised by Agents.
 
-For information on creating and managing Agents, see the [Identity Management](identity_management.md) section. For information on using Agents for services and interactions, see the section on [Interaction Flows](interaction_flows.md).
+The SDK is composed of a few core concepts which work together to provide a framework for making use of Decentralized Identities, and provides an interface to the SSI ecosystem via Agents and Interactions. It is designed to streamline the creation, validation, authentication and processing of signed messages in order to facilitate different protocols enacted between Agents. Messages created by Agents are secured by the security mechanism of their chosen [DID Method](https://w3c.github.io/did-core/).
 
-## Interactions
+The SDK itself functions as an Agent Factory. It manages a storage connection and a collection of registered DID Methods, providing storage access and resolution capabilities to the Agents which it creates. This documentation contains information on how to:
 
-Interactions represent protocols which can be carried out between Agents. An instance of an Interaction tracks the state of a protocol by reducing the exchanged messages into a protocol state representation.
+- [Install, configure and instantiate the Jolocom SDK](sdk_install_conf.md)
+- [Use an instance of the Jolocom SDK to create Agents](agents.md)
+- [Use the created Agents to participate in various SSI interactions](interaction_flows.md) and / or [create Verifiable Credentials](credentials.md)
 
-Each Agent possesses a collection of Interactions which represent the "unfinished" interactions they are currently involved in. For more information on Interactions, see the [Interaction Flows](interaction_flows.md) section.
-
-## Messages
-
-Messages are authenticated statements mediating the Interactions which Agents participate in. They take the form of signed JWTs with content specific to the phase of the interaction being carried out.
+For API documentation, see the API docs.
