@@ -186,24 +186,29 @@ The Credential Verification flow is a simple request-response message exchange b
 In this example, Alice is requesting from Bob the same type of Credential she issued for him in the [Credential Issuance](#verifiable-credential-issuance) section:
 
 ```typescript
+import { JolocomLib } from '@jolocom/sdk'
+
 const aliceCredRequest = await alice.credentialRequestToken({
   callbackURL: 'https://example.com/request',
   credentialRequirements: [
     {
       type: ['SimpleExampleCredential'],
-      constraints: [greater('age', 18), is('name', 'Bob')],
+      constraints: [
+        JolocomLib.util.constraintFunctions.greater('age', 18),
+        JolocomLib.util.constraintFunctions.is('name', 'Bob'),
+      ],
     },
   ],
 })
 
 // ------- the request is received by Bob ------- //
-const bobsInteraction = await bob.processJWT(aliceAuthZRequest)
-const bobsAuthZResponse = await bobsInteraction.createCredentialResponse([
+const bobsInteraction = await bob.processJWT(aliceCredRequest)
+const bobsCredResponse = await bobsInteraction.createCredentialResponse([
   alicesCredAboutBob.id, // use the ID from the aliceCredAboutBob instance
 ])
 
 // ------- Bob's response is received by Alice ------- //
-const alicesInteraction = await alice.processJWT(bobsAuthZResponse.encode())
+const alicesInteraction = await alice.processJWT(bobsCredResponse.encode())
 ```
 
 Note that the response argument is a list of Credential IDs. Each Credential has an ID which is a hash of the credential. The response creation will fetch each credential referenced in the list from the Agent Storage and include them in the response.
