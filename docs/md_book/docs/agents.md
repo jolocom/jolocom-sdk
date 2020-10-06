@@ -32,10 +32,16 @@ Two optional arguments can be provided to the `createNewAgent` function:
 
 ### createFromMnemonic
 
+```typescript
+agent.createFromMnemonic(
+  'hammer soul glare stairs indicate snack address divert mosquito chef season hobby',
+)
+```
+
 In case deterministic identity creation is desired, the `createFromMnemonic` method can be used. This function allows for the deterministic creation of a DID, and the associated keys. A BIP39 compliant mnemonic can be passed in. In case the used `registrar` does not implement the `recoverFromSeed` method, an error is thrown. The deterministic derivation of keys from a seed is delegated to the `registrar` implementation. Internally, BIP32, SLIP0010, or other specifications can be used. The `registrar` implementation encapsulates the specification, as well as the metadata required for derivation (e.g. paths, indexes, etc.)
 
 It is important to note that this function will attempt register a new DID with the DID method configured on the Agent. For a non-registering equivalent, see [load from mnemonic](#loadfrommnemonic).
-Once the keys and the DID have been derived, the `registrar` module is used to register the identity on the corresponding network (depending on the DID method used). In case the identity is already "anchored", an error is thrown, to prevent accidental identity updates.
+Once the keys and the DID have been derived, the `registrar` module is used to register the identity on the corresponding network (depending on the DID method used). In case the identity is already registered, an error is thrown, to prevent accidental identity updates.
 In case the desired functionality is to register the identity regardless of whether it's already registered on the ledger, a second boolean argument `shouldOverwrite` can be set to `true`
 
 ## Loading an existing identity
@@ -50,6 +56,12 @@ If a DID is provided, the method will attempt to find the associated encrypted w
 Note that the password or password store provided should match the password used to previously encrypt the Identity being loaded.
 
 ### loadFromMnemonic
+
+```typescript
+agent.loadFromMnemonic(
+  'hammer soul glare stairs indicate snack address divert mosquito chef season hobby',
+)
+```
 
 In case deterministic identity recovery is desired, the `loadFromMnemonic` method can be used. This function allows for the deterministic re-creation of a DID, and the associated keys. It is the non-registering equivalent of [create from mnemonic](#createfrommnemonic).
 Once the keys and the DID have been derived, the `resolver` module is used to ensure that the identity is "anchored" (the meaning and implementation of this functionality is defined by the DID Method). In case the identity can not be resolved, an error is thrown.
