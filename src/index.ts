@@ -40,6 +40,12 @@ export class JolocomSDK {
   public didMethods = new DidMethodKeeper()
   public transports = new TransportKeeper()
   public storage: IStorage
+
+  /**
+   * The toplevel resolver which simply invokes {@link resolve}
+   *
+   * @see {@link resolve}
+   */
   public resolver: IResolver
 
   constructor(conf: IJolocomSDKConfig) {
@@ -73,10 +79,12 @@ export class JolocomSDK {
   }
 
   /**
-   * Resolve a DID string such as 'did:jolo:123456789abcdef0' to an Identity
+   * Resolve a DID string such as `did:method:123456789abcdef0` to an Identity,
+   * looking through storage cache first, then using the appropriate DIDMethod
+   * of the {@link DidMethodKeeper}
    *
    * @param did string the did to resolve
-   * @returns Identity the resolved identity
+   * @returns the resolved identity
    */
   public async resolve(did: string): Promise<Identity> {
     return this.storage.get
@@ -102,6 +110,14 @@ export class JolocomSDK {
     return
   }
 
+  /**
+   * Create an Agent instance without any identity
+   *
+   * @param passOrStore - A password as string or {@link IPasswordStore}
+   * @param didMethodName - The name of a DID method registered on this Agent's
+   *                        SDK instance
+   * @category Agent
+   */
   public async createAgent(
     passOrStore?: string | IPasswordStore,
     didMethodName?: string,
@@ -117,6 +133,14 @@ export class JolocomSDK {
     })
   }
 
+  /**
+   * Create (and store) an Agent instance with a newly created Identity
+   *
+   * @param passOrStore - A password as string or {@link IPasswordStore}
+   * @param didMethodName - The name of a DID method registered on this Agent's
+   *                        SDK instance
+   * @category Agent
+   */
   public async createNewAgent(
     passOrStore?: string | IPasswordStore,
     didMethodName?: string,
@@ -126,6 +150,13 @@ export class JolocomSDK {
     return agent
   }
 
+  /**
+   * Create an Agent instance with an Identity loaded from storage
+   *
+   * @param passOrStore - A password as string or {@link IPasswordStore}
+   * @param did - The DID of the Agent Identity to load
+   * @category Agent
+   */
   public async loadAgent(
     passOrStore?: string | IPasswordStore,
     did?: string,
@@ -136,8 +167,19 @@ export class JolocomSDK {
     return agent
   }
 
-  // Currently does not handle mnemonic, to avoid complexity.
-  // Separate methods are exposed for recovery / identity creation from mnemonic
+  /**
+   * Create an Agent instance with an Identity loaded from storage or create a
+   * new Identity if not found.
+   *
+   * Note that if the identity is not found a new one will be created ignoring
+   * the passed in `did` parameter.
+   *
+   * @param passOrStore - A password as string or {@link IPasswordStore}
+   * @param did - The DID of the Agent Identity to try to load
+   * @param auto - whether or not to create a new identity if not found
+   *              (default: true)
+   * @category Agent
+   */
   async initAgent(
     { passOrStore, did, auto }: IJolocomSDKInitOptions = { auto: true },
   ) {
@@ -151,11 +193,23 @@ export class JolocomSDK {
     return await this.createNewAgent(passOrStore)
   }
 
+  /**
+   * Attach a plugin to the SDK
+   *
+   * @NOTE this is for internal use only currently
+   */
   async usePlugins(...plugs: JolocomPlugin[]) {
     const promises = plugs.map(p => p.register(this))
     await Promise.all(promises)
   }
 
+  /**
+   * Set the default DID method to use for creating/loading agents.
+   * Note that it must already have been registered with
+   * `sdk.didMethods.register`
+   *
+   * @category DID Method
+   */
   setDefaultDidMethod(methodName: string) {
     const method = this.didMethods.get(methodName)
     this.didMethods.setDefault(method)
