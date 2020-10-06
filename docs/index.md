@@ -12,8 +12,10 @@ The SDK is composed of a few core concepts which work together to provide a fram
 
 The SDK itself functions as an Agent Factory. It manages a storage connection and a collection of registered DID Methods, providing storage access and resolution capabilities to the Agents which it creates. This documentation contains information on how to:
 
-- [Install, configure and instantiate the Jolocom SDK](sdk_install_conf.md)
-- [Use an instance of the Jolocom SDK to create Agents](agents.md)
-- [Use the created Agents to participate in various SSI interactions](interaction_flows.md) and / or [create Verifiable Credentials](credentials.md)
+- [Install, configure and instantiate the Jolocom SDK](guides/sdk_install_conf.md)
+- [Use an instance of the Jolocom SDK to create Agents](guides/identity.md)
+- Use the created Agents to
+    - [Participate in various SSI interactions](guides/interaction_flows.md)
+    - [Create Verifiable Credentials](guides/credentials.md)
 
 For API documentation, see the [API docs](api/).
