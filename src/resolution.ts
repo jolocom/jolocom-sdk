@@ -6,7 +6,7 @@ export interface ResolverMetadata {
   retrieved: number
 }
 
-export interface MethodMetadata<T = string[]> {
+export interface MethodMetadata<T = string> {
   stateProof: T
 }
 // writing a guard for this is a huge pain
