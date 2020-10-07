@@ -41,7 +41,7 @@ test('Fail to recover non existing jolo identity from mnemonic', async () => {
 test('Load local identity from mnemonic', async () => {
   agent = await createAgent(conn1Name, 'jun', pass)
   const expectedDid =
-    'did:jun:FhHgj-WRVqeODSIJl1a8GDV9KG9WM8HLIo6ucni6zlHcyJNhQxHW5nA6YLR4NQuOB2X1xdkYUq7VRBUBahCYmpA'
+    'did:jun:Er9pmwbXpDOd_Vp46jVJUrZGjW-ujSXeoobGS77z2_Po'
 
   const identityWallet = await agent.loadFromMnemonic(mnemonic64A)
 
