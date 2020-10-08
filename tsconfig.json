@@ -75,7 +75,12 @@
 
   "typedocOptions": {
     "mode": "library",
+
     "excludeNotExported": true,
+    "excludePrivate": true,
+
+    "includeDeclarations": true,
+    "excludeExternals": true,
     "includeVersion": true,
     "out": "docs/api"
   }

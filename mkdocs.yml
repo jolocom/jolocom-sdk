@@ -1,0 +1,25 @@
+site_name: Jolocom SDK
+site_dir: 'docs-build/current'
+theme:
+  name: mkdocs
+  nav_style: light
+nav:
+  - 'Overview':
+    - index.md
+    - 'Installation and configuration': 'guides/sdk_install_conf.md'
+    - guides/agents.md
+    - guides/credentials.md
+  - 'Identity':
+    - 'Creating an Identity': 'guides/identity/#creating-an-identity'
+    - 'Loading an Identity': 'guides/identity/#loading-an-identity'
+  - 'Interactions':
+    - guides/interaction_flows.md
+    - 'Peer Resolution': 'guides/interaction_flows/#peer-resolution'
+    - 'Authentication': 'guides/interaction_flows/#authentication'
+    - 'Authorization': 'guides/interaction_flows/#authorization'
+    - 'Credential Issuance': 'guides/interaction_flows/#verifiable-credential-issuance'
+    - 'Credential Request': 'guides/interaction_flows/#credential-verification'
+  - API: './api/index.html'
+
+  - Versions:
+    - '1.0.0': '/1.0.0-rc10/'

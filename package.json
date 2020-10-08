@@ -13,7 +13,8 @@
     "lint": "eslint --ext .ts --ext .tsx .",
     "format": "yarn lint --fix",
     "test": "jest",
-    "docs": "rm -rf docs/api; typedoc"
+    "docs": "./bin/build_docs.sh",
+    "docs:serve": "./bin/build_docs.sh serve"
   },
   "private": false,
   "devDependencies": {

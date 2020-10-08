@@ -1,18 +1,6 @@
-# Agents and Identity Management
+# Identity
 
-An Agent is the core of any service built with the SDK. Each Agent possesses a DID and the capability to perform cryptographic operations with the keys associated with it's DID. Agents are suitable for all roles in any SSI interaction, and can be used for client-server or P2P style services. Common actions which Agents carry out include:
-
-- [Authentication](interaction_flows.md#authentication)
-- [Authorization](interaction_flows.md#authorization)
-- [Verifiable Credential Creation](credentials.md)
-- [Issuance and Receipt of Verifiable Credentials](interaction_flows.md#verifiable-credential-issuance)
-- [Requesting, Providing and Verifying of Verifiable Credentials](interaction_flows.md#credential-verification)
-
-For information on using Agents for services and interactions, see the section on [Interaction Flows](interaction_flows.md).
-
-An Agent can be instantiated in several ways using the SDK instance created in the [Configuration section](./sdk_install_conf.md#instantiating-the-jolocom-sdk):
-
-## Creating a new random identity
+## Creating an Identity
 
 To provision an Agent with a new random identity (i.e. DID and set of keys), the following function can be used:
 
@@ -44,7 +32,7 @@ It is important to note that this function will attempt register a new DID with 
 Once the keys and the DID have been derived, the `registrar` module is used to register the identity on the corresponding network (depending on the DID method used). In case the identity is already registered, an error is thrown, to prevent accidental identity updates.
 In case the desired functionality is to register the identity regardless of whether it's already registered on the ledger, a second boolean argument `shouldOverwrite` can be set to `true`
 
-## Loading an existing identity
+## Loading an Identity
 
 To instantiate an Agent with a previously created identity, the following function can be used:
 
@@ -67,23 +55,3 @@ In case deterministic identity recovery is desired, the `loadFromMnemonic` metho
 Once the keys and the DID have been derived, the `resolver` module is used to ensure that the identity is "anchored" (the meaning and implementation of this functionality is defined by the DID Method). In case the identity can not be resolved, an error is thrown.
 
 This method can be used to "recover" control over an existing identity, given only the BIP39 seed phrase (i.e. the same seed phrase used in the `createFromMnemonic` call).
-
-## Examples
-
-Below, we see an example setup of two Identities which will be used for examples in this documentation. These Agent instances can run within the same Node process, however for this case they can be imagined to be running on a client-server model, where Alice is the server and Bob is the client. For simplicity, imagine that an SDK instance has been created already for each process, as in the [Configuration section](./sdk_install_conf.md#instantiating-the-jolocom-sdk):
-
-Alices Agent loading:
-
-```typescript
-// The Alice Agent (did:jolo:alice) is loaded from the sdk storage
-const alice = await sdk.loadIdentity('alicesPassword', 'did:jolo:alice')
-```
-
-Bob Agent creation:
-
-```typescript
-// The Bob Agent is randomly generated using the 'jun' DID method
-const bob = await sdk.createNewAgent('bobsPassword', 'jun')
-```
-
-Now that our Agents are instantiated, let's see how they can be used to set up [Interaction Flows](./interaction_flows.md).
