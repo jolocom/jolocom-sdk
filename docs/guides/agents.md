@@ -1,8 +1,6 @@
 # Agents
 
-An Agent represents an actor holding identity and capable of interacting with
-other Agents. It is the core of any service or application built with the SDK.
-
+An Agent represents an Identity capable of interacting with other Agents. It is the core of any service or application built with the SDK.
 Agents are suitable for all roles in any SSI interaction, and can be used for client-server or P2P style services.
 
 To create/load an Agent, a JolocomSDK instance is needed, refer to the [Configuration section](./sdk_install_conf.md#instantiating-the-jolocom-sdk) for details.
