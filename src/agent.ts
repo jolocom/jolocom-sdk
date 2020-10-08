@@ -168,7 +168,7 @@ export class Agent {
    * @category Identity Management
    */
   public async loadIdentity(did?: string): Promise<IdentityWallet> {
-    const encryptedWalletInfo = await this.sdk.storage.get.encryptedWallet(did)
+    const encryptedWalletInfo = await this.storage.get.encryptedWallet(did)
     if (!encryptedWalletInfo) {
       throw new SDKError(ErrorCode.NoWallet)
     }
@@ -192,10 +192,10 @@ export class Agent {
     const identityWallet = await authAsIdentityFromKeyProvider(
       this._keyProvider,
       encryptionPass,
-      this.sdk.resolver,
+      this.resolver,
     )
 
-    await this.sdk.storage.store.didDoc(identityWallet.didDocument)
+    await this.storage.store.didDoc(identityWallet.didDocument)
 
     // This sets the didMethod so that it doesn't return a different value if
     // the SDK default is changed in runtime
@@ -205,13 +205,14 @@ export class Agent {
   }
 
   /**
-   * Loads an Identity based on a buffer of entropy.
+   * Loads an Identity based on a BIP39 mnemonic phrase
    *
-   * @param entropy - Buffer of private entropy to generate keys with
-   * @returns An identity corrosponding to the entropy
+   * @param mnemonic - a BIP39 mnemonic phrase to use
+   * @returns An IdentityWallet holding an Identity created by the configured
+   *          DID Method given the entropy encoded in the mnemonic phrase
+   *
    * @category Identity Management
    */
-
   public async loadFromMnemonic(mnemonic: string): Promise<IdentityWallet> {
     const pass = await this.passwordStore.getPassword()
 
@@ -252,6 +253,14 @@ export class Agent {
   }
 
   /**
+   * Creates and registers an Identity based on a BIP39 mnemonic phrase
+   *
+   * @param mnemonic - a BIP39 mnemonic phrase to use
+   * @param shouldOverwrite - if true, overwrite any pre-existing identity in
+   *                          storage (default false)
+   * @returns An IdentityWallet holding an Identity created by the configured
+   *          DID Method given the entropy encoded in the mnemonic phrase
+   *
    * @category Identity Management
    */
   public async createFromMnemonic(
