@@ -1532,12 +1532,12 @@
   dependencies:
     ethers "5.0.5"
 
-"@jolocom/sdk-storage-typeorm@^2.0.9":
-  version "2.0.9"
-  resolved "https://registry.yarnpkg.com/@jolocom/sdk-storage-typeorm/-/sdk-storage-typeorm-2.0.9.tgz#17c5b80bf1d4227d3d1e4c5544723e4350dd8804"
-  integrity sha512-cOZ1YBEOf1KbqSnAHIx9wT7qjZxWVlzeLdamlw5qJE1TksHstEBxSsj79rz9hpp7n3jBsPvJ/E0RD38qoAg5kA==
+"@jolocom/sdk-storage-typeorm@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@jolocom/sdk-storage-typeorm/-/sdk-storage-typeorm-3.0.0.tgz#11afacea2f24659107df39a8052780f84f5c4c76"
+  integrity sha512-Re0uQX2aYteZs2vl0RobUiwo3Dbs4qtzGsaiFl7sFmlPtxj3FeGeDOqxXq6EU3CCIcnIM7QWGE/8qfdlG0+mKA==
   dependencies:
-    class-transformer "^0.2.3"
+    class-transformer "^0.3.1"
     ramda "^0.27.1"
 
 "@jolocom/vaulted-key-provider@^0.7.4":
@@ -2515,11 +2515,6 @@ class-transformer@^0.1.9:
   version "0.1.10"
   resolved "https://registry.yarnpkg.com/class-transformer/-/class-transformer-0.1.10.tgz#350f168ebb4c1f87edb18b98dd973681fc20fff7"
   integrity sha512-QiNdUxEvTBiUtc0KiapGVHhgaqGQVEhOfL9UEBnb9xRfcwmDJT5ijIDwcwJUTwXaT/kGvZZB4JCGsiuR5adX6g==
-
-class-transformer@^0.2.3:
-  version "0.2.3"
-  resolved "https://registry.yarnpkg.com/class-transformer/-/class-transformer-0.2.3.tgz#598c92ca71dcca73f91ccb875d74a3847ccfa32d"
-  integrity sha512-qsP+0xoavpOlJHuYsQJsN58HXSl8Jvveo+T37rEvCEeRfMWoytAyR0Ua/YsFgpM6AZYZ/og2PJwArwzJl1aXtQ==
 
 class-transformer@^0.3.1:
   version "0.3.1"
