@@ -166,7 +166,7 @@ In this simple example, Alice is issuing Bob the Credential she created for him 
 Alice creates a Credential Offer:
 
 ```typescript
-const aliceCredOffer = await alice.credentialOffer({
+const aliceCredOffer = await alice.credOfferToken({
   callbackURL: 'https://example.com/issuance',
   offeredCredentials: [
     {
@@ -226,7 +226,7 @@ Alice creates a Credential Offer:
 ```typescript
 import { JolocomLib } from '@jolocom/sdk'
 
-const aliceCredRequest = await alice.credentialRequestToken({
+const aliceCredRequest = await alice.credRequestToken({
   callbackURL: 'https://example.com/request',
   credentialRequirements: [
     {

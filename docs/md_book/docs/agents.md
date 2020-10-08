@@ -46,10 +46,10 @@ In case the desired functionality is to register the identity regardless of whet
 
 ## Loading an existing identity
 
-To provision the Agent with a previously created identity, the following function can be used:
+To instantiate an Agent with a previously created identity, the following function can be used:
 
 ```typescript
-sdk.loadIdentity('demoPassword', 'did:jolo:aaa...fff')
+sdk.loadAgent('demoPassword', 'did:jolo:aaa...fff')
 ```
 
 If a DID is provided, the method will attempt to find the associated encrypted wallet / DID Document entries using the `storage` interface. In case no entries have been found, an error is thrown. In case no argument is provided to the function, the first identity found is used.
