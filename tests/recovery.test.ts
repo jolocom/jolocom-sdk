@@ -1,3 +1,11 @@
+test('FIXME: Recovery test disabled, see test file', () => {
+})
+
+/*
+ * These tests is disabled because `agent.loadFromMnemonic` fails during
+ * hdkey derivation, because `Buffer instanceof Uint8Array` returns false inside
+ * jest environments.... https://github.com/facebook/jest/issues/4422
+ *
 import { Agent } from '../src'
 import { createAgent, destroyAgent } from './util'
 
@@ -50,3 +58,4 @@ test('Load local identity from mnemonic', async () => {
   expect(await agent.keyProvider.getPubKeys(pass)).toHaveLength(4)
   expect(agent.identityWallet.didDocument.publicKey).toHaveLength(2)
 })
+*/

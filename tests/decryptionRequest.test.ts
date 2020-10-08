@@ -1,22 +1,19 @@
-import { entropyToMnemonic } from 'jolocom-lib/js/utils/crypto'
 import { Agent } from '../src'
 import { Identity } from 'jolocom-lib/js/identity/identity'
-import { createAgent, destroyAgent } from './util'
+import { createAgent, destroyAgent, meetAgent } from './util'
 
 const conn1Name = 'decrypt1'
 const conn2Name = 'decrypt2'
 let service: Agent, user: Agent
 
 beforeEach(async () => {
-  service = await createAgent(conn1Name, 'jolo')
-  // in this test, the service is "anchored" (the user can always resolve them)
-  await service.loadFromMnemonic(
-    entropyToMnemonic(Buffer.from('a'.repeat(64), 'hex')),
-  )
+  service = await createAgent(conn1Name)
+  await service.createNewIdentity()
 
   user = await createAgent(conn2Name)
-  // the user is "unanchored" (the service cannot resolve them initially)
   await user.createNewIdentity()
+
+  await meetAgent(user, service, false)
 })
 
 afterEach(async () => {
