@@ -23,6 +23,10 @@ cat > "$DOCS_BUILD_BASE/index.html" <<EOF
 </html>
 EOF
 
+# Disable gh-pages jekyll or otherwise it removes files starting with "_"
+# which is all typedoc generated modules.....
+touch "$DOCS_BUILD_BASE/.nojekyll"
+
 if [[ "$1" == "serve" ]]; then
   mkdocs serve -f mkdocs.yml
 else
