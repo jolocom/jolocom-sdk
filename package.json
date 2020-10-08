@@ -24,8 +24,8 @@
     "@babel/preset-env": "^7.11.0",
     "@babel/preset-typescript": "^7.10.4",
     "@babel/runtime": "^7.11.2",
-    "@jolocom/local-resolver-registrar": "^1.0.0-rc0",
-    "@jolocom/sdk-storage-typeorm": "^2.0.9",
+    "@jolocom/local-resolver-registrar": "^1.0.0-rc1",
+    "@jolocom/sdk-storage-typeorm": "^3.0.0",
     "@types/jest": "^26.0.10",
     "@types/node": "^13.9.8",
     "@types/node-fetch": "^2.5.5",
@@ -45,7 +45,7 @@
     "eslint-plugin-react": "^7.12.4",
     "fs-extra": "^8.1.0",
     "jest": "^26.4.2",
-    "jolocom-lib": "^5.1.0-rc7",
+    "jolocom-lib": "^5.1.0-rc9",
     "mockdate": "^2.0.2",
     "node-fetch": "^2.6.0",
     "prettier": "^1.18.2",
@@ -61,7 +61,7 @@
     "yarn": "^1.22.0"
   },
   "peerDependencies": {
-    "jolocom-lib": "^5.1.0-rc6"
+    "jolocom-lib": "^5.1.0-rc9"
   },
   "dependencies": {
     "@jolocom/protocol-ts": "^0.5.2",

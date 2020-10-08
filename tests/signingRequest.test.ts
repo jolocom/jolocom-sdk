@@ -1,7 +1,6 @@
-import { createAgent, destroyAgent } from './util'
+import { createAgent, destroyAgent, meetAgent } from './util'
 import { SigningFlowState } from '../src/interactionManager/signingFlow'
 import { Agent } from '../src'
-import { entropyToMnemonic } from 'jolocom-lib/js/utils/crypto'
 import { Identity } from 'jolocom-lib/js/identity/identity'
 import { verifySignatureWithIdentity } from 'jolocom-lib/js/utils/validation'
 
@@ -10,15 +9,13 @@ const conn2Name = 'signing2'
 let service: Agent, user: Agent
 
 beforeEach(async () => {
-  // in this test, the service is "anchored" (the user can always resolve them)
-  service = await createAgent(conn1Name, 'jolo')
-  await service.loadFromMnemonic(
-    entropyToMnemonic(Buffer.from('a'.repeat(64), 'hex')),
-  )
+  service = await createAgent(conn1Name)
+  await service.createNewIdentity()
 
-  // the user is "unanchored" (the service cannot resolve them initially)
-  user = await createAgent(conn2Name, 'jun')
+  user = await createAgent(conn2Name)
   await user.createNewIdentity()
+
+  await meetAgent(user, service, false)
 })
 
 afterEach(async () => {
