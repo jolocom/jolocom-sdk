@@ -17,7 +17,7 @@ The Agent will also persist the created encrypted wallet (containing keys associ
 Two optional arguments can be provided to the `createNewAgent` function:
 
 - `passwordOrStore` - The SDK makes use of a Password Store component, used for persisting secrets (e.g. the symmetric encryption key used to encrypt / decrypt the contents of the user's Wallet). A custom implementation satisfying the `IPasswordStore` interface can be passed at this point.
-  In case the argument is of type `string`, a [NaivePasswordStore](TODO) will be instantiated with the provided password. In case no argument is provided, the aforementioned `NaivePasswordStore` is initiated with a encryption random password. _For an example integration with react-native, see the [JolocomKeychainPasswordStore](JolocomKeychainPasswordStore)._
+  In case the argument is of type `string`, a [NaivePasswordStore](https://github.com/jolocom/jolocom-sdk/blob/36a7a4e7c17f4501d6fc4c79b2b3633befbb6904/src/storage/index.ts#L73) will be instantiated with the provided password. In case no argument is provided, the aforementioned `NaivePasswordStore` is initiated with a encryption random password. _For an example integration with react-native, see the [JolocomKeychainPasswordStore](https://github.com/jolocom/react-native-jolocom/blob/master/ts/passwordStore.ts)._
 - `didMethodName` - The DID Method used by the Agent. This DID Method will be used when creating an identity for the agent, as well as when recovering an identity from seed material. The Agent will still retain the ability to resolve across all DID Methods supported by the SDK. In case no argument is provided the DID Method registered as default on the SDK instance is used.
 
 ### Create an Agent based on a BIP39 mnemonic
@@ -42,8 +42,6 @@ Based on the DID Method the Agent is configured to use, the appropriate identity
 The Agent will also persist the recovered encrypted wallet (containing the recovered keys) and DID Document locally (allowing for the identity to be reused at later points), using the storage backend.
 
 *In case the identity is already registered, an error is thrown (in order to prevent accidental identity updates). In case the desired functionality is to register the identity and overwrite any existing entries (as defined by the DID Method) a second boolean argument `shouldOverwrite` can be set to `true`.*
-
-*Note - the `createFromMnemonic` function will be exposed at the sdk level in a future update*
 
 ### Loading an existing identity
 
