@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Identity - Jolocom SDK</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
+            <div class="container">
+                <a class="navbar-brand" href="../..">Jolocom SDK</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Overview <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../.." class="dropdown-item">Introduction</a>
+</li>
+                                    
+<li>
+    <a href="../sdk_install_conf/" class="dropdown-item">Installation and configuration</a>
+</li>
+                                    
+<li>
+    <a href="../agents/" class="dropdown-item">Agents</a>
+</li>
+                                    
+<li>
+    <a href="../credentials/" class="dropdown-item">Verifiable Credentials</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Identity <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="#creating-an-identity" class="dropdown-item">Creating an Identity</a>
+</li>
+                                    
+<li>
+    <a href="#loading-an-identity" class="dropdown-item">Loading an Identity</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Interactions <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../interaction_flows/" class="dropdown-item">Interaction Flows</a>
+</li>
+                                    
+<li>
+    <a href="../interaction_flows/#peer-resolution" class="dropdown-item">Peer Resolution</a>
+</li>
+                                    
+<li>
+    <a href="../interaction_flows/#authentication" class="dropdown-item">Authentication</a>
+</li>
+                                    
+<li>
+    <a href="../interaction_flows/#authorization" class="dropdown-item">Authorization</a>
+</li>
+                                    
+<li>
+    <a href="../interaction_flows/#verifiable-credential-issuance" class="dropdown-item">Credential Issuance</a>
+</li>
+                                    
+<li>
+    <a href="../interaction_flows/#credential-verification" class="dropdown-item">Credential Request</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="navitem">
+                                <a href="../../api/" class="nav-link">API</a>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Versions <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="/jolocom-sdk/1.0.0-rc11/" class="dropdown-item">1.0.0</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#identity" class="nav-link">Identity</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#creating-an-identity" class="nav-link">Creating an Identity</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#examples" class="nav-link">Examples</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="identity">Identity</h1>
+<h2 id="creating-an-identity">Creating an Identity</h2>
+<h3 id="creating-an-agent-with-a-random-identity">Creating an Agent with a random identity</h3>
+<p>To provision an Agent with a new random identity (i.e. DID and set of keys), the following function can be used:</p>
+<pre><code class="typescript">sdk.createNewAgent('demoPassword', 'jolo')
+</code></pre>
+
+<p>Based on the DID Method the Agent is configured to use, the appropriate identity creation / "anchoring" operations are executed (e.g. creating and broadcasting Blockchain transactions, interfacing with various distributed storage backends, etc.). If succesfull, the function returns the DID Document, and the corresponding signing keys, for the newly created identity.</p>
+<p>The Agent will also persist the created encrypted wallet (containing keys associated with the identity) and DID Document locally (allowing for the identity to be reused at later points), using the storage backend.</p>
+<p>Two optional arguments can be provided to the <code>createNewAgent</code> function:</p>
+<ul>
+<li><code>passwordOrStore</code> - The SDK makes use of a Password Store component, used for persisting secrets (e.g. the symmetric encryption key used to encrypt / decrypt the contents of the user's Wallet). A custom implementation satisfying the <code>IPasswordStore</code> interface can be passed at this point.
+  In case the argument is of type <code>string</code>, a <a href="https://github.com/jolocom/jolocom-sdk/blob/36a7a4e7c17f4501d6fc4c79b2b3633befbb6904/src/storage/index.ts#L73">NaivePasswordStore</a> will be instantiated with the provided password. In case no argument is provided, the aforementioned <code>NaivePasswordStore</code> is initiated with a encryption random password. <em>For an example integration with react-native, see the <a href="https://github.com/jolocom/react-native-jolocom/blob/master/ts/passwordStore.ts">JolocomKeychainPasswordStore</a>.</em></li>
+<li><code>didMethodName</code> - The DID Method used by the Agent. This DID Method will be used when creating an identity for the agent, as well as when recovering an identity from seed material. The Agent will still retain the ability to resolve across all DID Methods supported by the SDK. In case no argument is provided the DID Method registered as default on the SDK instance is used.</li>
+</ul>
+<h3 id="create-an-agent-based-on-a-bip39-mnemonic">Create an Agent based on a BIP39 mnemonic</h3>
+<p>In the previous section, the created Agent was provisioned with a newly created DID, as well as a set of signing keys. The only way to reuse an identity created this way is by exporting and later reusing the returned Encrypted Wallet.</p>
+<p>In case deterministic identity creation is desired, the <code>agent.createFromMnemonic</code> method can be used as follows:</p>
+<pre><code class="typescript">// the returned Agent instsance is not yet provisioned with an identity
+const agent = sdk.createAgent()
+
+agent.createFromMnemonic(
+  'hammer soul glare stairs indicate snack address divert mosquito chef season hobby',
+)
+</code></pre>
+
+<p>This function allows for the deterministic creation of a DID, and the associated keys. A BIP39 compliant mnemonic is expected as an argument. In case the used <code>registrar</code> does not implement the <code>recoverFromSeed</code> method, an error is thrown. The deterministic derivation of keys from a seed is delegated to the <code>registrar</code> implementation. Internally, BIP32, SLIP0010, or other specifications can be used. The <code>registrar</code> implementation encapsulates the specification, as well as the metadata required for derivation (e.g. paths, indexes, etc.)</p>
+<p>Based on the DID Method the Agent is configured to use, the appropriate identity creation / "anchoring" operations are then executed (e.g. creating and broadcasting Blockchain transactions, interfacing with various distributed storage backends, etc.). If succesfull, the function returns the DID Document, and the corresponding signing keys, for the recovered identity.</p>
+<p>The Agent will also persist the recovered encrypted wallet (containing the recovered keys) and DID Document locally (allowing for the identity to be reused at later points), using the storage backend.</p>
+<p><em>In case the identity is already registered, an error is thrown (in order to prevent accidental identity updates). In case the desired functionality is to register the identity and overwrite any existing entries (as defined by the DID Method) a second boolean argument <code>shouldOverwrite</code> can be set to <code>true</code>.</em></p>
+<h3 id="loading-an-existing-identity">Loading an existing identity</h3>
+<p>As mentioned in the previous sections, using <code>sdk.createNewIdentity</code> or <code>agent.createFromMnemonic</code> will persist the created / recovered encrypted wallet data using the <code>storage</code> backend the SDK was configured with.</p>
+<p>To provision the Agent with an identity persisted in the <code>storage</code> backend the following function can be used:</p>
+<pre><code class="typescript">sdk.loadAgent('demoPassword', 'did:jolo:aaa...fff')
+</code></pre>
+
+<p>If a DID is provided, the method will attempt to find the associated encrypted wallet / DID Document entries using the <code>storage</code> interface. In case no entries have been found, an error is thrown. In case no argument is provided to the function, the first identity found is used.</p>
+<p>Note that the password or password store provided should match the password used to previously encrypt the Identity being loaded.</p>
+<h3 id="recovering-an-existing-identity-from-a-mnemonic">Recovering an existing identity from a mnemonic</h3>
+<p>This function is equivalent to the previously described <a href="#createfrommnemonic">createFromMnemonic</a>, except that it does not attempt to register / anchor (as defined by the DID Method) a new identity. Instead, the configured <code>registrar</code> is used to derive the key material, and subsequently the DID, which is resolved using the <code>resolver</code> module.</p>
+<p>In case the DID is resolvable, and the returned DID Document matches the derived DID / keys, the Agent is provisioned with the recovered identity. In case the identity can not be resolved, an error is thrown.</p>
+<pre><code class="typescript">
+// the returned Agent instsance is not yet provisioned with an identity
+const agent = sdk.createAgent()
+
+agent.loadFromMnemonic(
+  'hammer soul glare stairs indicate snack address divert mosquito chef season hobby',
+)
+</code></pre>
+
+<p>This method can be used to "recover" control over an existing identity, given only the BIP39 mnemonic (i.e. the same one used in a previous <code>createFromMnemonic</code> call).</p>
+<h2 id="examples">Examples</h2>
+<p>Below, we see an example setup of two Identities which will be used for examples in this documentation. These Agent instances can run within the same Node process, however for this case they can be imagined to be running on a client-server model, where Alice is the server and Bob is the client. For simplicity, imagine that an SDK instance has been created already for each process, as in the <a href="../sdk_install_conf/#instantiating-the-jolocom-sdk">Configuration section</a>:</p>
+<p>Alices Agent loading:</p>
+<pre><code class="typescript">// The Alice Agent (did:jolo:alice) is loaded from the sdk storage
+const alice = await sdk.loadIdentity('alicesPassword', 'did:jolo:alice')
+</code></pre>
+
+<p>Bob Agent creation:</p>
+<pre><code class="typescript">// The Bob Agent is randomly generated using the 'jun' DID method
+const bob = await sdk.createNewAgent('bobsPassword', 'jun')
+</code></pre>
+
+<p>Now that our Agents are instantiated, let's see how they can be used to set up <a href="../interaction_flows/">Interaction Flows</a>.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
