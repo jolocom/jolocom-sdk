@@ -140,6 +140,7 @@ Alices request is broadcast and received and processed by Bob:
 ```typescript
 const bobsInteraction = await bob.processJWT(aliceAuthZRequest)
 const bobsAuthZResponse = await bobsInteraction.createAuthorizationResponse()
+
 await bob.processJWT(bobsAuthZResponse.encode())
 ```
 
@@ -205,8 +206,9 @@ const alicesIssuance = await alicesInteraction.createCredentialReceiveToken(
 alice.processJWT(alicesIssuance.encode())
 ```
 
-Bob receives Alice's second message, the issuance, and stores the issued Credentials.
-Note that storage of the credential is handled automatically by the Agent.
+Bob receives Alice's second message, the issuance, and verifies the received Credentials (ensuring the signatures are valid, the issuer is correct, and the received Credentials match the selection encoded in the `bobsCredSelection` message).
+
+Note that the storage of the issued Credentials is not handled automatically (allowing for additional / custom validation logic to be defined / evaluated by the SDK user before storing).
 
 ```typescript
 const bobReceives = await bob.processJWT(alicesIssuence.encode())
