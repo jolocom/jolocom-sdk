@@ -18,9 +18,11 @@ It is designed to streamline the creation, validation, authentication and proces
 
 The SDK itself functions as an Agent Factory. It manages a storage connection and a collection of registered DID Methods, providing storage access and resolution capabilities to the Agents which it creates.
 
-Check out the [documentation folder](./docs/md_book/docs/) for examples / instructions on how to:
-- Install, configure and instantiate the Jolocom SDK [link](./docs/md_book/docs/sdk_install_conf.md)
-- Use an instance of the Jolocom SDK to create [link](./docs/md_book/docs/agents.md)
-- Use the created Agents to participate in various SSI interactions and / or issue Verifiable Credentials [link](./docs/md_book/docs/interaction_flows.md)
+Check out the [documentation](https://jolocom.github.io/jolocom-sdk/) for examples / instructions on how to:
+- Install, configure and instantiate the Jolocom SDK [link](./docs/guides/sdk_install_conf.md)
+- Use an instance of the Jolocom SDK to create [link](./docs/guides/agents.md)
+- Use the created Agents to participate in various SSI interactions and / or issue Verifiable Credentials [link](./docs/guides/interaction_flows.md)
 
-For API documentation, see the API docs.
+For API documentation, see the API docs for the appropriate version by browsing
+to the [documentation](https://jolocom.github.io/jolocom-sdk/) and clicking on
+"API"

@@ -49,8 +49,9 @@ As mentioned in the previous sections, using `sdk.createNewIdentity` or `agent.c
 
 To provision the Agent with an identity persisted in the `storage` backend the following function can be used:
 
+
 ```typescript
-sdk.loadIdentity('demoPassword', 'did:jolo:aaa...fff')
+sdk.loadAgent('demoPassword', 'did:jolo:aaa...fff')
 ```
 
 If a DID is provided, the method will attempt to find the associated encrypted wallet / DID Document entries using the `storage` interface. In case no entries have been found, an error is thrown. In case no argument is provided to the function, the first identity found is used.

@@ -118,10 +118,10 @@ export class JolocomSDK {
    *                        SDK instance
    * @category Agent
    */
-  public async createAgent(
+  public _makeAgent(
     passOrStore?: string | IPasswordStore,
     didMethodName?: string,
-  ): Promise<Agent> {
+  ): Agent {
     const passwordStore = this._makePassStore(passOrStore)
     const didMethod = didMethodName
       ? this.didMethods.get(didMethodName)
@@ -134,21 +134,46 @@ export class JolocomSDK {
   }
 
   /**
-   * Create (and store) an Agent instance with a newly created Identity
+   * Create an Agent instance with a newly registered Identity, and persist it
+   * to storage
    *
    * @param passOrStore - A password as string or {@link IPasswordStore}
    * @param didMethodName - The name of a DID method registered on this Agent's
    *                        SDK instance
    * @category Agent
    */
-  public async createNewAgent(
+  public async createAgent(
     passOrStore?: string | IPasswordStore,
     didMethodName?: string,
   ): Promise<Agent> {
-    const agent = await this.createAgent(passOrStore, didMethodName)
+    const agent = this._makeAgent(passOrStore, didMethodName)
     await agent.createNewIdentity()
     return agent
   }
+
+  /**
+   * Create an Agent instance with a newly registered Identity based on entropy
+   * from a BIP39 mnemonic, and persist it to storage
+   *
+   * @param mnemonic - A BIP39 phrase
+   * @param shouldOverwrite - if true, overwrite any pre-existing identity in
+   *                          storage (default false)
+   * @param passOrStore - A password as string or {@link IPasswordStore}
+   * @param didMethodName - DID Method to use, or otherwise
+   *                        {@link default | setDefaultDidMethod}
+   * @category Agent
+   */
+  public async createAgentFromMnemonic(
+    mnemonic: string,
+    shouldOverwrite = false,
+    passOrStore?: string | IPasswordStore,
+    didMethodName?: string
+  ): Promise<Agent> {
+    const agent = this._makeAgent(passOrStore, didMethodName)
+    await agent.createFromMnemonic(mnemonic, shouldOverwrite)
+    return agent
+  }
+
 
   /**
    * Create an Agent instance with an Identity loaded from storage
@@ -162,8 +187,27 @@ export class JolocomSDK {
     did?: string,
   ): Promise<Agent> {
     const didMethodName = did ? did.split(':')[1] : ''
-    const agent = await this.createAgent(passOrStore, didMethodName)
+    const agent = this._makeAgent(passOrStore, didMethodName)
     await agent.loadIdentity(did)
+    return agent
+  }
+
+  /**
+   * Create an Agent instance with an Identity loaded from a mnemonic phrase
+   *
+   * @param mnemonic - A BIP39 phrase
+   * @param passOrStore - A password as string or {@link IPasswordStore}
+   * @param didMethodName - DID Method to use, or otherwise
+   *                        {@link default | setDefaultDidMethod}
+   * @category Agent
+   */
+  public async loadAgentFromMnemonic(
+    mnemonic: string,
+    passOrStore?: string | IPasswordStore,
+    didMethodName?: string
+  ): Promise<Agent> {
+    const agent = this._makeAgent(passOrStore, didMethodName)
+    await agent.loadFromMnemonic(mnemonic)
     return agent
   }
 
@@ -190,7 +234,7 @@ export class JolocomSDK {
         throw err
       }
     }
-    return await this.createNewAgent(passOrStore)
+    return this.createAgent(passOrStore)
   }
 
   /**
