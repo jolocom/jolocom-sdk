@@ -22,4 +22,4 @@ nav:
   - API: './api/index.html'
 
   - Versions:
-    - '1.0.0': '/1.0.0-rc10/'
+    - '1.0.0': '/jolocom-sdk/1.0.0-rc12/'
