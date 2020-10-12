@@ -70,12 +70,16 @@ export class JolocomSDK {
     } catch (err) {
       // pass, it's ok
     }
+    /*
+     * Note this is disabled because it breaks metro bundler
+     *
     try {
       const WebSocket = require('ws')
       this.transports.ws.configure({ WebSocket })
     } catch (err) {
       // pass, it's ok
     }
+    */
   }
 
   /**
