@@ -31,8 +31,9 @@ const testWsEndpoint = `ws://127.0.0.1:${testPort}`
 let serviceChanPromise: Promise<Channel>
 
 beforeEach(async () => {
-  // Create a user Agent and register a WebSockets transport type handler
+  // Create a user Agent and configure WebSockets transport handler
   user = await createAgent(conn1Name)
+  user.sdk.transports.ws.configure({ WebSocket })
   await user.createNewIdentity()
 
   // Create a service agent, and start a WebSockets server
