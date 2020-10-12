@@ -24,12 +24,12 @@ export interface IJolocomSDKConfig {
   eventDB?: InternalDb
 }
 
-export interface IJolocomSDKInitOptions {
+export interface IInitAgentOptions {
+  //mnemonic?: string
+  password?: string
+  passwordStore?: IPasswordStore
   did?: string
-  mnemonic?: string
   auto?: boolean
-  pass?: string
-  passOrStore?: string | IPasswordStore
 }
 
 export interface JolocomPlugin {
@@ -225,8 +225,9 @@ export class JolocomSDK {
    * @category Agent
    */
   async initAgent(
-    { passOrStore, did, auto }: IJolocomSDKInitOptions = { auto: true },
+    { password, passwordStore, did, auto }: IInitAgentOptions = { auto: true },
   ) {
+    const passOrStore = password || passwordStore
     try {
       return this.loadAgent(passOrStore, did)
     } catch (err) {
