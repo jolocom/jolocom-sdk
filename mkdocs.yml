@@ -9,6 +9,7 @@ nav:
     - 'Installation and configuration': 'guides/sdk_install_conf.md'
     - guides/agents.md
     - guides/credentials.md
+    - guides/channels.md
   - 'Identity':
     - 'Creating an Identity': 'guides/identity/#creating-an-identity'
     - 'Loading an Identity': 'guides/identity/#loading-an-identity'
