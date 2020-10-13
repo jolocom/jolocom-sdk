@@ -18,8 +18,13 @@ _In case you would like to avoid implementing a custom storage backend for the S
 
 ## Instantiating the Jolocom SDK
 
-The Jolocom SDK relies on an injected storage module / backend to persist data (e.g. DID Documents, Verifiable Credentials, Encrypted keys) required / collected as part of various SSI interactions. Custom storage backend implementations can be defined, as long as they satisfy the `IStorage` interface.
+The Jolocom SDK requires a set of external services that provide storage and
+network transports integrations appropriate to the runtime environment. The
+Storage module is required on instantiation, while network transports are
+configured (and can be reconfigured) after an SDK instance is created.
 
+### Storage
+A storage module is required to persist data (e.g. DID Documents, Verifiable Credentials, Encrypted keys, etc) which is generated or collected as part of various SSI interactions and events. Custom storage backend implementations can be defined, as long as they satisfy the [IStorage](../../api/interfaces/_src_storage_index_.istorage.html) interface.
 The fastest way to get a compliant storage module is by using the [@jolocom/sdk-storage-typeorm](https://www.npmjs.com/package/@jolocom/sdk-storage-typeorm) module:
 
 ```typescript
@@ -44,3 +49,29 @@ const sdk = new JolocomSDK({
 ```
 
 An additional optional argument, `eventDB`, can be provided to the constructor to specify a custom storage backend for "events" encountered as part of [Peer-Resolution flows](./interaction_flows.md#peer-resolution). This DB will only be used for particular DID methods. In case no argument is passed, the `storage` argument is used instead.
+
+### Network Transports
+
+The SDK currently supports WebSockets and HTTP as data transports. These need to
+be configured prior to usage, to inject platform specific solutions.
+
+#### HTTP
+The HTTP transport simply requires an implementation of
+[fetch](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch).
+For Node environments, install `node-fetch` and it will be automatically
+configured.  Or to use your custom `fetch` implementation:
+```typescript
+sdk.transports.http.configure({ fetch: customFetchImplementation })
+```
+
+#### WebSocket
+The WebSocket transport requires an implementation of [WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket).
+
+In Node environments, to use [ws](https://npmjs.com/package/ws) as the WebSocket
+implementation, install the pacakge then after instantiating the SDK in your
+code:
+```typescript
+import * as WebSocket from 'ws'
+/* .... instantiate SDK .... */
+sdk.transports.ws.configure({ WebSocket })
+```
