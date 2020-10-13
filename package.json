@@ -38,7 +38,7 @@
     "babel-plugin-inline-import": "^3.0.0",
     "babel-plugin-transform-typescript-metadata": "^0.2.2",
     "case-sensitive-paths-webpack-plugin": "^2.1.2",
-    "class-transformer": "^0.1.9",
+    "class-transformer": "^0.3.1",
     "eslint": "^5.15.3",
     "eslint-config-prettier": "^4.1.0",
     "eslint-plugin-prettier": "^3.0.1",
