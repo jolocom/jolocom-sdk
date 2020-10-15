@@ -229,13 +229,15 @@ export class JolocomSDK {
    * @category Agent
    */
   async initAgent(
-    { password, passwordStore, did, auto }: IInitAgentOptions = { auto: true },
+    { password, passwordStore, did, auto }: IInitAgentOptions,
   ) {
     const passOrStore = password || passwordStore
     try {
-      return this.loadAgent(passOrStore, did)
+      // NOTE: must 'await' here explicity for error handling to work correctly
+      const agent = await this.loadAgent(passOrStore, did)
+      return agent
     } catch (err) {
-      if (err.message !== ErrorCode.NoWallet || !auto) {
+      if (err.message !== ErrorCode.NoWallet || auto === false) {
         throw err
       }
     }

@@ -44,7 +44,7 @@ import { Identity } from 'jolocom-lib/js/identity/identity'
  *
  *
  * The {@link JolocomSDK} has further convenience methods for Agent
- * construction: {@link JolocomSDK.createNewAgent},
+ * construction: {@link JolocomSDK.createAgent},
  * {@link JolocomSDK.loadAgent}, {@link JolocomSDK.initAgent}
  */
 export class Agent {
