@@ -1,25 +1,33 @@
-import { createConnection, getConnection } from 'typeorm'
-import { getSdk } from './util'
+import { destroyAgent, getSdk } from './util'
+import { JolocomSDK } from 'src'
 
-beforeEach(async () =>
-  createConnection({
-    type: 'sqlite',
-    database: ':memory:',
-    dropSchema: true,
-    entities: [
-      'node_modules/@jolocom/sdk-storage-typeorm/js/src/entities/*.js',
-    ],
-    synchronize: true,
-    logging: false,
-  }),
-)
+const connName = 'test'
 
-afterEach(async () => {
-  const conn = getConnection()
-  return conn.close()
+let sdk: JolocomSDK
+beforeEach(async () => {
+  sdk = await getSdk(connName)
+  sdk.setDefaultDidMethod('jun')
 })
 
-test('Create identity', async () => {
-  const SDK = await getSdk('test')
-  console.log(SDK)
+afterEach(async () => {
+  await destroyAgent(connName)
+})
+
+test('Create Agent', async () => {
+  const alice = await sdk.createAgent('pass', 'jun')
+  expect(alice.idw.did).toBeDefined()
+})
+
+test('Init Agent with only a password', async () => {
+  const alice = await sdk.initAgent({ password: 'please' })
+  expect(alice.idw.did).toBeDefined()
+})
+
+test('Init Agent multiple times returning the same agent', async () => {
+  const alice = await sdk.initAgent({ password: 'please' })
+  expect(alice.idw.did).toBeDefined()
+
+  const aliceAgain = await sdk.initAgent({ password: 'please' })
+
+  expect(alice.idw.did).toEqual(aliceAgain.idw.did)
 })
