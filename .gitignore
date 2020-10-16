@@ -6,10 +6,12 @@ coverage/
 .gitattributes
 .watchmanconfig
 dist/
-db.sqlite3
+*.sqlite3
 */sentry.properties
 local_identity.password.txt
 js
+docs-build
+docs/api
 
 #### Below is the default react native .gitignore ###
 ############### DO NOT EDIT BELOW ###################
