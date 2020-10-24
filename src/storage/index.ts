@@ -4,6 +4,7 @@ import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { InternalDb } from '@jolocom/local-resolver-registrar/js/db'
 
 import { IdentitySummary, CredentialMetadataSummary } from '../types'
+import { Identity } from 'jolocom-lib/js/identity/identity'
 
 export interface EncryptedSeedAttributes {
   encryptedEntropy: string
@@ -32,6 +33,7 @@ export interface IStorageStore {
   ): Promise<void>
   issuerProfile(issuer: IdentitySummary): Promise<void>
   didDoc(doc: DidDocument): Promise<void>
+  identity(identity: Identity): Promise<void>
   interactionToken(token: JSONWebToken<any>): Promise<void>
 }
 
@@ -48,6 +50,7 @@ export interface IStorageGet {
   ): Promise<CredentialMetadataSummary>
   publicProfile(did: string): Promise<IdentitySummary>
   didDoc(did: string): Promise<DidDocument>
+  identity(did: string): Promise<Identity>
   interactionTokens(attrs: {
     nonce?: string
     type?: string
