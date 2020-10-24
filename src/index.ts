@@ -91,18 +91,15 @@ export class JolocomSDK {
    * @returns the resolved identity
    */
   public async resolve(did: string): Promise<Identity> {
-    return this.storage.get
-      .didDoc(did)
-      .then(ddo => Identity.fromDidDocument({ didDocument: ddo }))
-      .catch(async () => {
-        const resolved = await this.didMethods
-          .getForDid(did)
-          .resolver.resolve(did)
-        await this.storage.store.didDoc(resolved.didDocument).catch(err => {
-          console.error('Failed store DID document after resolving', err)
-        })
-        return resolved
+    return this.storage.get.identity(did).catch(async () => {
+      const resolved = await this.didMethods
+        .getForDid(did)
+        .resolver.resolve(did)
+      await this.storage.store.identity(resolved).catch(err => {
+        console.error('Failed store DID document after resolving', err)
       })
+      return resolved
+    })
   }
 
   private _makePassStore(passOrStore?: string | IPasswordStore) {
