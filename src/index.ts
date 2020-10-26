@@ -271,7 +271,7 @@ export class JolocomSDK {
     id: Identity,
     skp: SoftwareKeyProvider,
   ): Promise<void> {
-    if (id.did !== skp.id) throw new Error('Identity data inconsistant')
+    if (id.did !== skp.id) throw new Error('Identity data inconsistent')
     await this.storage.store.encryptedWallet({
       id: skp.id,
       encryptedWallet: skp.encryptedWallet,

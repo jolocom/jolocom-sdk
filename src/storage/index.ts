@@ -32,7 +32,6 @@ export interface IStorageStore {
     credentialMetadata: CredentialMetadataSummary,
   ): Promise<void>
   issuerProfile(issuer: IdentitySummary): Promise<void>
-  didDoc(doc: DidDocument): Promise<void>
   identity(identity: Identity): Promise<void>
   interactionToken(token: JSONWebToken<any>): Promise<void>
 }
@@ -49,7 +48,6 @@ export interface IStorageGet {
     credential: SignedCredential,
   ): Promise<CredentialMetadataSummary>
   publicProfile(did: string): Promise<IdentitySummary>
-  didDoc(did: string): Promise<DidDocument>
   identity(did: string): Promise<Identity>
   interactionTokens(attrs: {
     nonce?: string
