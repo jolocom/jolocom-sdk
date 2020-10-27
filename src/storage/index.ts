@@ -1,5 +1,4 @@
 import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
-import { DidDocument } from 'jolocom-lib/js/identity/didDocument/didDocument'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { InternalDb } from '@jolocom/local-resolver-registrar/js/db'
 
