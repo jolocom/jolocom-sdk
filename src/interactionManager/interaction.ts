@@ -130,21 +130,34 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     this.flow = new interactionFlowForMessage[interactionType](this)
   }
 
-  static async fromMessages(
+  /**
+   * Returns an Interaction with state calculated from the given list of messages
+   * @param messages - List of messages to calculate interaction state from
+   * @param ctx - The manager of this interaction
+   * @param id - A unique identifier for this interaction
+   * @param transportAPI - reference to an open transport to reach the
+   *                       {@link Interaction.participants}
+   */
+  static async fromMessages<F extends Flow<any>>(
     messages: Array<JSONWebToken<any>>,
     ctx: InteractionManager,
     id: string,
     transportAPI?: TransportAPI
-  ): Promise<Interaction> {
+  ): Promise<Interaction<F>> {
+    // TODO This function should be reconsidered when there is a cleaner separation between
+    // interactions, flows and flow state
+
     if (messages.length === 0) {
       throw new SDKError(ErrorCode.InvalidToken)
     }
 
     // instantiate
-    const interaction = new Interaction(ctx, id, messages[0].interactionType, transportAPI)
+    const interaction = new Interaction<F>(ctx, id, messages[0].interactionType, transportAPI)
 
     // set message history
     interaction.messages = messages
+    // @ts-ignore
+    interaction.flow.history = messages
 
     // set participants
     interaction.participants.requester = await ctx.ctx.resolve(messages[0].issuer)
@@ -153,7 +166,7 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
 
     // set role
     if (messages[0].issuer === ctx.ctx.idw.did) interaction.role = InteractionRole.Requester
-    else if (messages[1].issuer === ctx.ctx.idw.did) interaction.role = InteractionRole.Responder
+    else if (messages[1] && messages[1].issuer === ctx.ctx.idw.did) interaction.role = InteractionRole.Responder
 
     // replay history to get current state
     for (let message of messages) {

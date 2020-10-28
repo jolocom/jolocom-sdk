@@ -320,14 +320,12 @@ export class Agent {
   public async processJWT(jwt: string, transportAPI?: TransportAPI): Promise<Interaction> {
     const token = JolocomLib.parse.interactionToken.fromJWT(jwt)
 
-    const interaction = this.interactionManager.getInteraction(token.nonce)
-
-    if (interaction) {
+    return await this.interactionManager.getInteraction(token.nonce, transportAPI).then(async (interaction) => {
       await interaction.processInteractionToken(token)
       return interaction
-    } else {
-      return this.interactionManager.start(token, transportAPI)
-    }
+    }).catch(async _ => {
+      return await this.interactionManager.start(token, transportAPI)
+    })
   }
 
   /**
@@ -337,7 +335,7 @@ export class Agent {
    * @returns Promise<Interaction> the associated Interaction object
    * @category Interaction Management
    */
-  public findInteraction<F extends Flow<any>>(inp: string | JSONWebToken<any>): Interaction<F> | null {
+  public async findInteraction<F extends Flow<any>>(inp: string | JSONWebToken<any>): Promise<Interaction<F>> {
     let id
     if (typeof inp === 'string') {
       try {
@@ -350,10 +348,11 @@ export class Agent {
     } else if (inp && inp.nonce) {
       id = inp.nonce
     } else {
-      return null
+      // TODO different error
+      throw new SDKError(ErrorCode.InvalidToken)
     }
 
-    return this.interactionManager.getInteraction<F>(id)
+    return await this.interactionManager.getInteraction<F>(id)
   }
 
   /**

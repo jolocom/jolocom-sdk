@@ -18,7 +18,7 @@ import { TransportAPI } from '../types'
  *
  * @category Interactions
  */
-export class InteractionManager{
+export class InteractionManager {
   public readonly ctx: Agent
 
   public interactions: {
@@ -45,9 +45,7 @@ export class InteractionManager{
     return interaction
   }
 
-  // FIXME this can return UNDEFINED, should throw an error
-  // FIXME need to be async to support storage backends
-  public getInteraction<F extends Flow<any> = Flow<any>>(id: string) {
-    return this.interactions[id] as Interaction<F>
+  public async getInteraction<F extends Flow<any>>(id: string, transportAPI?: TransportAPI): Promise<Interaction<F>> {
+    return await Interaction.fromMessages<F>(await this.ctx.storage.get.interactionTokens({ nonce: id }), this, id, transportAPI)
   }
 }
