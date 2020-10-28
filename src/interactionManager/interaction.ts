@@ -130,6 +130,40 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     this.flow = new interactionFlowForMessage[interactionType](this)
   }
 
+  static async fromMessages(
+    messages: Array<JSONWebToken<any>>,
+    ctx: InteractionManager,
+    id: string,
+    transportAPI?: TransportAPI
+  ): Promise<Interaction> {
+    if (messages.length === 0) {
+      throw new SDKError(ErrorCode.InvalidToken)
+    }
+
+    // instantiate
+    const interaction = new Interaction(ctx, id, messages[0].interactionType, transportAPI)
+
+    // set message history
+    interaction.messages = messages
+
+    // set participants
+    interaction.participants.requester = await ctx.ctx.resolve(messages[0].issuer)
+
+    if (messages[1]) interaction.participants.responder = await ctx.ctx.resolve(messages[1].issuer)
+
+    // set role
+    if (messages[0].issuer === ctx.ctx.idw.did) interaction.role = InteractionRole.Requester
+    else if (messages[1].issuer === ctx.ctx.idw.did) interaction.role = InteractionRole.Responder
+
+    // replay history to get current state
+    for (let message of messages) {
+      await interaction.flow.onValidMessage(message.interactionToken, message.interactionType)
+    }
+
+    // return
+    return interaction
+  }
+
   get firstMessage() {
     if (this.messages.length < 1) throw new Error('Empty interaction')
     return this.messages[0]
