@@ -120,7 +120,7 @@ export class CredentialOfferFlow extends Flow<
   }
 
   public getIssuanceResult(): IssuanceResult {
-    return this.state.issued.map(cred => {
+    return this.state.issued.map((cred, i) => {
       const offer = this.state.offerSummary.find(
         ({ type }) => type === last(cred.type),
       )
@@ -129,13 +129,20 @@ export class CredentialOfferFlow extends Flow<
         throw new Error('Received wrong credentials')
       }
 
+      const validationErrors = {
+        invalidIssuer: cred.issuer !== this.ctx.participants.requester!.did,
+        invalidSubject: cred.subject !== this.ctx.participants.responder!.did,
+      }
+
+      if (validationErrors.invalidIssuer || validationErrors.invalidSubject) {
+        this.state.credentialsValidity[i] = false
+        this.state.credentialsAllValid = false
+      }
+
       return {
         ...offer,
         signedCredential: cred,
-        validationErrors: {
-          invalidIssuer: cred.issuer !== this.ctx.participants.requester!.did,
-          invalidSubject: cred.subject !== this.ctx.participants.responder!.did,
-        },
+        validationErrors,
       }
     })
   }
