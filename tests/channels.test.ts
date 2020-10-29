@@ -108,7 +108,7 @@ test('Establish a channel', async () => {
     description: "test"
   })
   const resp = await serviceChan.startThread(authReq)
-  const interxn = service.findInteraction(resp)
-  const userAuthInterxn = user.findInteraction(resp)
+  const interxn = await service.findInteraction(resp)
+  const userAuthInterxn = await user.findInteraction(resp)
   expect(interxn!.flow.state).toEqual(userAuthInterxn!.flow.state)
 })

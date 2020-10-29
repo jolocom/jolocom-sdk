@@ -31,11 +31,11 @@ test('Authentication interaction', async () => {
   const bobResponse = (
     await bobInteraction.createAuthenticationResponse()
   ).encode()
-  await bob.processJWT(bobResponse)
+  const bobNewInteraction = await bob.processJWT(bobResponse)
 
   const aliceInteraction = await alice.processJWT(bobResponse)
 
   expect(aliceInteraction.getMessages().map(m => m.encode())).toEqual(
-    bobInteraction.getMessages().map(m => m.encode()),
+    bobNewInteraction.getMessages().map(m => m.encode()),
   )
 })
