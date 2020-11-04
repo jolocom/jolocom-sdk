@@ -170,7 +170,7 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
 
     // replay history to get current state
     for (let message of messages) {
-      await interaction.flow.onValidMessage(message.interactionToken, message.interactionType)
+      await interaction.flow.handleInteractionToken(message.interactionToken, message.interactionType)
     }
 
     // return
@@ -439,7 +439,7 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     }
 
     // TODO if handling fails, should we still be pushing the token??
-    const res = await this.flow.handleInteractionToken(token)
+    const res = await this.flow.handleInteractionToken(token.interactionToken, token.interactionType)
     this.messages.push(token)
     await this.ctx.ctx.storage.store.interactionToken(token)
 

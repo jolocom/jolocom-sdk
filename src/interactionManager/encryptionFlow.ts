@@ -15,7 +15,7 @@ export interface EncryptionFlowState extends FlowState {
 
 export class EncryptionFlow extends Flow<
   EncryptionRequest | EncryptionResponse
-> {
+  > {
   public type = FlowType.Encrypt
   public state: EncryptionFlowState = {}
 
@@ -23,7 +23,7 @@ export class EncryptionFlow extends Flow<
     super(ctx)
   }
 
-  public async onValidMessage(
+  public async handleInteractionToken(
     token: EncryptionRequest | EncryptionResponse,
     interactionType: string,
   ) {

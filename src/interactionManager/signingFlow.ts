@@ -17,7 +17,7 @@ export class SigningFlow extends Flow<SigningRequest | SigningResponse> {
     super(ctx)
   }
 
-  public async onValidMessage(
+  public async handleInteractionToken(
     token: SigningRequest | SigningResponse,
     tokenType: string,
   ) {

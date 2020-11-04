@@ -15,7 +15,7 @@ export interface DecryptionFlowState extends FlowState {
 
 export class DecryptionFlow extends Flow<
   DecryptionRequest | DecryptionResponse
-> {
+  > {
   public type = FlowType.Decrypt
   public state: DecryptionFlowState = {}
 
@@ -23,7 +23,7 @@ export class DecryptionFlow extends Flow<
     super(ctx)
   }
 
-  public async onValidMessage(
+  public async handleInteractionToken(
     token: DecryptionRequest | DecryptionResponse,
     interactionType: string,
   ) {
