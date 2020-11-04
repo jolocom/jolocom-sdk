@@ -415,6 +415,18 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
   public async processInteractionToken<T>(
     token: JSONWebToken<T>,
   ): Promise<boolean> {
+
+    // extract PCA
+    if (token.payload.pca) {
+      // update local state
+      await this.ctx.ctx.sdk.didMethods
+        .getForDid(token.issuer)
+        .registrar.encounter(token.payload.pca)
+    }
+
+    // verify
+    await this.ctx.ctx.idw.validateJWT(token, this.messages[this.messages.length - 1], this.ctx.ctx.resolver)
+
     if (!this.participants.requester) {
       // TODO what happens if the signer isnt resolvable
       try {
