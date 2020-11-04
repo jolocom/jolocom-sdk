@@ -23,13 +23,10 @@ afterEach(async () => {
 
 test('Decryption Request interaction', async () => {
   // making them mutually resolvable
-  await meetAgent(user, service)
+  await meetAgent(user, service, false)
 
   // ensure the service is resolvable by the user
   await expect(user.resolve(service.idw.did)).resolves.toBeInstanceOf(Identity)
-
-  // ensure the user is resolvable by the service
-  await expect(service.resolve(user.idw.did)).resolves.toBeInstanceOf(Identity)
 
   // create a resolution request
   const serviceResRequest = await service.resolutionRequestToken()

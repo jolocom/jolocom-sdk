@@ -20,13 +20,8 @@ afterEach(async () => {
 })
 
 test('Credential Issuance interaction', async () => {
-  // making them mutually resolvable
-  await meetAgent(bob, alice)
-
-  // ensure bob is resolvable by alice
-  await expect(alice.resolve(bob.idw.did)).resolves.toMatchObject(
-    Promise.resolve(bob.idw.didDocument.toJSON()),
-  )
+  // making alice resolvable by bob
+  await meetAgent(bob, alice, false)
 
   // ensure alice is resolvable by bob
   await expect(bob.resolve(alice.idw.did)).resolves.toMatchObject(

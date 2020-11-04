@@ -65,7 +65,7 @@ beforeEach(async () => {
   });
 
   // Make agents encounter each other
-  await meetAgent(user, service)
+  await meetAgent(user, service, false)
 
   console.log('user is', user.identityWallet.did)
   console.log('service is', service.identityWallet.did)

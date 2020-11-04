@@ -18,8 +18,8 @@ afterEach(async () => {
 })
 
 test('Authentication interaction', async () => {
-  // making them mutually resolvable
-  await meetAgent(alice, bob)
+  // making alice resolvable for bob
+  await meetAgent(bob, alice, false)
 
   const aliceAuthRequest = await alice.authRequestToken({
     callbackURL: 'nowhere',
