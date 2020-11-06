@@ -45,7 +45,7 @@
     "eslint-plugin-react": "^7.12.4",
     "fs-extra": "^8.1.0",
     "jest": "^26.4.2",
-    "jolocom-lib": "^5.1.0-rc9",
+    "jolocom-lib": "^5.1.0-rc11",
     "mockdate": "^2.0.2",
     "node-fetch": "^2.6.0",
     "prettier": "^1.18.2",
