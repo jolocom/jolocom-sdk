@@ -15,7 +15,7 @@ import {
 
 export class CredentialOfferFlow extends Flow<
   CredentialOfferRequest | CredentialOfferResponse | CredentialsReceive
-> {
+  > {
   public state: CredentialOfferFlowState = {
     offerSummary: [],
     selection: [],
@@ -30,7 +30,7 @@ export class CredentialOfferFlow extends Flow<
     super(ctx)
   }
 
-  public async onValidMessage(
+  public async handleInteractionToken(
     token:
       | CredentialOfferRequest
       | CredentialOfferResponse

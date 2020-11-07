@@ -49,7 +49,6 @@ export class WebSocketTransport {
     return {
       // NOTE FIXME should send JSON.stringify??
       send: async (msg) => {
-        console.log('sending mdessss', msg)
         ws.send(msg)
       },
       ready: readyPromise,

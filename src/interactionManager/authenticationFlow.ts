@@ -9,7 +9,7 @@ export class AuthenticationFlow extends Flow<Authentication> {
   public type = FlowType.Authentication
 
   // TODO InteractionType.AuthenticaitonResponse should exist
-  public async onValidMessage(token: Authentication, interactionType: string) {
+  public async handleInteractionToken(token: Authentication, interactionType: string) {
     // FIXME what's with this multilayer type checking
     switch (interactionType) {
       case InteractionType.Authentication:

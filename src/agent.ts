@@ -596,4 +596,16 @@ export class Agent {
       await this.passwordStore.getPassword(),
     )
   }
+
+  /**
+   * Returns the Proof of Control Authority for an Agent
+   * the PCA is a DID Method specific set of data which
+   * proves that the key holder also controls the Identifier
+   *
+   * @returns Control Proof string
+   */
+  public async getProofOfControlAuthority(): Promise<string> {
+    const split = this.idw.did.split(":")
+    return await this.storage.eventDB.read(split[2])
+  }
 }

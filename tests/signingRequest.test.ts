@@ -24,26 +24,11 @@ afterEach(async () => {
 })
 
 test('Signing Request interaction', async () => {
+  // making service resolvable by user
+  await meetAgent(user, service, false)
+
   // ensure the service is resolvable by the user
-  await expect(user.resolve(service.idw.did)).resolves.toBeTruthy()
-
-  // ensure the user is not resolvable by the service
-  await expect(service.resolve(user.idw.did)).rejects.toBeTruthy()
-
-  // create a resolution request
-  const serviceResRequest = await service.resolutionRequestToken()
-
-  // process the services request and get the handle for the interaction
-  const userResInteraction = await user.processJWT(serviceResRequest)
-
-  // create a resolution response
-  const userResponse = await userResInteraction.createResolutionResponse()
-
-  // process the resolution response, containing the state update proof of the User
-  await service.processJWT(userResponse.encode())
-
-  // the service should be able to resolve the user now
-  await expect(service.resolve(user.idw.did)).resolves.toBeInstanceOf(Identity)
+  await expect(user.resolve(service.idw.did)).resolves.toBeInstanceOf(Identity)
 
   const data = Buffer.from('hello there')
 
@@ -58,7 +43,7 @@ test('Signing Request interaction', async () => {
   const serviceSigInt = await service.processJWT(signResponse.encode())
 
   const state = serviceSigInt.getSummary().state as SigningFlowState
-  await expect(state.signature).toBeDefined()
+  expect(state.signature).toBeDefined()
 
   await expect(
     verifySignatureWithIdentity(
