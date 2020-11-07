@@ -34,7 +34,7 @@ export class ChannelKeeper {
   }
 
   async findByJWT(jwt: string) {
-    const interxn = this.ctx.findInteraction(jwt)
+    const interxn = await this.ctx.findInteraction(jwt)
     const chId = interxn && interxn.flow.type === FlowType.EstablishChannel
       ? interxn.id
       : ''

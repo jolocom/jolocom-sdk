@@ -31,3 +31,34 @@ test('Init Agent multiple times returning the same agent', async () => {
 
   expect(alice.idw.did).toEqual(aliceAgain.idw.did)
 })
+
+test('Allow interaction continuation accross agent instances which share a DID', async () => {
+  const alice = await sdk.initAgent({ password: 'please' })
+
+  const bob = await sdk.createAgent('pass', 'jun')
+
+  const auth = await alice.credOfferToken({
+    callbackURL: 'none',
+    offeredCredentials: [{ type: 'dummy' }],
+  })
+
+  const bobInteraction = await bob.processJWT(auth)
+
+  const res = await bobInteraction
+    .createCredentialOfferResponseToken([{ type: 'dummy' }])
+    .then(t => t.encode())
+
+  const alice2 = await sdk.initAgent({ password: 'please' })
+
+  const continuedInteraction = await alice2.processJWT(res)
+
+  // @ts-ignore
+  expect(continuedInteraction.getSummary().state.offerSummary).toEqual([
+    { type: 'dummy' },
+  ])
+
+  // @ts-ignore
+  expect(continuedInteraction.getSummary().state.selection).toEqual([
+    { type: 'dummy' },
+  ])
+})

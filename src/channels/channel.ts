@@ -61,11 +61,11 @@ export class Channel extends Transportable {
     return flowState.established
   }
 
-  public getSummary(): ChannelSummary {
-    const interactions = this._threadIdList.map((qId: string) => {
-      const interxn = this.ctx.ctx.interactionManager.getInteraction(qId)
+  public async getSummary(): Promise<ChannelSummary> {
+    const interactions = await Promise.all(this._threadIdList.map(async (qId: string) => {
+      const interxn = await this.ctx.ctx.interactionManager.getInteraction(qId)
       return interxn && interxn.getSummary()
-    })
+    }))
 
     return {
       initialInteraction: this.initialInteraction.getSummary(),
