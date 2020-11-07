@@ -1,6 +1,6 @@
 {
   "name": "@jolocom/sdk",
-  "version": "1.0.0-rc14",
+  "version": "4.0.0-rc2",
   "main": "js/index.js",
   "files": [
     "js/"
@@ -25,7 +25,7 @@
     "@babel/preset-typescript": "^7.10.4",
     "@babel/runtime": "^7.11.2",
     "@jolocom/local-resolver-registrar": "^1.0.0-rc1",
-    "@jolocom/sdk-storage-typeorm": "^4.0.0-rc1",
+    "@jolocom/sdk-storage-typeorm": "^4.0.0-rc2",
     "@types/jest": "^26.0.10",
     "@types/node": "^13.9.8",
     "@types/node-fetch": "^2.5.5",
