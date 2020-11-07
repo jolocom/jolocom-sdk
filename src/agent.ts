@@ -195,7 +195,7 @@ export class Agent {
       this.resolver,
     )
 
-    await this.storage.store.didDoc(identityWallet.didDocument)
+    await this.storage.store.identity(identityWallet.identity)
 
     // This sets the didMethod so that it doesn't return a different value if
     // the SDK default is changed in runtime

@@ -91,18 +91,21 @@ export class JolocomSDK {
    * @returns the resolved identity
    */
   public async resolve(did: string): Promise<Identity> {
-    return this.storage.get
-      .didDoc(did)
-      .then(ddo => Identity.fromDidDocument({ didDocument: ddo }))
-      .catch(async () => {
-        const resolved = await this.didMethods
-          .getForDid(did)
-          .resolver.resolve(did)
-        await this.storage.store.didDoc(resolved.didDocument).catch(err => {
-          console.error('Failed store DID document after resolving', err)
-        })
-        return resolved
+    const cached = await this.storage.get.identity(did)
+
+    if (!cached) {
+      const resolved = await this.didMethods
+        .getForDid(did)
+        .resolver.resolve(did)
+
+      await this.storage.store.identity(resolved).catch(err => {
+        console.error('Failed to store Identity after resolving', err)
       })
+
+      return resolved
+    }
+
+    return cached
   }
 
   private _makePassStore(passOrStore?: string | IPasswordStore) {
@@ -171,13 +174,12 @@ export class JolocomSDK {
     mnemonic: string,
     shouldOverwrite = false,
     passOrStore?: string | IPasswordStore,
-    didMethodName?: string
+    didMethodName?: string,
   ): Promise<Agent> {
     const agent = this._makeAgent(passOrStore, didMethodName)
     await agent.createFromMnemonic(mnemonic, shouldOverwrite)
     return agent
   }
-
 
   /**
    * Create an Agent instance with an Identity loaded from storage
@@ -208,7 +210,7 @@ export class JolocomSDK {
   public async loadAgentFromMnemonic(
     mnemonic: string,
     passOrStore?: string | IPasswordStore,
-    didMethodName?: string
+    didMethodName?: string,
   ): Promise<Agent> {
     const agent = this._makeAgent(passOrStore, didMethodName)
     await agent.loadFromMnemonic(mnemonic)
@@ -228,9 +230,7 @@ export class JolocomSDK {
    *              (default: true)
    * @category Agent
    */
-  async initAgent(
-    { password, passwordStore, did, auto }: IInitAgentOptions,
-  ) {
+  async initAgent({ password, passwordStore, did, auto }: IInitAgentOptions) {
     const passOrStore = password || passwordStore
     try {
       // NOTE: must 'await' here explicity for error handling to work correctly
@@ -277,12 +277,12 @@ export class JolocomSDK {
     id: Identity,
     skp: SoftwareKeyProvider,
   ): Promise<void> {
-    if (id.did !== skp.id) throw new Error('Identity data inconsistant')
+    if (id.did !== skp.id) throw new Error('Identity data inconsistent')
     await this.storage.store.encryptedWallet({
       id: skp.id,
       encryptedWallet: skp.encryptedWallet,
       timestamp: Date.now(),
     })
-    await this.storage.store.didDoc(id.didDocument)
+    await this.storage.store.identity(id)
   }
 }

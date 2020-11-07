@@ -1541,10 +1541,10 @@
   dependencies:
     ethers "5.0.5"
 
-"@jolocom/sdk-storage-typeorm@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@jolocom/sdk-storage-typeorm/-/sdk-storage-typeorm-3.0.0.tgz#11afacea2f24659107df39a8052780f84f5c4c76"
-  integrity sha512-Re0uQX2aYteZs2vl0RobUiwo3Dbs4qtzGsaiFl7sFmlPtxj3FeGeDOqxXq6EU3CCIcnIM7QWGE/8qfdlG0+mKA==
+"@jolocom/sdk-storage-typeorm@^4.0.0-rc1":
+  version "4.0.0-rc1"
+  resolved "https://registry.yarnpkg.com/@jolocom/sdk-storage-typeorm/-/sdk-storage-typeorm-4.0.0-rc1.tgz#ab05135b1ff876681d081bcd78c8407ead837465"
+  integrity sha512-so4uEF/VBSgORJ5TQhUmDjgKYy1hbeFFz9UZOI20lM9kCzTbqVFPDSgQ6PKwaAE23bm282BTT3gKoMUP+VfkEQ==
   dependencies:
     class-transformer "^0.3.1"
     ramda "^0.27.1"
@@ -4694,10 +4694,10 @@ jest@^26.4.2:
     import-local "^3.0.2"
     jest-cli "^26.4.2"
 
-jolocom-lib@^5.1.0-rc11:
-  version "5.1.0-rc11"
-  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-5.1.0-rc11.tgz#4c29ebd405dbf60452e99fff603e0cfb7204845d"
-  integrity sha512-EmUg3PlZdbM3K6h7RTgRiDgvPjC9mZAeOgfg6S6ZoaGMIoc4j8vKU+EA4GlaZDHI8Kb9Y79gfs8yG36rn798UQ==
+jolocom-lib@^5.1.0-rc12:
+  version "5.1.0-rc12"
+  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-5.1.0-rc12.tgz#04e332293adc0fd19d34ac0e5c91eb5eda6d37c9"
+  integrity sha512-mGHygJkjJKFrxHHnqU7Rvu8T4Crwg7fpYMnFKG9E8lOgpPbcXoLMwUdwtXWW+mbCBRp4KxqolgGvDnqDKCOcYQ==
   dependencies:
     "@hawkingnetwork/ed25519-hd-key-rn" "^1.0.1"
     "@jolocom/jolo-did-registrar" "^1.0.0-rc6"
