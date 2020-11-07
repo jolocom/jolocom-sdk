@@ -47,7 +47,7 @@ export interface IStorageGet {
     credential: SignedCredential,
   ): Promise<CredentialMetadataSummary>
   publicProfile(did: string): Promise<IdentitySummary>
-  identity(did: string): Promise<Identity>
+  identity(did: string): Promise<Identity | undefined>
   interactionTokens(attrs: {
     nonce?: string
     type?: string
