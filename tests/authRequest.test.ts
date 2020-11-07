@@ -38,4 +38,7 @@ test('Authentication interaction', async () => {
   expect(aliceInteraction.getMessages().map(m => m.encode())).toEqual(
     bobNewInteraction.getMessages().map(m => m.encode()),
   )
+
+  await expect(alice.resolve(bob.idw.did)).resolves.toBeTruthy()
+  await expect(bob.resolve(alice.idw.did)).resolves.toBeTruthy()
 })

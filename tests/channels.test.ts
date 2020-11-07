@@ -66,9 +66,6 @@ beforeEach(async () => {
 
   // Make agents encounter each other
   await meetAgent(user, service, false)
-
-  console.log('user is', user.identityWallet.did)
-  console.log('service is', service.identityWallet.did)
 })
 
 afterEach(async () => {
@@ -96,7 +93,6 @@ test('Establish a channel', async () => {
 
   const userChan = await user.channels.create(userInterxn)
   await userChan.start(async interxn => {
-    console.log('use got interaction request', interxn.id)
     const resp = await interxn.createAuthenticationResponse()
     await interxn.send(resp)
   })
