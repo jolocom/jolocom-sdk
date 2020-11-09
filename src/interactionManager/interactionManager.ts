@@ -22,7 +22,7 @@ export class InteractionManager {
   public readonly ctx: Agent
 
   public interactions: {
-    [NONCE: string]: Interaction
+    [NONCE: string]: Interaction<Flow<any>>
   } = {}
 
   public constructor(ctx: Agent) {
@@ -45,9 +45,8 @@ export class InteractionManager {
     return interaction
   }
 
-  public async getInteraction<F extends Flow<any>>(id: string, transportAPI?: TransportAPI): Promise<Interaction<F>> {
-    //@ts-ignore
+  public async getInteraction<F extends Flow<any>>(id: string, transportAPI?: TransportAPI) {
     return this.interactions[id] 
       ? this.interactions[id]
-      : Interaction.fromMessages<F>(await this.ctx.storage.get.interactionTokens({ nonce: id }), this, id, transportAPI) }
+      : await Interaction.fromMessages<F>(await this.ctx.storage.get.interactionTokens({ nonce: id }), this, id, transportAPI) }
 }

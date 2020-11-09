@@ -53,7 +53,8 @@ export class TransportKeeper {
   ): Promise<TransportAPI> {
     const transportHandler = this._transportHandlers[transport.type]
     if (!transportHandler) throw new SDKError(ErrorCode.TransportNotSupported)
-    const transportAPI = await transportHandler.start(transport, onMessage)
+
+    const transportAPI = transportHandler.start(transport, onMessage)
     transportAPI.desc = transport
     return transportAPI
   }
