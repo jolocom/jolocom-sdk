@@ -30,7 +30,7 @@ export class HTTPTransport implements TransportHandler {
   }
 
   start(desc: TransportDesc, onMessage?: TransportMessageHandler): TransportAPI {
-    const { config: callbackURL } = desc
+    const { config: { callbackURL } } = desc
     return {
       send: async (token: string) => {
         const response = await this._fetch(callbackURL, {

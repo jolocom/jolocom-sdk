@@ -46,6 +46,8 @@ export class InteractionManager {
   }
 
   public async getInteraction<F extends Flow<any>>(id: string, transportAPI?: TransportAPI): Promise<Interaction<F>> {
-    return await Interaction.fromMessages<F>(await this.ctx.storage.get.interactionTokens({ nonce: id }), this, id, transportAPI)
-  }
+    //@ts-ignore
+    return this.interactions[id] 
+      ? this.interactions[id]
+      : Interaction.fromMessages<F>(await this.ctx.storage.get.interactionTokens({ nonce: id }), this, id, transportAPI) }
 }
