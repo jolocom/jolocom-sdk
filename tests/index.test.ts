@@ -42,15 +42,14 @@ test('Allow interaction continuation accross agent instances which share a DID',
     offeredCredentials: [{ type: 'dummy' }],
   })
 
-  const bobInteraction = await bob.processJWT(auth)
+  const bobInteraction = await bob.processJWT(auth.encode())
 
   const res = await bobInteraction
     .createCredentialOfferResponseToken([{ type: 'dummy' }])
-    .then(t => t.encode())
 
   const alice2 = await sdk.initAgent({ password: 'please' })
 
-  const continuedInteraction = await alice2.processJWT(res)
+  const continuedInteraction = await alice2.processJWT(res.encode())
 
   // @ts-ignore
   expect(continuedInteraction.getSummary().state.offerSummary).toEqual([

@@ -48,7 +48,7 @@ test('Credential Request interaction', async () => {
     ],
   })
 
-  const bobInteraction = await bob.processJWT(aliceCredReq)
+  const bobInteraction = await bob.processJWT(aliceCredReq.encode())
 
   const bobResponse = (
     await bobInteraction.createCredentialResponse([bobSelfSignedCred.id])

@@ -26,7 +26,7 @@ test('Authentication interaction', async () => {
     description: 'test',
   })
 
-  const bobInteraction = await bob.processJWT(aliceAuthRequest)
+  const bobInteraction = await bob.processJWT(aliceAuthRequest.encode())
 
   const bobResponse = (
     await bobInteraction.createAuthenticationResponse()

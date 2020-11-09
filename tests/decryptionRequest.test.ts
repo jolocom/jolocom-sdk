@@ -32,7 +32,7 @@ test('Decryption Request interaction', async () => {
   const serviceResRequest = await service.resolutionRequestToken()
 
   // process the services request and get the handle for the interaction
-  const userResInteraction = await user.processJWT(serviceResRequest)
+  const userResInteraction = await user.processJWT(serviceResRequest.encode())
 
   // create a resolution response
   const userResponse = await userResInteraction.createResolutionResponse()
@@ -56,7 +56,7 @@ test('Decryption Request interaction', async () => {
     callbackURL: 'nowhere',
   })
 
-  const userDecInteraction = await user.processJWT(decReq)
+  const userDecInteraction = await user.processJWT(decReq.encode())
 
   const decryptionResponse = await userDecInteraction.createDecResponseToken()
 

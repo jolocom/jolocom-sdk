@@ -87,7 +87,7 @@ test('Establish a channel', async () => {
   }
   const reqToken = await service.establishChannelRequestToken(req)
 
-  const userInterxn = await user.processJWT(reqToken)
+  const userInterxn = await user.processJWT(reqToken.encode())
   const userResp = await userInterxn.createEstablishChannelResponse(0)
   await userInterxn.processInteractionToken(userResp)
 

@@ -37,7 +37,7 @@ test('Signing Request interaction', async () => {
     callbackURL: 'nowhere',
   })
 
-  const userSignInteraction = await user.processJWT(signReq)
+  const userSignInteraction = await user.processJWT(signReq.encode())
   const signResponse = await userSignInteraction.createSigningResponseToken()
 
   const serviceSigInt = await service.processJWT(signResponse.encode())

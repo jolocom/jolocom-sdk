@@ -20,9 +20,12 @@ import {
   DecryptionType,
   EncryptionType,
   SigningType,
+  DecryptionRequest,
+  EncryptionRequest,
+  SigningRequest,
 } from './interactionManager/types'
 import { Interaction } from './interactionManager/interaction'
-import { ResolutionType } from './interactionManager/resolutionFlow'
+import { ResolutionType, ResolutionRequest } from './interactionManager/resolutionFlow'
 import {
   ICredentialRequestAttrs,
   CredentialOfferRequestAttrs,
@@ -32,6 +35,10 @@ import { BaseMetadata } from '@jolocom/protocol-ts'
 import { ISignedCredCreationArgs } from 'jolocom-lib/js/credentials/signedCredential/types'
 import { Flow } from './interactionManager/flow'
 import { Identity } from 'jolocom-lib/js/identity/identity'
+import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRequest'
+import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credentialOfferRequest'
+import { CredentialsReceive } from 'jolocom-lib/js/interactionTokens/credentialsReceive'
+import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 
 /**
  * The `Agent` class mainly provides an abstraction around the {@link
@@ -367,13 +374,13 @@ export class Agent {
   public async authRequestToken(auth: {
     callbackURL: string
     description?: string
-  }): Promise<string> {
+  }): Promise<JSONWebToken<Authentication>> {
     const token = await this.idw.create.interactionTokens.request.auth(
       auth,
       await this.passwordStore.getPassword(),
     )
     await this.interactionManager.start(token)
-    return token.encode()
+    return token
   }
 
   /**
@@ -385,7 +392,7 @@ export class Agent {
    */
   public async resolutionRequestToken(
     req: { description?: string; uri?: string; callbackURL?: string } = {},
-  ): Promise<string> {
+  ): Promise<JSONWebToken<ResolutionRequest>> {
     const token = await this.idw.create.message(
       {
         message: req,
@@ -395,7 +402,7 @@ export class Agent {
     )
 
     await this.interactionManager.start(token)
-    return token.encode()
+    return token
   }
 
   /**
@@ -408,7 +415,7 @@ export class Agent {
    */
   public async authorizationRequestToken(
     request: AuthorizationRequest,
-  ): Promise<string> {
+  ): Promise<JSONWebToken<AuthorizationRequest>> {
     const token = await this.idw.create.message(
       {
         message: request,
@@ -418,7 +425,7 @@ export class Agent {
     )
 
     await this.interactionManager.start(token)
-    return token.encode()
+    return token
   }
 
   /**
@@ -430,7 +437,7 @@ export class Agent {
    */
   public async establishChannelRequestToken(
     request: EstablishChannelRequest,
-  ): Promise<string> {
+  ): Promise<JSONWebToken<EstablishChannelRequest>> {
     const token = await this.idw.create.message(
       {
         message: request,
@@ -440,7 +447,7 @@ export class Agent {
     )
 
     await this.interactionManager.start(token)
-    return token.encode()
+    return token
   }
 
   /**
@@ -452,13 +459,13 @@ export class Agent {
    */
   public async credRequestToken(
     request: ICredentialRequestAttrs,
-  ): Promise<string> {
+  ): Promise<JSONWebToken<CredentialRequest>> {
     const token = await this.idw.create.interactionTokens.request.share(
       request,
       await this.passwordStore.getPassword(),
     )
     await this.interactionManager.start(token)
-    return token.encode()
+    return token
   }
 
   /**
@@ -472,13 +479,13 @@ export class Agent {
    */
   public async credOfferToken(
     offer: CredentialOfferRequestAttrs,
-  ): Promise<string> {
+  ): Promise<JSONWebToken<CredentialOfferRequest>> {
     const token = await this.idw.create.interactionTokens.request.offer(
       offer,
       await this.passwordStore.getPassword(),
     )
     await this.interactionManager.start(token)
-    return token.encode()
+    return token
   }
 
   /**
@@ -494,14 +501,14 @@ export class Agent {
   public async credIssuanceToken(
     issuance: ICredentialsReceiveAttrs,
     selection: string,
-  ): Promise<string> {
+  ): Promise<JSONWebToken<CredentialsReceive>> {
     const token = await this.idw.create.interactionTokens.response.issue(
       issuance,
       await this.passwordStore.getPassword(),
       JolocomLib.parse.interactionToken.fromJWT(selection),
     )
 
-    return token.encode()
+    return token
   }
 
   /**
@@ -509,13 +516,15 @@ export class Agent {
    */
   public async rpcDecRequest(req: {
     toDecrypt: Buffer
+    target?: string
     callbackURL: string
-  }): Promise<string> {
+  }): Promise<JSONWebToken<DecryptionRequest>> {
     const token = await this.idw.create.message(
       {
         message: {
           callbackURL: req.callbackURL,
           request: {
+            target: req.target,
             data: req.toDecrypt.toString('base64'),
           },
         },
@@ -526,7 +535,7 @@ export class Agent {
 
     await this.interactionManager.start(token)
 
-    return token.encode()
+    return token
   }
 
   /**
@@ -536,7 +545,7 @@ export class Agent {
     toEncrypt: Buffer
     target: string
     callbackURL: string
-  }): Promise<string> {
+  }): Promise<JSONWebToken<EncryptionRequest>> {
     const token = await this.idw.create.message(
       {
         message: {
@@ -553,7 +562,7 @@ export class Agent {
 
     await this.interactionManager.start(token)
 
-    return token.encode()
+    return token
   }
 
   /**
@@ -562,7 +571,7 @@ export class Agent {
   public async signingRequest(req: {
     toSign: Buffer
     callbackURL: string
-  }): Promise<string> {
+  }): Promise<JSONWebToken<SigningRequest>> {
     const token = await this.idw.create.message(
       {
         message: {
@@ -578,7 +587,7 @@ export class Agent {
 
     await this.interactionManager.start(token)
 
-    return token.encode()
+    return token
   }
 
   /**

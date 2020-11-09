@@ -37,7 +37,7 @@ test('Credential Issuance interaction', async () => {
     ],
   })
 
-  const bobInteraction = await bob.processJWT(aliceCredOffer)
+  const bobInteraction = await bob.processJWT(aliceCredOffer.encode())
 
   const bobResponse = (
     await bobInteraction.createCredentialOfferResponseToken([
