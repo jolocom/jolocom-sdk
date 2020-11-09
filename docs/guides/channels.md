@@ -22,11 +22,12 @@ const establishChToken = await alice.establishChannelRequestToken({
   transports: [
     {
       type: ChannelTransportType.WebSockets,
-      config: 'ws://localhost:9000'
-    }
-  ]
+      config: 'ws://localhost:9000',
+    },
+  ],
 })
 ```
+
 Currently only one transport type, WebSockets, is supported for creating
 channels, but this can be extended by defining new transports, as long as both
 agents are configured to support them.
@@ -48,7 +49,7 @@ So on bob's end:
 
 ```typescript
 // bob receives the token (app specific), processes it to get a new interaction
-const bobInterxn = bob.processJWT(establishChToken)
+const bobInterxn = bob.processJWT(establishChToken.encode())
 
 // inspect the transport options
 import { EstablishChannelFlowState } from '@jolocom/sdk/js/interactionManager/types'
@@ -58,13 +59,12 @@ console.log(flowState.transports)
 // create a response selecting the transport at index 0
 const establishResp = await bobInterxn.createEstablishChannelResponse(0)
 // process the response locally to update our own interaction state
-await bobInterxn.processInteractionToken(establishResp)
+await bobInterxn.processInteractionToken(establishResp.encode())
 ```
 
 Now bob's interaction state is up to date, and they must open the channel. Note
 that the WebSocket transport needs to be configured prior to use, please refer
 to the [configuration guide](../sdk_install_conf)
-
 
 ```typescript
 // create a channel based on this interaction
@@ -94,13 +94,14 @@ Once alice receives this message and validates it, the channel is considered
 established.
 
 ## Using the Channel
+
 Now that the channel is established, further interactions can happen on it using
 the `startThread` method:
 
 ```typescript
 const authRequest = await alice.authRequest({
   callbackURL: '', // can be left empty because
-                   // we will use the pre-established channel
+  // we will use the pre-established channel
   description: 'are you bob?',
 })
 
