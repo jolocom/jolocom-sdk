@@ -45,7 +45,7 @@ Alices request is broadcast and received and processed by Bob:
 
 ```typescript
 // ------- the request is received by Bob ------- //
-const bobsInteraction = await bob.processJWT(authRequest)
+const bobsInteraction = await bob.processJWT(authRequest.encode())
 const bobsAuthResponse = await bobsInteraction.createAuthenticationResponse()
 
 await bob.processJWT(bobsAuthResponse.encode())
@@ -91,7 +91,7 @@ const aliceAuthZRequest = await alice.authorizationRequestToken({
 Alices request is broadcast and received and processed by Bob:
 
 ```typescript
-const bobsInteraction = await bob.processJWT(aliceAuthZRequest)
+const bobsInteraction = await bob.processJWT(aliceAuthZRequest.encode())
 const bobsAuthZResponse = await bobsInteraction.createAuthorizationResponse()
 
 await bob.processJWT(bobsAuthZResponse.encode())
@@ -140,7 +140,7 @@ const aliceCredOffer = await alice.credOfferToken({
 Alices offer is broadcast and received and processed by Bob:
 
 ```typescript
-const bobsInteraction = await bob.processJWT(aliceCredOffer)
+const bobsInteraction = await bob.processJWT(aliceCredOffer.encode())
 const bobsCredSelection = await bobsInteraction.createCredentialOfferResponseToken(
   [{ type: 'SimpleExampleCredential' }],
 )
@@ -217,7 +217,7 @@ const aliceCredRequest = await alice.credRequestToken({
 Alices request is broadcast and received and processed by Bob:
 
 ```typescript
-const bobsInteraction = await bob.processJWT(aliceCredRequest)
+const bobsInteraction = await bob.processJWT(aliceCredRequest.encode())
 const bobsCredResponse = await bobsInteraction.createCredentialResponse([
   alicesCredAboutBob.id, // use the ID from the aliceCredAboutBob instance
 ])

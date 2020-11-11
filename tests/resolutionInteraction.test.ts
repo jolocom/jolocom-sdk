@@ -32,7 +32,7 @@ test('Resolution interaction', async () => {
   const serviceResRequest = await service.resolutionRequestToken()
 
   // process the services request and get the handle for the interaction
-  const userInteraction = await user.processJWT(serviceResRequest)
+  const userInteraction = await user.processJWT(serviceResRequest.encode())
 
   // create a resolution response
   const userResponse = await userInteraction.createResolutionResponse()
