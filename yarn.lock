@@ -1541,10 +1541,10 @@
   dependencies:
     ethers "5.0.5"
 
-"@jolocom/sdk-storage-typeorm@^4.0.0-rc1":
-  version "4.0.0-rc1"
-  resolved "https://registry.yarnpkg.com/@jolocom/sdk-storage-typeorm/-/sdk-storage-typeorm-4.0.0-rc1.tgz#ab05135b1ff876681d081bcd78c8407ead837465"
-  integrity sha512-so4uEF/VBSgORJ5TQhUmDjgKYy1hbeFFz9UZOI20lM9kCzTbqVFPDSgQ6PKwaAE23bm282BTT3gKoMUP+VfkEQ==
+"@jolocom/sdk-storage-typeorm@^4.0.0-rc2":
+  version "4.0.0-rc2"
+  resolved "https://registry.yarnpkg.com/@jolocom/sdk-storage-typeorm/-/sdk-storage-typeorm-4.0.0-rc2.tgz#cbcb8823f0fa1b5b12186ac78ba1215e69862bad"
+  integrity sha512-THwS7/WF5U+2vgoW400NtzbLfIHLdDrA0r8s7DkfZ6eKcl7oAnzJ4T/RpjR43bpJufjbrXOxPd0irrdEwOdy4A==
   dependencies:
     class-transformer "^0.3.1"
     ramda "^0.27.1"

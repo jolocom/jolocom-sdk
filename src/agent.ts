@@ -359,6 +359,7 @@ export class Agent {
       throw new SDKError(ErrorCode.InvalidToken)
     }
 
+    //@ts-ignore
     return await this.interactionManager.getInteraction<F>(id)
   }
 
