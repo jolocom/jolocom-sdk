@@ -7,7 +7,7 @@
 To provision an Agent with a new random identity (i.e. DID and set of keys), the following function can be used:
 
 ```typescript
-sdk.createNewAgent('demoPassword', 'jolo')
+sdk.createAgent('demoPassword', 'jolo')
 ```
 
 Based on the DID Method the Agent is configured to use, the appropriate identity creation / "anchoring" operations are executed (e.g. creating and broadcasting Blockchain transactions, interfacing with various distributed storage backends, etc.). If succesfull, the function returns the DID Document, and the corresponding signing keys, for the newly created identity.
@@ -24,13 +24,10 @@ Two optional arguments can be provided to the `createNewAgent` function:
 
 In the previous section, the created Agent was provisioned with a newly created DID, as well as a set of signing keys. The only way to reuse an identity created this way is by exporting and later reusing the returned Encrypted Wallet.
 
-In case deterministic identity creation is desired, the `agent.createFromMnemonic` method can be used as follows:
+In case deterministic identity creation is desired, the `sdk.createAgentFromMnemonic` method can be used as follows:
 
 ```typescript
-// the returned Agent instsance is not yet provisioned with an identity
-const agent = sdk.createAgent()
-
-agent.createFromMnemonic(
+const agent = sdk.createAgentFromMnemonic(
   'hammer soul glare stairs indicate snack address divert mosquito chef season hobby',
 )
 ```
@@ -45,7 +42,7 @@ The Agent will also persist the recovered encrypted wallet (containing the recov
 
 ### Loading an existing identity
 
-As mentioned in the previous sections, using `sdk.createNewIdentity` or `agent.createFromMnemonic` will persist the created / recovered encrypted wallet data using the `storage` backend the SDK was configured with.
+As mentioned in the previous sections, using `sdk.createAgent` or `sdk.createAgentFromMnemonic` will persist the created / recovered encrypted wallet data using the `storage` backend the SDK was configured with.
 
 To provision the Agent with an identity persisted in the `storage` backend the following function can be used:
 
@@ -60,21 +57,17 @@ Note that the password or password store provided should match the password used
 
 ### Recovering an existing identity from a mnemonic
 
-This function is equivalent to the previously described [createFromMnemonic](#createfrommnemonic), except that it does not attempt to register / anchor (as defined by the DID Method) a new identity. Instead, the configured `registrar` is used to derive the key material, and subsequently the DID, which is resolved using the `resolver` module.
+This function is similar to the previously described `sdk.createAgentFromMnemonic`, except that it does not attempt to register / anchor (as defined by the DID Method) a new identity. Instead, the configured `registrar` is used to derive the key material, and subsequently the DID, which is resolved using the `resolver` module.
 
 In case the DID is resolvable, and the returned DID Document matches the derived DID / keys, the Agent is provisioned with the recovered identity. In case the identity can not be resolved, an error is thrown.
 
 ```typescript
-
-// the returned Agent instsance is not yet provisioned with an identity
-const agent = sdk.createAgent()
-
-agent.loadFromMnemonic(
+const agent = sdk.loadFromMnemonic(
   'hammer soul glare stairs indicate snack address divert mosquito chef season hobby',
 )
 ```
 
-This method can be used to "recover" control over an existing identity, given only the BIP39 mnemonic (i.e. the same one used in a previous `createFromMnemonic` call).
+This method can be used to "recover" control over an existing identity, given only the BIP39 mnemonic (i.e. the same one used in a previous `createAgentFromMnemonic` call).
 
 ## Examples
 
@@ -83,15 +76,16 @@ Below, we see an example setup of two Identities which will be used for examples
 Alices Agent loading:
 
 ```typescript
-// The Alice Agent (did:jolo:alice) is loaded from the sdk storage
-const alice = await sdk.loadIdentity('alicesPassword', 'did:jolo:alice')
+// The Alice Agent (did:jolo:alice) is loaded from the SDK storage
+const alice = await sdk.loadAgent('alicesPassword', 'did:jolo:alice')
 ```
 
 Bob Agent creation:
 
 ```typescript
-// The Bob Agent is randomly generated using the 'jun' DID method
-const bob = await sdk.createNewAgent('bobsPassword', 'jun')
+// The Bob Agent is randomly generated using the 'jun' DID method, and persisted
+// to storage
+const bob = await sdk.createAgent('bobsPassword', 'jun')
 ```
 
 Now that our Agents are instantiated, let's see how they can be used to set up [Interaction Flows](./interaction_flows.md).
