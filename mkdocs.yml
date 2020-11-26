@@ -12,7 +12,7 @@ nav:
     - guides/channels.md
   - 'Identity':
     - 'Creating an Identity': 'guides/identity/#creating-an-identity'
-    - 'Loading an Identity': 'guides/identity/#loading-an-identity'
+    - 'Loading an Identity': 'guides/identity/#loading-an-existing-identity'
   - 'Interactions':
     - guides/interaction_flows.md
     - 'Peer Resolution': 'guides/interaction_flows/#peer-resolution'
@@ -23,4 +23,4 @@ nav:
   - API: './api/index.html'
 
   - Versions:
-    - '1.0.0': '/jolocom-sdk/1.0.0-rc12/'
+    - '1.0.0': '/jolocom-sdk/1.0.0/'
