@@ -12,7 +12,7 @@
     "typeorm": "ts-node -O '{\"module\": \"commonjs\"}' -r ./bin/repl.ts node_modules/.bin/typeorm",
     "lint": "eslint --ext .ts --ext .tsx .",
     "format": "yarn lint --fix",
-    "test": "jest",
+    "test": "jest --coverage --collectCoverageFrom=src/**/*.ts --coverageDirectory=coverage",
     "docs": "./bin/build_docs.sh",
     "docs:serve": "./bin/build_docs.sh serve"
   },
