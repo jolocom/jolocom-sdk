@@ -459,7 +459,17 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     // TODO if handling fails, should we still be pushing the token??
     const res = await this.flow.handleInteractionToken(token.interactionToken, token.interactionType)
     this.messages.push(token)
-    await this.ctx.ctx.storage.store.interactionToken(token)
+
+    const storedTokens = (await this.ctx.ctx.storage.get.interactionTokens({
+      nonce: token.nonce,
+      type: token.interactionType,
+      issuer: token.issuer
+    })).map(t => t.encode())
+    const tokenStr = token.encode()
+    // check if token is already in storage before attempting to commit it to
+    // storage
+    if (!storedTokens.some(t => t === tokenStr))
+      await this.ctx.ctx.storage.store.interactionToken(token)
 
     if (!this._transportAPI) {
       // update transportAPI
