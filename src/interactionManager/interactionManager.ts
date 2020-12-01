@@ -3,6 +3,7 @@ import { Interaction } from './interaction'
 import { Agent } from '../agent'
 import { Flow } from './flow'
 import { TransportAPI } from '../types'
+import { SDKError, ErrorCode } from '../errors'
 
 /**
  * The {@link InteractionManager} is an entry point to dealing with {@link
@@ -45,8 +46,34 @@ export class InteractionManager {
     return interaction
   }
 
+  /**
+   * Returns an {@link Interaction} instance by ID, if there is one in memory.
+   * Otherwise tries to reconstruct the Interaction from tokens that were
+   * previously processed through the SDK (and thus committed to storage).
+   *
+   * @param id - the interaction ID
+   * @param transportAPI - transportAPI to use in case trying to load the
+   *                       interaction from storage
+   * @throws SDKError(ErrorCode.NoSuchInteraction) if not found
+   */
   public async getInteraction<F extends Flow<any>>(id: string, transportAPI?: TransportAPI) {
-    return this.interactions[id] 
-      ? this.interactions[id]
-      : await Interaction.fromMessages<F>(await this.ctx.storage.get.interactionTokens({ nonce: id }), this, id, transportAPI) }
+    // NOTE FIXME TODO
+    // should getInteraction be taking a transportAPI argument?
+    // what if the transportAPI is specified but interaction is loaded from
+    // memory?
+    // should getInteraction be instantiating new interactions like this?
+    // should there be a separate loadInteraction method?
+
+    // if there's an interaction instance, we return it
+    if (this.interactions[id]) return this.interactions[id]
+
+    // otherwise we try to reconstruct the interaction object from the stored
+    // interaction messages
+    const messages = await this.ctx.storage.get.interactionTokens({ nonce: id })
+    if (messages.length === 0) throw new SDKError(ErrorCode.NoSuchInteraction)
+    const interxn = await Interaction.fromMessages(messages, this, id, transportAPI)
+
+    this.interactions[id] = interxn
+    return interxn
+  }
 }
