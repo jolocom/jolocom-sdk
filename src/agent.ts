@@ -337,7 +337,16 @@ export class Agent {
     if (!interxn) {
       // NOTE: interactionManager.start calls processInteractionToken internally
       interxn = await this.interactionManager.start(token, transportAPI)
-    } else {
+    } else if (interxn.lastMessage.encode() !== jwt) {
+      // NOTE FIXME TODO #multitenancy
+      // we only process the message if it is not last message seen
+      // this is to allow for some flexibility with how processJWT is called,
+      // mostly because of how there is no separation between interaction tokens
+      // stored by different agents sharing the same database.
+      //
+      // When agent multi-tenancy is implemented properly, we can remove this
+      // flexibility and instead always run processInteractionToken on incoming
+      // JWTs
       await interxn.processInteractionToken(token)
     }
 
