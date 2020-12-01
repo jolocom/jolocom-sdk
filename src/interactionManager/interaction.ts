@@ -131,7 +131,11 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
   }
 
   /**
-   * Returns an Interaction with state calculated from the given list of messages
+   * Returns an Interaction with state calculated from the given list of
+   * messages. The messages are *not* committed to storage in the process,
+   * because this method is intended to be used to reload previously stored
+   * interactions. See {@link InteractionManager.getInteraction}
+   *
    * @param messages - List of messages to calculate interaction state from
    * @param ctx - The manager of this interaction
    * @param id - A unique identifier for this interaction
@@ -144,36 +148,18 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     id: string,
     transportAPI?: TransportAPI
   ): Promise<Interaction<F>> {
-    // TODO This function should be reconsidered when there is a cleaner separation between
-    // interactions, flows and flow state
+    const firstToken = messages[0]
+    const interaction = new Interaction<F>(
+      ctx,
+      firstToken.nonce,
+      firstToken.interactionType,
+      transportAPI
+    )
 
-    if (messages.length === 0) {
-      throw new SDKError(ErrorCode.InvalidToken)
-    }
-
-    // instantiate
-    const interaction = new Interaction<F>(ctx, id, messages[0].interactionType, transportAPI)
-
-    // set message history
-    interaction.messages = messages
-    // @ts-ignore
-    interaction.flow.history = messages
-
-    // set participants
-    interaction.participants.requester = await ctx.ctx.resolve(messages[0].issuer)
-
-    if (messages[1]) interaction.participants.responder = await ctx.ctx.resolve(messages[1].issuer)
-
-    // set role
-    if (messages[0].issuer === ctx.ctx.idw.did) interaction.role = InteractionRole.Requester
-    else if (messages[1] && messages[1].issuer === ctx.ctx.idw.did) interaction.role = InteractionRole.Responder
-
-    // replay history to get current state
+    // we process all the tokens sequentially
     for (let message of messages) {
-      await interaction.flow.handleInteractionToken(message.interactionToken, message.interactionType)
+      await interaction.processInteractionToken(message)
     }
-
-    // return
     return interaction
   }
 
