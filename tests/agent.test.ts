@@ -96,6 +96,16 @@ describe('findInteraction', () => {
 
       expect(() => interxn.transportAPI).not.toThrow()
     })
+
+    it('returns the reconstructed instance if called again', async () => {
+      const jwt = await alice.authRequestToken({ callbackURL: 'dummy', description: 'test' })
+
+      const alice2 = await alice.sdk.initAgent({})
+      const interxn = await alice2.findInteraction(jwt.nonce)
+      const interxnAgain = await alice2.findInteraction(jwt.nonce)
+
+      expect(interxn).toStrictEqual(interxnAgain)
+    })
   })
 
   // TODO
