@@ -21,6 +21,7 @@ export enum ErrorCode {
   ParseJWTFailed = 'ParseJWT',
 
   InvalidToken = 'InvalidToken',
+  NoSuchInteraction = 'NoSuchInteraction',
 
   NoEntropy = 'NoEntropy',
   NoPassword = 'NoPassword',

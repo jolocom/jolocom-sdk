@@ -131,7 +131,11 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
   }
 
   /**
-   * Returns an Interaction with state calculated from the given list of messages
+   * Returns an Interaction with state calculated from the given list of
+   * messages. The messages are *not* committed to storage in the process,
+   * because this method is intended to be used to reload previously stored
+   * interactions. See {@link InteractionManager.getInteraction}
+   *
    * @param messages - List of messages to calculate interaction state from
    * @param ctx - The manager of this interaction
    * @param id - A unique identifier for this interaction
@@ -144,36 +148,18 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     id: string,
     transportAPI?: TransportAPI
   ): Promise<Interaction<F>> {
-    // TODO This function should be reconsidered when there is a cleaner separation between
-    // interactions, flows and flow state
+    const firstToken = messages[0]
+    const interaction = new Interaction<F>(
+      ctx,
+      firstToken.nonce,
+      firstToken.interactionType,
+      transportAPI
+    )
 
-    if (messages.length === 0) {
-      throw new SDKError(ErrorCode.InvalidToken)
-    }
-
-    // instantiate
-    const interaction = new Interaction<F>(ctx, id, messages[0].interactionType, transportAPI)
-
-    // set message history
-    interaction.messages = messages
-    // @ts-ignore
-    interaction.flow.history = messages
-
-    // set participants
-    interaction.participants.requester = await ctx.ctx.resolve(messages[0].issuer)
-
-    if (messages[1]) interaction.participants.responder = await ctx.ctx.resolve(messages[1].issuer)
-
-    // set role
-    if (messages[0].issuer === ctx.ctx.idw.did) interaction.role = InteractionRole.Requester
-    else if (messages[1] && messages[1].issuer === ctx.ctx.idw.did) interaction.role = InteractionRole.Responder
-
-    // replay history to get current state
+    // we process all the tokens sequentially
     for (let message of messages) {
-      await interaction.flow.handleInteractionToken(message.interactionToken, message.interactionType)
+      await interaction.processInteractionToken(message)
     }
-
-    // return
     return interaction
   }
 
@@ -419,7 +405,7 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
    *
    * @param token - the token to
    * @returns Promise<boolean> whether or not processing was successful
-   * @throws AppError<InvalidToken> with `origError` set to the original token
+   * @throws SDKError<InvalidToken> with `origError` set to the original token
    *                                validation error from the jolocom library
    * @category Basic
    *
@@ -460,12 +446,30 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     }
 
     // verify
-    await this.ctx.ctx.idw.validateJWT(token, this.messages[this.messages.length - 1], this.ctx.ctx.resolver)
+    try {
+      await this.ctx.ctx.idw.validateJWT(
+        token,
+        this.messages[this.messages.length - 1],
+        this.ctx.ctx.resolver
+      )
+    } catch (err) {
+      throw new SDKError(ErrorCode.InvalidToken, err)
+    }
 
     // TODO if handling fails, should we still be pushing the token??
     const res = await this.flow.handleInteractionToken(token.interactionToken, token.interactionType)
     this.messages.push(token)
-    await this.ctx.ctx.storage.store.interactionToken(token)
+
+    const storedTokens = (await this.ctx.ctx.storage.get.interactionTokens({
+      nonce: token.nonce,
+      type: token.interactionType,
+      issuer: token.issuer
+    })).map(t => t.encode())
+    const tokenStr = token.encode()
+    // check if token is already in storage before attempting to commit it to
+    // storage
+    if (!storedTokens.some(t => t === tokenStr))
+      await this.ctx.ctx.storage.store.interactionToken(token)
 
     if (!this._transportAPI) {
       // update transportAPI

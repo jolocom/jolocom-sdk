@@ -326,13 +326,31 @@ export class Agent {
    */
   public async processJWT(jwt: string, transportAPI?: TransportAPI): Promise<Interaction> {
     const token = JolocomLib.parse.interactionToken.fromJWT(jwt)
+    let interxn
 
-    return await this.interactionManager.getInteraction(token.nonce, transportAPI).then(async (interaction) => {
-      await interaction.processInteractionToken(token)
-      return interaction
-    }).catch(async _ => {
-      return await this.interactionManager.start(token, transportAPI)
-    })
+    try {
+      interxn = await this.interactionManager.getInteraction(token.nonce, transportAPI)
+    } catch (err) {
+      if (err.message !== ErrorCode.NoSuchInteraction) throw err
+    }
+
+    if (!interxn) {
+      // NOTE: interactionManager.start calls processInteractionToken internally
+      interxn = await this.interactionManager.start(token, transportAPI)
+    } else if (interxn.lastMessage.encode() !== jwt) {
+      // NOTE FIXME TODO #multitenancy
+      // we only process the message if it is not last message seen
+      // this is to allow for some flexibility with how processJWT is called,
+      // mostly because of how there is no separation between interaction tokens
+      // stored by different agents sharing the same database.
+      //
+      // When agent multi-tenancy is implemented properly, we can remove this
+      // flexibility and instead always run processInteractionToken on incoming
+      // JWTs
+      await interxn.processInteractionToken(token)
+    }
+
+    return interxn
   }
 
   /**
@@ -355,8 +373,7 @@ export class Agent {
     } else if (inp && inp.nonce) {
       id = inp.nonce
     } else {
-      // TODO different error
-      throw new SDKError(ErrorCode.InvalidToken)
+      throw new SDKError(ErrorCode.NoSuchInteraction)
     }
 
     //@ts-ignore

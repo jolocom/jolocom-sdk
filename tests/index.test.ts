@@ -32,9 +32,25 @@ test('Init Agent multiple times returning the same agent', async () => {
   expect(alice.idw.did).toEqual(aliceAgain.idw.did)
 })
 
-test('Allow interaction continuation accross agent instances which share a DID', async () => {
+test('Allow agents on the same DB to interact together', async () => {
+  // NOTE: both agents are created on the same SDK instance, hence the same
+  // storage backend connection
   const alice = await sdk.initAgent({ password: 'please' })
+  const bob = await sdk.createAgent('pass', 'jun')
+  const authReq = await alice.authRequestToken({
+    callbackURL: '',
+    description: 'hello neighbour'
+  })
+  const bobInterxn = await bob.processJWT(authReq.encode())
+  const authResp = await bobInterxn.createAuthenticationResponse()
+  await alice.processJWT(authResp.encode())
+  await bob.processJWT(authResp.encode())
+})
 
+test('Allow interaction continuation accross agent instances which share a DID', async () => {
+  // NOTE: both agents are created on the same SDK instance, hence the same
+  // storage backend connection, hence they have access to the
+  const alice = await sdk.initAgent({ password: 'please' })
   const bob = await sdk.createAgent('pass', 'jun')
 
   const auth = await alice.credOfferToken({
