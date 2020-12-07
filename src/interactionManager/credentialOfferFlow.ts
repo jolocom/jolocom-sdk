@@ -12,6 +12,7 @@ import {
   isCredentialOfferResponse,
   isCredentialReceive,
 } from './guards'
+import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
 
 export class CredentialOfferFlow extends Flow<
   CredentialOfferRequest | CredentialOfferResponse | CredentialsReceive
@@ -88,36 +89,44 @@ export class CredentialOfferFlow extends Flow<
     return true
   }
 
-  // Sets the validity map, currently if the issuer and if the subjects are correct.
-  // also populates the SignedCredentialWithMetadata with credentials
+  // Sets the state of issued credentials and their validity
   private async handleCredentialReceive({
     signedCredentials,
   }: CredentialsReceive) {
-    this.state.issued = signedCredentials
-    this.state.issued.map(cred => {
-      const offer = this.state.offerSummary.find(
-        ({ type }) => type === last(cred.type),
-      )
+    // First we check if all received credentials were actually offered
+    const issuedTypes = signedCredentials.map(cred => last(cred.type) || '')
+    if (!this.areTypesOffered(issuedTypes)) {
+      throw new Error('Received wrong credentials')
+    }
 
-      if (!offer) {
-        throw new Error('Received wrong credentials')
-      }
+    // Then we compute the list of issued credential and their validity,
+    // maintaining order as per the offer
+    const issued: SignedCredential[] = []
+    this.state.offerSummary.forEach(o => {
+      const selected = signedCredentials.find(cred => last(cred.type) === o.type)
+      if (selected) issued.push(selected)
     })
-
+    this.state.issued = issued
     const validArr = (this.state.credentialsValidity = await Promise.all(
-      signedCredentials.map(async cred => {
+      issued.map(async cred => {
         try {
           await JolocomLib.parseAndValidate.signedCredential(
             cred.toJSON(),
             await this.ctx.ctx.ctx.resolve(cred.issuer),
           )
         } catch (e) {
+          // credential signature is invalid!
           return false
         }
-        return true
+
+        const validIssuer = cred.issuer === this.ctx.participants.requester!.did
+        const validSubject = cred.subject === this.ctx.participants.responder!.did
+        return validIssuer && validSubject
       }),
     ))
+
     this.state.credentialsAllValid = validArr.every(v => v)
+
     return true
   }
 
@@ -142,11 +151,6 @@ export class CredentialOfferFlow extends Flow<
       const validationErrors = {
         invalidIssuer: cred.issuer !== this.ctx.participants.requester!.did,
         invalidSubject: cred.subject !== this.ctx.participants.responder!.did,
-      }
-
-      if (validationErrors.invalidIssuer || validationErrors.invalidSubject) {
-        this.state.credentialsValidity[i] = false
-        this.state.credentialsAllValid = false
       }
 
       return {
