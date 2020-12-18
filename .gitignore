@@ -12,6 +12,7 @@ local_identity.password.txt
 js
 docs-build
 docs/api
+.repl.history
 
 #### Below is the default react native .gitignore ###
 ############### DO NOT EDIT BELOW ###################

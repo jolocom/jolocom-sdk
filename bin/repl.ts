@@ -1,64 +1,50 @@
-import { initStore, entities, actions } from '../index'
+import { JolocomSDK } from '../src'
+import { JolocomTypeormStorage } from '@jolocom/sdk-storage-typeorm'
+import { createConnection } from 'typeorm'
 
-const welcomeBanner = `
-/****** This code was executed ******/
-let store = require('src/store').initStore()
-let bmw = store.backendMiddleware
-let s = bmw.storageLib
-let e = require('src/lib/storage/entities')
-let a = require('src/actions')
+const repl = require('repl')
 
-/****** Cheatsheet ******
- *
- * p = _ // put last return value in global variable p
- * store.dispatch(a.registrationActions.createIdentity(crypto.randomBytes(16)))
- * store.dispatch(a.accountActions.checkIdentityExists)
- * store.getState()
- ***********************/
-
- Please press [RETURN] for a prompt
-`
-
-if (process.env.REPL) {
-  // if we are running as a REPL
-
-  const store = initStore()
-  const storage = store.backendMiddleware.storageLib
-
-  const replGlobalMerge = (function(gl) {
-    return (toMerge: object) => Object.assign(gl, toMerge)
-  })(global)
-
-  // assign some useful shortcuts
-  replGlobalMerge({
-    storage,
-    entities,
-    bmw: store.backendMiddleware,
-    store,
-    actions,
-    s: storage,
-    e: entities,
-    a: actions,
-  })
-
-  // @ts-ignore
-  const connPromise = global.storage.initConnection()
-  connPromise.then(() => {
-    // this doesn't work, presumably because it's async
-    // but the funny thing is console.log(conn) at the end works
-    // Yet on the repl there's no conn global.
-    //
-    // @mnzaki tried capturing the global object in a closure (as function
-    // arguments and as a const alias) and it still didn't work
-    //
-    replGlobalMerge({
-      // @ts-ignore
-      conn: global.storage.connection,
-    })
-
-    // @ts-ignore
-    // console.log(conn)
-
-    console.log(welcomeBanner)
-  })
+const typeOrmConfig = {
+    name: 'demoDb',
+    type: 'sqlite',
+    database: ':memory:',
+    dropSchema: true,
+    entities: ['node_modules/@jolocom/sdk-storage-typeorm/js/src/entities/*.js'],
+    synchronize: true,
+    logging: false,
 }
+
+async function loadDefaultAgent(global: any) {
+  // @ts-ignore
+  global.dbConn = await createConnection(typeOrmConfig)
+  global.sdk = new JolocomSDK({
+    storage: new JolocomTypeormStorage(global.dbConn),
+  })
+
+  global.sdk.setDefaultDidMethod('jun')
+  global.a = await global.sdk.createAgent()
+}
+
+loadDefaultAgent(global).then(() => {
+  const initLines = loadDefaultAgent.toString().split('\n')
+  const initSource = initLines.slice(1, initLines.length - 1).map(line => {
+    return line.replace(/global\./g, '')
+  }).join('\n')
+
+  console.log(
+`// Docs are at https://jolocom.github.io/jolocom-sdk/
+// Press the [TAB] button for autocompletion!
+
+/****** This code was executed ******/
+${initSource}
+`)
+
+  const replServer = repl.start({
+    useGlobal: true
+  })
+  if (replServer.setupHistory) {
+    replServer.setupHistory('./.repl.history', (err: Error) => {
+      if (err) console.error('REPL History error', err)
+    })
+  }
+})
