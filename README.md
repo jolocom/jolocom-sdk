@@ -19,8 +19,8 @@ It is designed to streamline the creation, validation, authentication and proces
 The SDK itself functions as an Agent Factory. It manages a storage connection and a collection of registered DID Methods, providing storage access and resolution capabilities to the Agents which it creates.
 
 ## Documentation
-Check out the documentation at [https://jolocom.github.io/jolocom-sdk/](https://jolocom.github.io/jolocom-sdk/) for examples / instructions on how to:
-- [Installation Guide](https://jolocom.github.io/jolocom-sdk/1.0.0/guides/sdk_install_conf.md): Install, configure and instantiate the Jolocom SDK
-- [Agents Guide](https://jolocom.github.io/jolocom-sdk/1.0.0/guides/agents.md): Use an instance of the Jolocom SDK to create an Agent or load it from storage
-- [Interactions Guide](https://jolocom.github.io/jolocom-sdk/1.0.0/guides/interaction_flows.md): Use the created Agents to participate in various SSI interactions and / or issue Verifiable Credentials
+Check out the documentation at [https://jolocom.github.io/jolocom-sdk/](https://jolocom.github.io/jolocom-sdk/) for examples and guides:
+- [Installation Guide](https://jolocom.github.io/jolocom-sdk/1.0.0/guides/sdk_install_conf/): Install, configure and instantiate the Jolocom SDK
+- [Agents Guide](https://jolocom.github.io/jolocom-sdk/1.0.0/guides/agents): Use an instance of the Jolocom SDK to create an Agent or load it from storage
+- [Interactions Guide](https://jolocom.github.io/jolocom-sdk/1.0.0/guides/interaction_flows): Use the created Agents to participate in various SSI interactions and / or issue Verifiable Credentials
 - [API documentation](https://jolocom.github.io/jolocom-sdk/1.0.0/api/): browse to the [documentation](https://jolocom.github.io/jolocom-sdk/) and click on "[API](https://jolocom.github.io/jolocom-sdk/1.0.0/api/)" in the top navigation bar.
