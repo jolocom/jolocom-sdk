@@ -1,6 +1,7 @@
 import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
 import { InternalDb } from '@jolocom/local-resolver-registrar/js/db'
+import { JsonLdObject } from 'jolocom-lib/js/linkedData/types'
 
 import { IdentitySummary, CredentialMetadataSummary } from '../types'
 import { Identity } from 'jolocom-lib/js/identity/identity'
@@ -16,9 +17,21 @@ export interface EncryptedWalletAttributes {
   timestamp: number
 }
 
-export interface FindOptions {
-  skip?: number
-  take: number
+export interface CredentialQuery {
+  id?: string,
+  issuer?: string,
+  subject?: string,
+  type?: string[],
+  claims?: {
+    [key: string]: string | number | boolean | JsonLdObject | JsonLdObject[]
+  }
+}
+
+export interface QueryOptions {
+  pagination?: {
+    skip?: number,
+    take: number
+  }
 }
 
 /**
@@ -43,10 +56,7 @@ export interface IStorageStore {
 export interface IStorageGet {
   settingsObject(): Promise<{ [key: string]: any }>
   setting(key: string): Promise<any>
-  verifiableCredential(query?: object, findOptions?: FindOptions): Promise<SignedCredential[]>
-  // FIXME types
-  attributesByType(type: string[]): Promise<{ type: string[]; results: any[] }>
-  vCredentialsByAttributeValue(attribute: string, findOptions?: FindOptions): Promise<SignedCredential[]>
+  verifiableCredential(query?: CredentialQuery, options?: QueryOptions): Promise<SignedCredential[]>
   encryptedWallet(id?: string): Promise<EncryptedWalletAttributes | null>
   credentialMetadata(
     credential: SignedCredential,
@@ -59,7 +69,7 @@ export interface IStorageGet {
       type?: string
       issuer?: string
     },
-    findOptions?: FindOptions,
+    options?: QueryOptions,
   ): Promise<Array<JSONWebToken<any>>>
 }
 

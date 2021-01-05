@@ -30,6 +30,7 @@ import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRe
 import { SDKError, ErrorCode } from '../errors'
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { Identity } from 'jolocom-lib/js/identity/identity'
+import { CredentialQuery } from '../storage'
 
 import {
   AuthorizationType,
@@ -617,17 +618,13 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     }
   }
 
-  public async getAttributesByType(type: string[]) {
-    return this.ctx.ctx.storage.get.attributesByType(type)
-  }
-
   public async getStoredCredentialById(id: string) {
     return this.ctx.ctx.storage.get.verifiableCredential({
       id,
     })
   }
 
-  public async getVerifiableCredential(query?: object) {
+  public async getVerifiableCredential(query?: CredentialQuery) {
     return this.ctx.ctx.storage.get.verifiableCredential(query)
   }
 

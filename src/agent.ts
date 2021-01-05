@@ -1,5 +1,6 @@
 import { IdentityWallet } from 'jolocom-lib/js/identityWallet/identityWallet'
-import { IPasswordStore, NaivePasswordStore, IStorage } from './storage'
+import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
+import { IPasswordStore, NaivePasswordStore, IStorage, CredentialQuery } from './storage'
 import { SoftwareKeyProvider, JolocomLib } from 'jolocom-lib'
 import { SDKError, ErrorCode } from './errors'
 import { walletUtils } from '@jolocom/native-core'
@@ -622,6 +623,19 @@ export class Agent {
       credParams,
       await this.passwordStore.getPassword(),
     )
+  }
+
+  /**
+   * Returns a Signed Credential
+   *
+   * @param credParams - credential attributes
+   * @returns SignedCredential instance
+   * @category Credential Management
+   */
+  public async getCredentials(
+    query: CredentialQuery = {}
+  ): Promise<SignedCredential[]> {
+    return await this.storage.get.verifiableCredential({...query, subject: this.idw.did})
   }
 
   /**
