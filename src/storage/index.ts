@@ -16,6 +16,11 @@ export interface EncryptedWalletAttributes {
   timestamp: number
 }
 
+export interface FindOptions {
+  skip?: number
+  take: number
+}
+
 /**
  * @todo IdentitySummary is a UI type, which can always be
  * derived from a DID Doc and Public Profile.
@@ -38,21 +43,24 @@ export interface IStorageStore {
 export interface IStorageGet {
   settingsObject(): Promise<{ [key: string]: any }>
   setting(key: string): Promise<any>
-  verifiableCredential(query?: object): Promise<SignedCredential[]>
+  verifiableCredential(query?: object, findOptions?: FindOptions): Promise<SignedCredential[]>
   // FIXME types
   attributesByType(type: string[]): Promise<{ type: string[]; results: any[] }>
-  vCredentialsByAttributeValue(attribute: string): Promise<SignedCredential[]>
+  vCredentialsByAttributeValue(attribute: string, findOptions?: FindOptions): Promise<SignedCredential[]>
   encryptedWallet(id?: string): Promise<EncryptedWalletAttributes | null>
   credentialMetadata(
     credential: SignedCredential,
   ): Promise<CredentialMetadataSummary>
   publicProfile(did: string): Promise<IdentitySummary>
   identity(did: string): Promise<Identity | undefined>
-  interactionTokens(attrs: {
-    nonce?: string
-    type?: string
-    issuer?: string
-  }): Promise<Array<JSONWebToken<any>>>
+  interactionTokens(
+    attrs: {
+      nonce?: string
+      type?: string
+      issuer?: string
+    },
+    findOptions?: FindOptions,
+  ): Promise<Array<JSONWebToken<any>>>
 }
 
 export interface IStorageDelete {
