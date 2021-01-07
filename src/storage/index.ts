@@ -28,10 +28,8 @@ export interface CredentialQuery {
 }
 
 export interface QueryOptions {
-  pagination?: {
-    skip?: number,
-    take: number
-  }
+  skip?: number,
+  take: number
 }
 
 /**
