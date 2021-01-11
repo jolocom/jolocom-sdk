@@ -8,7 +8,7 @@
   "scripts": {
     "build": "rm -rf js && tsc --rootDir src -p .",
     "prepare": "yarn build",
-    "repl": "REPL=1 ts-node -P . -r ./bin/repl.ts",
+    "repl": "node --experimental-repl-await -r ts-node/register ./bin/repl.ts",
     "typeorm": "ts-node -O '{\"module\": \"commonjs\"}' -r ./bin/repl.ts node_modules/.bin/typeorm",
     "lint": "eslint --ext .ts --ext .tsx .",
     "format": "yarn lint --fix",
