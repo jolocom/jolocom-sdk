@@ -88,6 +88,17 @@ describe('findInteraction', () => {
   })
 
   describe('reconstructing an interaction from stored messages', () => {
+    it('returns an interaction even if already expired', async () => {
+      jest.useFakeTimers('modern')
+      jest.setSystemTime(0)
+      const jwt = await alice.authRequestToken({ callbackURL: 'dummy', description: 'test' })
+      jest.useRealTimers()
+      const alice2 = await alice.sdk.initAgent({})
+      const interxn = await alice2.findInteraction(jwt.nonce)
+
+      expect(() => interxn.transportAPI).not.toThrow()
+    })
+
     it('returns an interaction that has a transportAPI', async () => {
       const jwt = await alice.authRequestToken({ callbackURL: 'dummy', description: 'test' })
 
