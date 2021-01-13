@@ -72,9 +72,22 @@ export class InteractionManager {
     // interaction messages
     const messages = await this.ctx.storage.get.interactionTokens({ nonce: id })
     if (messages.length === 0) throw new SDKError(ErrorCode.NoSuchInteraction)
+
     const interxn = await Interaction.fromMessages(messages, this, id, transportAPI)
 
     this.interactions[id] = interxn
+
     return interxn
+  }
+
+  public async listInteractions<T>(opts?: {flows?: Array<{ firstMessageType: string }>, take?: number, skip?: number, reverse?: boolean }): Promise<Interaction[]> {
+    let queryOpts = opts && {
+      take: opts.take,
+      skip: opts.skip,
+      ...(opts.reverse && { order: { id: 'DESC' as 'DESC' } })
+    }
+    const attrs = opts && opts.flows && opts.flows.map(f => ({ type: f.firstMessageType }))
+    const ids = await this.ctx.storage.get.interactionIds(attrs, queryOpts)
+    return Promise.all(ids.map((id: string) => this.getInteraction(id)))
   }
 }
