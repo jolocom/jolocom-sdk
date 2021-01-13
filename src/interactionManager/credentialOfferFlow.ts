@@ -26,6 +26,7 @@ export class CredentialOfferFlow extends Flow<
     credentialsAllValid: true,
   }
   public type = FlowType.CredentialOffer
+  public static firstMessageType = InteractionType.CredentialOfferRequest
 
   public constructor(ctx: Interaction) {
     super(ctx)

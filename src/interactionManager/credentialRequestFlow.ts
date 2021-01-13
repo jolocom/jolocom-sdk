@@ -14,6 +14,7 @@ export class CredentialRequestFlow extends Flow<
     providedCredentials: [],
   }
   public type = FlowType.CredentialShare
+  public static firstMessageType = InteractionType.CredentialRequest
 
   constructor(ctx: Interaction) {
     super(ctx)

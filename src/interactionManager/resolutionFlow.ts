@@ -32,6 +32,7 @@ export const isResolutionResponse = (
 export class ResolutionFlow extends Flow<ResolutionRequest | ResolutionResult> {
   public type = FlowType.Resolution
   public state: ResolutionFlowState = {}
+  public static firstMessageType = ResolutionType.ResolutionRequest
 
   public async handleInteractionToken(
     token: ResolutionRequest | ResolutionResult,

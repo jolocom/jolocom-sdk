@@ -16,6 +16,7 @@ export class AuthorizationFlow extends Flow<
   public state: AuthorizationFlowState = {
     description: '',
   }
+  public static firstMessageType = AuthorizationType.AuthorizationRequest
 
   public async handleInteractionToken(
     token: AuthorizationRequest | AuthorizationResponse,

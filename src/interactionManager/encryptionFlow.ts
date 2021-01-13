@@ -18,6 +18,7 @@ export class EncryptionFlow extends Flow<
   > {
   public type = FlowType.Encrypt
   public state: EncryptionFlowState = {}
+  public static firstMessageType = EncryptionType.EncryptionRequest
 
   public constructor(ctx: Interaction) {
     super(ctx)
