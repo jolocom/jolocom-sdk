@@ -27,6 +27,7 @@ test('Authentication interaction', async () => {
   })
 
   const bobInteraction = await bob.processJWT(aliceAuthRequest.encode())
+  expect(() => bobInteraction.transportAPI).not.toThrow()
 
   const bobResponse = (
     await bobInteraction.createAuthenticationResponse()

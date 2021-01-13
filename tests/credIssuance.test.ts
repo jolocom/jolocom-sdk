@@ -39,6 +39,7 @@ test('Credential Issuance interaction', async () => {
   })
 
   const bobInteraction = await bob.processJWT(aliceCredOffer.encode())
+  expect(() => bobInteraction.transportAPI).not.toThrow()
 
   const bobResponse = (
     await bobInteraction.createCredentialOfferResponseToken([

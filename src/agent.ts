@@ -334,12 +334,21 @@ export class Agent {
       if (err.message !== ErrorCode.NoSuchInteraction) throw err
     }
 
+    // extract ProofOfControlAuthority (PCA) and process it if available
+    if (token.payload.pca) {
+      // update local state
+      await this.sdk.didMethods
+        .getForDid(token.issuer)
+        .registrar.encounter(token.payload.pca)
+    }
+
     if (!interxn) {
-      // NOTE: interactionManager.start calls processInteractionToken internally
+      // NOTE: interactionManager.start internally calls
+      // processInteractionToken and storage.store
       interxn = await this.interactionManager.start(token, transportAPI)
     } else if (interxn.lastMessage.encode() !== jwt) {
       // NOTE FIXME TODO #multitenancy
-      // we only process the message if it is not last message seen
+      // we only process the message if it is not last message seen (see "else if" condition)
       // this is to allow for some flexibility with how processJWT is called,
       // mostly because of how there is no separation between interaction tokens
       // stored by different agents sharing the same database.
@@ -348,6 +357,7 @@ export class Agent {
       // flexibility and instead always run processInteractionToken on incoming
       // JWTs
       await interxn.processInteractionToken(token)
+      await this.storage.store.interactionToken(token)
     }
 
     return interxn

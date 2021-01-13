@@ -49,6 +49,7 @@ test('Credential Request interaction', async () => {
   })
 
   const bobInteraction = await bob.processJWT(aliceCredReq.encode())
+  expect(() => bobInteraction.transportAPI).not.toThrow()
 
   const bobResponse = (
     await bobInteraction.createCredentialResponse([bobSelfSignedCred.id])
