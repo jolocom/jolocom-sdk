@@ -42,6 +42,7 @@ export class InteractionManager {
     )
     this.interactions[token.nonce] = interaction
     await interaction.processInteractionToken(token)
+    await this.ctx.storage.store.interactionToken(token)
 
     return interaction
   }

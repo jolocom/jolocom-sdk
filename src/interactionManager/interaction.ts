@@ -132,9 +132,9 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
 
   /**
    * Returns an Interaction with state calculated from the given list of
-   * messages. The messages are *not* committed to storage in the process,
-   * because this method is intended to be used to reload previously stored
-   * interactions. See {@link InteractionManager.getInteraction}
+   * messages. The messages are *not* committed to storage or validated in the
+   * process, because this method is intended to be used to reload previously
+   * stored interactions. See {@link InteractionManager.getInteraction}
    *
    * @param messages - List of messages to calculate interaction state from
    * @param ctx - The manager of this interaction
@@ -156,9 +156,9 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
       transportAPI
     )
 
-    // we process all the tokens sequentially
+    // we process all the tokens sequentially, withot revalidating
     for (let message of messages) {
-      await interaction.processInteractionToken(message)
+      await interaction._processToken(message)
     }
     return interaction
   }
@@ -399,29 +399,9 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     )
   }
 
-  /**
-   * Validate an interaction token and process it to update the interaction
-   * state (via the associated {@link Flow})
-   *
-   * @param token - the token to
-   * @returns Promise<boolean> whether or not processing was successful
-   * @throws SDKError<InvalidToken> with `origError` set to the original token
-   *                                validation error from the jolocom library
-   * @category Basic
-   *
-   */
-  public async processInteractionToken<T>(
+  private async _processToken<T>(
     token: JSONWebToken<T>,
   ): Promise<boolean> {
-
-    // extract PCA
-    if (token.payload.pca) {
-      // update local state
-      await this.ctx.ctx.sdk.didMethods
-        .getForDid(token.issuer)
-        .registrar.encounter(token.payload.pca)
-    }
-
     if (!this.participants.requester) {
       // TODO what happens if the signer isnt resolvable
       try {
@@ -445,32 +425,6 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
       }
     }
 
-    // verify
-    try {
-      await this.ctx.ctx.idw.validateJWT(
-        token,
-        this.messages[this.messages.length - 1],
-        this.ctx.ctx.resolver
-      )
-    } catch (err) {
-      throw new SDKError(ErrorCode.InvalidToken, err)
-    }
-
-    // TODO if handling fails, should we still be pushing the token??
-    const res = await this.flow.handleInteractionToken(token.interactionToken, token.interactionType)
-    this.messages.push(token)
-
-    const storedTokens = (await this.ctx.ctx.storage.get.interactionTokens({
-      nonce: token.nonce,
-      type: token.interactionType,
-      issuer: token.issuer
-    })).map(t => t.encode())
-    const tokenStr = token.encode()
-    // check if token is already in storage before attempting to commit it to
-    // storage
-    if (!storedTokens.some(t => t === tokenStr))
-      await this.ctx.ctx.storage.store.interactionToken(token)
-
     if (!this._transportAPI) {
       // update transportAPI
       // @ts-ignore
@@ -491,7 +445,39 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
       }
     }
 
+    // TODO if handling fails, should we still be pushing the token??
+    const res = await this.flow.handleInteractionToken(token.interactionToken, token.interactionType)
+    this.messages.push(token)
+
     return res
+  }
+
+  /**
+   * Validate an interaction token and process it to update the interaction
+   * state (via the associated {@link Flow})
+   *
+   * @param token - the token to validate and process
+   * @returns Promise<boolean> whether or not processing was successful
+   * @throws SDKError<InvalidToken> with `origError` set to the original token
+   *                                validation error from the jolocom library
+   * @category Basic
+   *
+   */
+  public async processInteractionToken<T>(
+    token: JSONWebToken<T>,
+  ): Promise<boolean> {
+    // verify
+    try {
+      await this.ctx.ctx.idw.validateJWT(
+        token,
+        this.messages.length ? this.messages[this.messages.length - 1] : undefined,
+        this.ctx.ctx.resolver
+      )
+    } catch (err) {
+      throw new SDKError(ErrorCode.InvalidToken, err)
+    }
+
+    return this._processToken(token)
   }
 
   /**
