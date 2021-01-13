@@ -18,7 +18,8 @@ export interface EncryptedWalletAttributes {
 
 export interface FindOptions {
   skip?: number
-  take: number
+  take?: number
+  order?: { [k: string]: 'ASC' | 'DESC' }
 }
 
 /**
@@ -40,6 +41,12 @@ export interface IStorageStore {
   interactionToken(token: JSONWebToken<any>): Promise<void>
 }
 
+export interface InteractionTokenAttrs {
+  nonce?: string
+  type?: string
+  issuer?: string
+}
+
 export interface IStorageGet {
   settingsObject(): Promise<{ [key: string]: any }>
   setting(key: string): Promise<any>
@@ -54,13 +61,13 @@ export interface IStorageGet {
   publicProfile(did: string): Promise<IdentitySummary>
   identity(did: string): Promise<Identity | undefined>
   interactionTokens(
-    attrs: {
-      nonce?: string
-      type?: string
-      issuer?: string
-    },
+    attrs?: InteractionTokenAttrs,
     findOptions?: FindOptions,
   ): Promise<Array<JSONWebToken<any>>>
+  interactionIds(
+    attrs?: InteractionTokenAttrs | InteractionTokenAttrs[],
+    findOptions?: FindOptions,
+  ): Promise<Array<string>>
 }
 
 export interface IStorageDelete {
