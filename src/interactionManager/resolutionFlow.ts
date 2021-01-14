@@ -30,7 +30,7 @@ export const isResolutionResponse = (
 ): t is ResolutionResult => typ === ResolutionType.ResolutionResponse
 
 export class ResolutionFlow extends Flow<ResolutionRequest | ResolutionResult> {
-  public type = FlowType.Resolution
+  public static type = FlowType.Resolution
   public state: ResolutionFlowState = {}
   public static firstMessageType = ResolutionType.ResolutionRequest
 

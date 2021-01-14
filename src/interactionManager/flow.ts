@@ -8,12 +8,17 @@ export interface FlowState { }
 export abstract class Flow<T> {
   protected ctx: Interaction
 
-  public abstract type: FlowType
+  public static type: FlowType
   public abstract state: FlowState
   public static firstMessageType: InteractionType | string
 
   constructor(ctx: Interaction) {
     this.ctx = ctx
+  }
+
+  get type() {
+    // @ts-ignore
+    return this.constructor.type
   }
 
   public getState() {

@@ -11,7 +11,7 @@ export interface SigningFlowState extends FlowState {
 export class SigningFlow extends Flow<SigningRequest | SigningResponse> {
   public state: SigningFlowState = {}
 
-  public type = FlowType.Sign
+  public static type = FlowType.Sign
   public static firstMessageType = SigningType.SigningRequest
 
   public constructor(ctx: Interaction) {

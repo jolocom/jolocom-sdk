@@ -16,7 +16,7 @@ export class EstablishChannelFlow extends Flow<
     description: '',
     established: false,
   }
-  public type = FlowType.EstablishChannel
+  public static type = FlowType.EstablishChannel
   public static firstMessageType = EstablishChannelType.EstablishChannelRequest
 
   public constructor(ctx: Interaction) {

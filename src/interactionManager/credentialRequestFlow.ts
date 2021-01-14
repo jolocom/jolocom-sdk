@@ -13,7 +13,7 @@ export class CredentialRequestFlow extends Flow<
     constraints: [],
     providedCredentials: [],
   }
-  public type = FlowType.CredentialShare
+  public static type = FlowType.CredentialShare
   public static firstMessageType = InteractionType.CredentialRequest
 
   constructor(ctx: Interaction) {

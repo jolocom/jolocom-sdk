@@ -6,7 +6,7 @@ import { isAuthenticationRequest } from './guards'
 
 export class AuthenticationFlow extends Flow<Authentication> {
   public state: AuthenticationFlowState = { description: '' }
-  public type = FlowType.Authentication
+  public static type = FlowType.Authentication
   public static firstMessageType = InteractionType.Authentication
 
   // TODO InteractionType.AuthenticaitonResponse should exist
