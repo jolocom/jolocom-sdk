@@ -1,9 +1,15 @@
 import { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
-import { Interaction } from './interaction'
+import { Interaction, flows } from './interaction'
 import { Agent } from '../agent'
 import { Flow } from './flow'
 import { TransportAPI } from '../types'
 import { SDKError, ErrorCode } from '../errors'
+import { FlowType } from './types'
+
+const firstMessageForFlowType = {}
+flows.forEach(f => {
+  firstMessageForFlowType[f.type] = f.firstMessageType
+})
 
 /**
  * The {@link InteractionManager} is an entry point to dealing with {@link
@@ -80,13 +86,29 @@ export class InteractionManager {
     return interxn
   }
 
-  public async listInteractions<T>(opts?: {flows?: Array<{ firstMessageType: string }>, take?: number, skip?: number, reverse?: boolean }): Promise<Interaction[]> {
+  /**
+   * Returns a list of {@link Interaction} instances given filtering and
+   * pagination criteria
+   *
+   * @param flows - a list of {@link FlowType}s or Flow classes
+   * @param take - number of results to return (pagination limit)
+   * @param skip - number of results to skip (pagination offset)
+   * @param reverse - if true, return the list in reverse storage order
+   */
+  public async listInteractions<T>(opts?: {
+    flows?: Array<FlowType | { firstMessageType: string }>,
+    take?: number,
+    skip?: number,
+    reverse?: boolean
+  }): Promise<Interaction[]> {
     let queryOpts = opts && {
       take: opts.take,
       skip: opts.skip,
       ...(opts.reverse && { order: { id: 'DESC' as 'DESC' } })
     }
-    const attrs = opts && opts.flows && opts.flows.map(f => ({ type: f.firstMessageType }))
+    const attrs = opts && opts.flows && opts.flows.map(f => ({
+      type: typeof f === "string" ? firstMessageForFlowType[f] : f.firstMessageType
+    }))
     const ids = await this.ctx.storage.get.interactionIds(attrs, queryOpts)
     return Promise.all(ids.map((id: string) => this.getInteraction(id)))
   }
