@@ -12,10 +12,11 @@ import { isAuthorizationRequest, isAuthorizationResponse } from './guards'
 export class AuthorizationFlow extends Flow<
   AuthorizationResponse | AuthorizationRequest
 > {
-  public type = FlowType.Authorization
+  public static type = FlowType.Authorization
   public state: AuthorizationFlowState = {
     description: '',
   }
+  public static firstMessageType = AuthorizationType.AuthorizationRequest
 
   public async handleInteractionToken(
     token: AuthorizationRequest | AuthorizationResponse,

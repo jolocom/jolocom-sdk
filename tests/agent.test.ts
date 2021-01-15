@@ -1,5 +1,7 @@
 import { destroyAgent, createAgent, meetAgent } from './util'
-import { Agent } from 'src'
+import { Agent, FlowType } from '../src'
+import { AuthenticationFlow } from '../src/interactionManager/authenticationFlow'
+import { AuthorizationFlow } from '../src/interactionManager/authorizationFlow'
 
 const conn1Name = 'agentTest1'
 const conn2Name = 'agentTest2'
@@ -59,6 +61,77 @@ describe('processJWT', () => {
 
     startSpy.mockRestore()
     processInteractionTokenSpy!.mockRestore()
+  })
+})
+
+describe('listInteractions', () => {
+  it('lists the requested number of interactions', async () => {
+    for (let t in [1, 2, 3, 4]) {
+      const aliceRequest = await alice.authRequestToken({
+        callbackURL: 'no',
+        description: 'authntest'+t
+      })
+      const bobInterxn = await bob.processJWT(aliceRequest.encode())
+      const bobResponse = (
+        await bobInterxn.createAuthenticationResponse()
+      ).encode()
+      await alice.processJWT(bobResponse)
+    }
+    for (let t in [1, 2]) {
+      const aliceRequest = await alice.authorizationRequestToken({
+        callbackURL: 'no',
+        description: 'authztest'+t
+      })
+      const bobInterxn = await bob.processJWT(aliceRequest.encode())
+      const bobResponse = (
+        await bobInterxn.createAuthorizationResponse()
+      ).encode()
+      await alice.processJWT(bobResponse)
+    }
+
+    const authnInterxns = await alice.interactionManager.listInteractions({
+      flows: [AuthenticationFlow],
+      take: 2
+    })
+    const authzInterxns = await alice.interactionManager.listInteractions({
+      flows: [AuthorizationFlow],
+      take: 2
+    })
+    const allInterxns = await alice.interactionManager.listInteractions({ skip: 3 })
+    expect(authnInterxns).toHaveLength(2)
+    expect(authzInterxns).toHaveLength(2)
+    expect(allInterxns).toHaveLength(3)
+  })
+
+  it('lists the requested interactions in the requested order', async () => {
+    const ids = []
+    for (let t in [1, 2, 3, 4]) {
+      const aliceRequest = await alice.authRequestToken({
+        callbackURL: 'no',
+        description: 'authntest'+t
+      })
+      const bobInterxn = await bob.processJWT(aliceRequest.encode())
+      ids.push(bobInterxn.id)
+      const bobResponse = (
+        await bobInterxn.createAuthenticationResponse()
+      ).encode()
+      await alice.processJWT(bobResponse)
+    }
+
+    const authnInterxns = await alice.interactionManager.listInteractions({
+      flows: [FlowType.Authentication],
+      take: 2
+    })
+    expect(authnInterxns).toHaveLength(2)
+    expect(authnInterxns[0].id).toEqual(ids[0])
+
+    const reversedAuthnInterxns = await alice.interactionManager.listInteractions({
+      flows: [FlowType.Authentication],
+      take: 2,
+      reverse: true
+    })
+    expect(reversedAuthnInterxns).toHaveLength(2)
+    expect(reversedAuthnInterxns[0].id).toEqual(ids[ids.length-1])
   })
 })
 

@@ -1,4 +1,3 @@
-import { CredentialOfferFlow } from './credentialOfferFlow'
 import {
   InteractionType,
   CredentialOfferResponseSelection,
@@ -22,10 +21,8 @@ import {
   SigningResponse,
   SigningType,
 } from './types'
-import { CredentialRequestFlow } from './credentialRequestFlow'
 import { Flow } from './flow'
 import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credentialOfferRequest'
-import { AuthenticationFlow } from './authenticationFlow'
 import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRequest'
 import { SDKError, ErrorCode } from '../errors'
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
@@ -36,8 +33,6 @@ import {
   AuthorizationRequest,
   AuthorizationFlowState,
 } from './types'
-import { AuthorizationFlow } from './authorizationFlow'
-import { EstablishChannelFlow } from './establishChannelFlow'
 
 import {
   InteractionManager,
@@ -46,32 +41,42 @@ import {
 import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
 import { CredentialOfferResponse } from 'jolocom-lib/js/interactionTokens/credentialOfferResponse'
 
+import { CredentialOfferFlow } from './credentialOfferFlow'
+import { CredentialRequestFlow } from './credentialRequestFlow'
+import { AuthenticationFlow } from './authenticationFlow'
+import { AuthorizationFlow } from './authorizationFlow'
+import { EstablishChannelFlow } from './establishChannelFlow'
 import { EncryptionFlow } from './encryptionFlow'
 import { DecryptionFlow } from './decryptionFlow'
 import { SigningFlow } from './signingFlow'
-import { generateIdentitySummary } from '../util'
-
 import {
   ResolutionType,
   ResolutionFlow,
   ResolutionFlowState,
   ResolutionRequest,
 } from './resolutionFlow'
+
+import { generateIdentitySummary } from '../util'
 import { last } from 'ramda'
 import { TransportAPI, TransportDesc, InteractionTransportType } from '../types'
 import { Transportable } from '../transports'
 
-const interactionFlowForMessage = {
-  [InteractionType.CredentialOfferRequest]: CredentialOfferFlow,
-  [InteractionType.CredentialRequest]: CredentialRequestFlow,
-  [InteractionType.Authentication]: AuthenticationFlow,
-  [AuthorizationType.AuthorizationRequest]: AuthorizationFlow,
-  [EstablishChannelType.EstablishChannelRequest]: EstablishChannelFlow,
-  [EncryptionType.EncryptionRequest]: EncryptionFlow,
-  [DecryptionType.DecryptionRequest]: DecryptionFlow,
-  [ResolutionType.ResolutionRequest]: ResolutionFlow,
-  [SigningType.SigningRequest]: SigningFlow,
-}
+export const flows = [
+  AuthenticationFlow,
+  AuthorizationFlow,
+  CredentialOfferFlow,
+  CredentialRequestFlow,
+  EstablishChannelFlow,
+  SigningFlow,
+  EncryptionFlow,
+  DecryptionFlow,
+  ResolutionFlow
+]
+
+const interactionFlowForMessage = {}
+flows.forEach(f => {
+  interactionFlowForMessage[f.firstMessageType] = f
+})
 
 /**
  * This class is instantiated by the {@link InteractionManager} when it needs to
