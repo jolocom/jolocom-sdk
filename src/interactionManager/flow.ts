@@ -16,7 +16,7 @@ export abstract class Flow<T> {
     this.ctx = ctx
   }
 
-  get type() {
+  get type(): FlowType {
     // @ts-ignore
     return this.constructor.type
   }
