@@ -317,15 +317,15 @@ export class Agent {
    * Parses a recieved interaction token in JWT format and process it through
    * the interaction system, returning the corresponding Interaction
    *
-   * @param jwt recieved jwt string
+   * @param jwt recieved jwt string or parsed JSONWebToken
    * @returns Promise<Interaction> the associated Interaction object
    * @throws AppError<InvalidToken> with `origError` set to the original token
    *                                validation error from the jolocom library
    *
    * @category Interaction Management
    */
-  public async processJWT(jwt: string, transportAPI?: TransportAPI): Promise<Interaction> {
-    const token = JolocomLib.parse.interactionToken.fromJWT(jwt)
+  public async processJWT(jwt: JSONWebToken<any> | string, transportAPI?: TransportAPI): Promise<Interaction> {
+    const token = typeof jwt === 'string' ? JolocomLib.parse.interactionToken.fromJWT(jwt) : jwt
     let interxn
 
     try {
