@@ -1,3 +1,4 @@
+export { FilePasswordStore } from '@jolocom/sdk-password-store-filesystem'
 import { destroyAgent, getSdk } from './util'
 import { JolocomSDK } from 'src'
 
@@ -20,6 +21,12 @@ test('Create Agent', async () => {
 
 test('Init Agent with only a password', async () => {
   const alice = await sdk.initAgent({ password: 'please' })
+  expect(alice.idw.did).toBeDefined()
+})
+
+test('Init Agent with only a password store', async () => {
+  const passwordStore = new FilePasswordStore(__dirname + '/password.txt')
+  const alice = await sdk.initAgent({ passwordStore })
   expect(alice.idw.did).toBeDefined()
 })
 
