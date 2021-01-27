@@ -1,7 +1,7 @@
 import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credentialOfferRequest'
 import { CredentialOfferResponse } from 'jolocom-lib/js/interactionTokens/credentialOfferResponse'
 import { CredentialsReceive } from 'jolocom-lib/js/interactionTokens/credentialsReceive'
-import { InteractionType, CredentialOfferResponseSelection } from 'jolocom-lib/js/interactionTokens/types'
+import { InteractionType, CredentialOfferResponseSelection, CredentialDefinition } from '@jolocom/protocol-ts'
 import { JolocomLib } from 'jolocom-lib'
 import { last } from 'ramda'
 import { Flow } from './flow'

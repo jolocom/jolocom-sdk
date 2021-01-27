@@ -30,7 +30,7 @@ import {
   ICredentialRequestAttrs,
   CredentialOfferRequestAttrs,
   ICredentialsReceiveAttrs,
-} from 'jolocom-lib/js/interactionTokens/types'
+} from '@jolocom/protocol-ts'
 import { BaseMetadata } from '@jolocom/protocol-ts'
 import { ISignedCredCreationArgs } from 'jolocom-lib/js/credentials/signedCredential/types'
 import { Flow } from './interactionManager/flow'

@@ -1538,17 +1538,10 @@
     "@jolocom/native-core-node-14-linux-x64" "^1.0.0"
     "@jolocom/native-core-node-14-win32-x64" "^1.0.0"
 
-"@jolocom/protocol-ts@^0.5.1":
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/@jolocom/protocol-ts/-/protocol-ts-0.5.1.tgz#faa22952029b27d2115be355c4bbf409af00f9c5"
-  integrity sha512-AMnn22qKm+0l840hg3WRioXudxd+1uuJka4oi5vRH4PGinzpEsNoXn5sc4anHy7VbZhwGrBT2UgQEPQYqHP8gQ==
-  dependencies:
-    cred-types-jolocom-core "^0.0.11"
-
-"@jolocom/protocol-ts@^0.5.2":
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/@jolocom/protocol-ts/-/protocol-ts-0.5.2.tgz#291a6865f2c3eeb47443bf8be3210848baeb5d25"
-  integrity sha512-vQq5EhapRaxyzM3UaEAycoej1jdaU6RWM1yNeh47SqHqEfRsxsVrI3MYAuUeCXaq5ULv4MCwrDt/Y6ARsR4EOA==
+"@jolocom/protocol-ts@^0.5.4":
+  version "0.5.4"
+  resolved "https://registry.yarnpkg.com/@jolocom/protocol-ts/-/protocol-ts-0.5.4.tgz#a59052d97b45ad157e877b1ed8ed2cd8235ad45e"
+  integrity sha512-t6gzeLZPgKQUksjAVgMint/htYIEy6LwVfqhm7kZx4+bkAxa0LHIynqEXFPA7bbx1+mrd2hxsvWmSswXiBtlkw==
   dependencies:
     cred-types-jolocom-core "^0.0.11"
 
@@ -2538,12 +2531,7 @@ cipher-base@^1.0.0, cipher-base@^1.0.1, cipher-base@^1.0.3:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
 
-class-transformer@^0.1.9:
-  version "0.1.10"
-  resolved "https://registry.yarnpkg.com/class-transformer/-/class-transformer-0.1.10.tgz#350f168ebb4c1f87edb18b98dd973681fc20fff7"
-  integrity sha512-QiNdUxEvTBiUtc0KiapGVHhgaqGQVEhOfL9UEBnb9xRfcwmDJT5ijIDwcwJUTwXaT/kGvZZB4JCGsiuR5adX6g==
-
-class-transformer@^0.3.1:
+class-transformer@0.3.1, class-transformer@^0.3.1:
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/class-transformer/-/class-transformer-0.3.1.tgz#ee681a5439ff2230fc57f5056412d3befa70d597"
   integrity sha512-cKFwohpJbuMovS8xVLmn8N2AUbAuc8pVo4zEfsUVo8qgECOogns1WVk/FkOZoxhOPTyTYFckuoH+13FO+MQ8GA==
@@ -4712,21 +4700,21 @@ jest@^26.4.2:
     import-local "^3.0.2"
     jest-cli "^26.4.2"
 
-jolocom-lib@^5.1.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-5.1.0.tgz#3237cb810743151b24d64d0bed0aa5711bf3d863"
-  integrity sha512-Ed5P3P9l/MlaQDqNJSY/0IXHzIuB7k5qgn+gM9FA3YKzeyZBXwb7WjYIh6sMqzQz6SbZlfT0Q+d1eX5KR/iQeQ==
+jolocom-lib@^5.2.0:
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-5.2.0.tgz#8ac056ad5ff6b0069b99e3957f5da03db28ed266"
+  integrity sha512-gYBWt5sKjoF33FlKV8G6p09WAojFM4ExBFmeye7+eCvdf+ebBSgSRdxiuZ+lsMf3dZhTE3Nc23fTUkvnAxvzCg==
   dependencies:
     "@hawkingnetwork/ed25519-hd-key-rn" "^1.0.1"
     "@jolocom/jolo-did-registrar" "^1.0.0"
     "@jolocom/jolo-did-resolver" "^1.0.0"
     "@jolocom/local-resolver-registrar" "^1.0.1"
     "@jolocom/native-core" "^1.0.0"
-    "@jolocom/protocol-ts" "^0.5.1"
+    "@jolocom/protocol-ts" "^0.5.4"
     "@jolocom/vaulted-key-provider" "^0.7.4"
     "@types/sinon" "^9.0.5"
     bip39 "^3.0.2"
-    class-transformer "^0.3.1"
+    class-transformer "0.3.1"
     create-hash "^1.2.0"
     did-resolver "2.0.0"
     ethereumjs-util "^6.1.0"
@@ -6482,7 +6470,7 @@ sprintf-js@~1.0.2:
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha1-BOaSb2YolTVPPdAVIDYzuFcpfiw=
 
-sqlite3@^4.2.0:
+sqlite3@^4:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/sqlite3/-/sqlite3-4.2.0.tgz#49026d665e9fc4f922e56fb9711ba5b4c85c4901"
   integrity sha512-roEOz41hxui2Q7uYnWsjMOTry6TcNUNmp8audCx18gF10P2NknwdpF+E+HKvz/F2NvPKGGBF4NGc+ZPQ+AABwg==
