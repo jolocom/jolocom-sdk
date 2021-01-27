@@ -39,6 +39,7 @@ import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRe
 import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credentialOfferRequest'
 import { CredentialsReceive } from 'jolocom-lib/js/interactionTokens/credentialsReceive'
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
+import { CredentialType } from './credentials'
 
 /**
  * The `Agent` class mainly provides an abstraction around the {@link
@@ -508,10 +509,22 @@ export class Agent {
   public async credOfferToken(
     offer: CredentialOfferRequestAttrs,
   ): Promise<JSONWebToken<CredentialOfferRequest>> {
-    const token = await this.idw.create.interactionTokens.request.offer(
-      offer,
-      await this.passwordStore.getPassword(),
-    )
+    const token = await this.idw.create.interactionTokens.request.offer({
+      callbackURL: offer.callbackURL,
+      offeredCredentials: offer.offeredCredentials.map(oc => {
+        oc.issuer = {
+          id: this.idw.did,
+          // name: TODO get name from PublicProfile credential?
+          ...oc.issuer
+        }
+        if (oc.credential) {
+          const credType = new CredentialType(oc.type, oc.credential)
+          oc = credType.onCreateOffer(oc)
+        }
+        return oc
+      }),
+    }, await this.passwordStore.getPassword())
+
     await this.interactionManager.start(token)
     return token
   }
