@@ -56,7 +56,7 @@ export class CredentialType {
     return {
       label: dm.label,
       key,
-      value: value || dm.text
+      value: value !== undefined ? value : dm.text
     }
   }
 
