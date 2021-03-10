@@ -60,6 +60,7 @@ import { generateIdentitySummary } from '../util'
 import { last } from 'ramda'
 import { TransportAPI, TransportDesc, InteractionTransportType } from '../types'
 import { Transportable } from '../transports'
+import { CredentialQuery } from 'src/storage'
 
 export const flows = [
   AuthenticationFlow,
@@ -608,17 +609,13 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     }
   }
 
-  public async getAttributesByType(type: string[]) {
-    return this.ctx.ctx.storage.get.attributesByType(type)
-  }
-
   public async getStoredCredentialById(id: string) {
     return this.ctx.ctx.storage.get.verifiableCredential({
       id,
     })
   }
 
-  public async getVerifiableCredential(query?: object) {
+  public async getVerifiableCredential(query?: CredentialQuery) {
     return this.ctx.ctx.storage.get.verifiableCredential(query)
   }
 

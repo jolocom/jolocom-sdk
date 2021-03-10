@@ -30,7 +30,7 @@ test('Credential Request interaction', async () => {
   )
 
   // Bob self-issues a name credential
-  const bobSelfSignedCred = await bob.signedCredential({
+  const bobSelfSignedCred = await bob.credentials.issue({
     metadata: claimsMetadata.name,
     subject: bob.idw.did,
     claim: {
@@ -38,8 +38,6 @@ test('Credential Request interaction', async () => {
       familyName: 'Agent',
     },
   })
-
-  await bob.storage.store.verifiableCredential(bobSelfSignedCred)
 
   const aliceCredReq = await alice.credRequestToken({
     callbackURL: 'nowhere',

@@ -90,7 +90,7 @@ test('Credential Issuance interaction', async () => {
   const aliceInteraction = await alice.processJWT(bobResponse)
 
   const aliceIssuance = await aliceInteraction.createCredentialReceiveToken([
-    await alice.signedCredential({
+    await alice.credentials.issue({
       metadata: claimsMetadata.name,
       subject: bob.idw.did,
       claim: {
@@ -100,7 +100,7 @@ test('Credential Issuance interaction', async () => {
     }),
   ])
 
-  const bobRecieving = await bob.processJWT(aliceIssuance.encode())
+  const bobRecieving = await bob.processJWT(aliceIssuance)
   const bobsFlow = bobRecieving.flow as CredentialOfferFlow
   expect(bobsFlow.state.credentialsAllValid).toBeTruthy()
 
@@ -110,6 +110,9 @@ test('Credential Issuance interaction', async () => {
     invalidIssuer: false,
     invalidSubject: false
   })
+  await expect(bob.credentials.query()).resolves.toHaveLength(0)
+  await bobRecieving.storeSelectedCredentials()
+  await expect(bob.credentials.query()).resolves.toHaveLength(1)
 })
 
 test('Credential Issuance interaction, with out of order selection and invalid credential', async () => {
