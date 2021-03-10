@@ -1,10 +1,27 @@
-import { CredentialDefinition, CredentialOffer, CredentialManifestDisplayMapping } from '@jolocom/protocol-ts'
-import { jsonpath } from './util'
+import {
+  CredentialDefinition,
+  CredentialOffer,
+  CredentialManifestDisplayMapping,
+  ClaimEntry,
+} from "@jolocom/protocol-ts"
+import { jsonpath } from "./util"
 
 export interface DisplayVal {
-  label?: string,
-    key?: string,
-    value?: string
+  label?: string
+  key?: string
+  value?: string
+}
+
+export interface CredentialDisplay {
+  name: string
+  schema: string
+  styles: CredentialDefinition["styles"]
+  display: {
+    properties: DisplayVal[]
+    title?: DisplayVal
+    subtitle?: DisplayVal
+    description?: DisplayVal
+  }
 }
 
 // TODO actually move into jolocom-lib??
@@ -17,60 +34,65 @@ export class CredentialType {
     this.def = def
   }
 
-  display(claim: any) {
-    const displayVals: {
-      properties?: DisplayVal | DisplayVal[]
-    } = {}
+  display(claim: ClaimEntry): CredentialDisplay {
+    const display: CredentialDisplay['display'] = {
+      properties: []
+    }
 
     if (this.def.display) {
-      Object.keys(this.def.display).forEach(k => {
+      Object.keys(this.def.display).forEach((k) => {
         const val = this.def.display![k]
         if (Array.isArray(val)) {
           // it's the 'properties' array
-          displayVals[k] = val.map(dm => this._processDisplayMapping(dm, claim))
+          display[k] = val.map((dm) =>
+            this._processDisplayMapping(dm, claim)
+          )
         } else {
           // one of 'title', 'subtitle', 'description'
-          displayVals[k] = this._processDisplayMapping(val, claim)
+          display[k] = this._processDisplayMapping(val, claim)
         }
       })
     }
 
     return {
-      name: this.def.name || this.def.display?.title || this.type,
-      schema: this.def.schema || '',
-      ...displayVals,
+      name: this.def.name || this.type,
+      schema: this.def.schema || "",
+      display: display,
       styles: {
         ...this.def.styles,
-      }
+      },
     }
   }
 
-  private _processDisplayMapping(dm: CredentialManifestDisplayMapping, claim: any) {
+  private _processDisplayMapping(
+    dm: CredentialManifestDisplayMapping,
+    claim: any
+  ) {
     let value
-    const key = claim ? dm.path?.find(p => {
-      // the paths are jsonpath
-      value = jsonpath(p, claim)
-      return value !== undefined
-    }) : undefined
+    const key = claim
+      ? dm.path?.find((p) => {
+          // the paths are jsonpath
+          value = jsonpath(p, claim)
+          return value !== undefined
+        })
+      : undefined
 
     return {
       label: dm.label,
       key,
-      value: value !== undefined ? value : dm.text
+      value: value !== undefined ? value : dm.text,
     }
   }
 
-  onCreateOffer(
-    offer: CredentialOffer,
-  ): CredentialOffer {
-    const credentialDefaults = { schema: '', name: offer.type }
+  onCreateOffer(offer: CredentialOffer): CredentialOffer {
+    const credentialDefaults = { schema: "", name: offer.type }
     return {
       ...offer,
       credential: {
         ...credentialDefaults,
         ...this.def,
         ...offer.credential,
-      }
+      },
     }
   }
 }

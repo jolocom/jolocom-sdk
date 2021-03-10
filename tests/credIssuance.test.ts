@@ -76,8 +76,8 @@ test('Credential Issuance interaction', async () => {
   const flow = bobInteraction.flow as CredentialOfferFlow
   const creds = flow.getOfferDisplay()
   expect(creds[0].name).toEqual(credDesc.name)
-  expect(creds[0].properties).toHaveLength(2)
-  const props = creds[0].properties
+  expect(creds[0].display.properties).toHaveLength(2)
+  const props = creds[0].display.properties
   expect(props && props[0].label).toEqual(credDesc.claimSchema.test.title)
 
   const bobResponse = (
