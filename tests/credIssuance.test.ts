@@ -29,17 +29,56 @@ test('Credential Issuance interaction', async () => {
     Promise.resolve(alice.idw.didDocument.toJSON()),
   )
 
+  const credDesc = {
+    schema: 'https://schema.org/example',
+    name: 'Test Credential',
+    claimSchema: {
+      test: { type: 'string', title: 'Test Name'  },
+      testStatus: {
+        type: 'boolean',
+        title: 'Test Status',
+        description: "Whether the test was successful"
+      },
+    }
+  }
+
+  const jsonSchemaToDisplayMappings = (schema: any) => {
+    const props = schema && schema.properties || schema
+    return Object.keys(props).map(key => {
+      const subSchema = props[key]
+      return {
+        label: subSchema.title,
+        path: [`$.${key}`],
+        ...(subSchema.description !== undefined && { text: subSchema.description })
+      }
+    })
+  }
+
   const aliceCredOffer = await alice.credOfferToken({
     callbackURL: 'nowhere',
     offeredCredentials: [
       {
         type: claimsMetadata.name.type[1],
+        credential: {
+          schema: credDesc.schema,
+          name: credDesc.name,
+          display: {
+            properties: jsonSchemaToDisplayMappings(credDesc.claimSchema)
+          }
+        }
       },
     ],
   })
 
   const bobInteraction = await bob.processJWT(aliceCredOffer.encode())
   expect(() => bobInteraction.transportAPI).not.toThrow()
+
+  const flow = bobInteraction.flow as CredentialOfferFlow
+  const creds = flow.getOfferDisplay()
+  expect(creds[0].name).toEqual(credDesc.name)
+  expect(creds[0].display.properties).toHaveLength(2)
+  const props = creds[0].display.properties
+  expect(props && props[0].label).toEqual(credDesc.claimSchema.test.title)
 
   const bobResponse = (
     await bobInteraction.createCredentialOfferResponseToken([

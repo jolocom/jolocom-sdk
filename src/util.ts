@@ -40,3 +40,49 @@ export async function generateSecureRandomBytes(
     })
   })
 }
+
+/**
+ * Simple implementation of jsonpath that only supports very direct addressing
+ * This takes a path p and and obj and returns the nested value denoted by the
+ * path
+ *
+ * Example:
+ * let obj = { some: { properties: ['a', 'b'] } }
+ * jsonpath('$.some.properties.0', obj) === 'a'
+ * jsonpath("$['some']['properties'][1]", obj) === 'b'
+ * jsonpath("$.some", obj) === obj.some
+ *
+ * @param p - a path into the object, as in the example
+ * @param obj - an object or array
+ */
+export const jsonpath = function simpleJsonPath(p: string, obj: object | any[]): any {
+  let trimmedP = p.trim()
+  if (trimmedP[0] != '$') return
+
+  let frags: string[]
+  if (trimmedP[1] === '.') {
+    // remove the beginning '$.' and split on '.'
+    frags = trimmedP.substring(2).split('.')
+  } else if (trimmedP[1] === '[') {
+    // remove the beginning '$' and replace separating '][' with ','
+    trimmedP = trimmedP.substring(1).replace('][', ',')
+    // result should look like a json list ['some',2]
+    frags = JSON.parse(trimmedP)
+  } else {
+    return
+  }
+
+  // go through the object key path and reduce to desired value
+  return frags.reduce((obj, k) => {
+    if (!obj) return
+    if (Array.isArray(obj)) {
+      try {
+        return obj[parseInt(k)]
+      } catch {
+        return
+      }
+    } else if (typeof obj === 'object') {
+      return obj[k]
+    }
+  }, obj)
+}

@@ -1,9 +1,10 @@
 import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credentialOfferRequest'
 import { CredentialOfferResponse } from 'jolocom-lib/js/interactionTokens/credentialOfferResponse'
 import { CredentialsReceive } from 'jolocom-lib/js/interactionTokens/credentialsReceive'
-import { InteractionType, CredentialOfferResponseSelection } from 'jolocom-lib/js/interactionTokens/types'
+import { InteractionType, CredentialOfferResponseSelection, CredentialDefinition } from '@jolocom/protocol-ts'
 import { JolocomLib } from 'jolocom-lib'
 import { last } from 'ramda'
+import { CredentialType } from '../credentials'
 import { Flow } from './flow'
 import { Interaction } from './interaction'
 import { CredentialOfferFlowState, IssuanceResult, FlowType } from './types'
@@ -159,6 +160,14 @@ export class CredentialOfferFlow extends Flow<
         signedCredential: cred,
         validationErrors,
       }
+    })
+  }
+
+  public getOfferDisplay() {
+    return this.state.offerSummary.map((oc, idx) => {
+      const claim = this.state.issued[idx]?.claim
+      const credType = new CredentialType(oc.type, oc.credential || {} as CredentialDefinition)
+      return credType.display(claim)
     })
   }
 }

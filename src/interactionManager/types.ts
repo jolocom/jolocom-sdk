@@ -1,7 +1,8 @@
 import {
   CredentialOffer,
   CredentialOfferResponseSelection,
-} from 'jolocom-lib/js/interactionTokens/interactionTokens.types'
+} from '@jolocom/protocol-ts'
+
 import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
 import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRequest'
 import { CredentialResponse } from 'jolocom-lib/js/interactionTokens/credentialResponse'
