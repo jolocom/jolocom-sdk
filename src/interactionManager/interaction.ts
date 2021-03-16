@@ -658,8 +658,10 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     return Promise.all(
       issued
         .filter((cred, i) => credentialsValidity[i])
-        .map(async cred =>
-          this.ctx.ctx.storage.store.verifiableCredential(cred),
+        .map(async cred => {
+          this.ctx.ctx.storage.store.verifiableCredential(cred)
+          return cred
+        }
         ),
     )
   }
