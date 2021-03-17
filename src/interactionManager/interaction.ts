@@ -659,7 +659,7 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
       issued
         .filter((cred, i) => credentialsValidity[i])
         .map(async cred => {
-          this.ctx.ctx.storage.store.verifiableCredential(cred)
+          await this.ctx.ctx.storage.store.verifiableCredential(cred)
           return cred
         }
         ),
