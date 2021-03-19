@@ -13,6 +13,7 @@ export interface DisplayVal {
 }
 
 export interface CredentialDisplay {
+  type: string
   name: string
   schema: string
   styles: CredentialDefinition["styles"]
@@ -55,6 +56,7 @@ export class CredentialType {
     }
 
     return {
+      type: this.type,
       name: this.def.name || this.type,
       schema: this.def.schema || "",
       display: display,
