@@ -670,4 +670,8 @@ export class Agent {
     const split = this.idw.did.split(":")
     return await this.storage.eventDB.read(split[2])
   }
+
+  public async deleteIdentityData() {
+    await this.sdk.deleteIdentityData(this.idw.did)
+  }
 }

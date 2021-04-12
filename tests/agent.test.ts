@@ -198,6 +198,57 @@ describe('findInteraction', () => {
   // need proper sorting!)
 })
 
+describe('Delete identity', () => {
+  it('deletes the agent identity, credentials, and interaction tokens', async () => {
+    let creds = [{ type: 'dummy' }]
+
+    const credOffer = await alice.credOfferToken({
+      callbackURL: '',
+      offeredCredentials: creds
+    })
+    const bobInterxn = await bob.processJWT(credOffer.encode())
+    const bobResponse = await bobInterxn.createCredentialOfferResponseToken(creds)
+    await bob.processJWT(bobResponse)
+    const aliceInteraction = await alice.processJWT(bobResponse)
+
+    const aliceIssuance = await aliceInteraction.createCredentialReceiveToken([
+      await alice.credentials.issue({
+        metadata: {
+          type: ['VerifiableCredential', creds[0].type],
+          name: creds[0].type,
+          context: []
+        },
+        subject: bob.idw.did,
+        claim: {
+          givenName: 'Bob',
+          familyName: 'Agent',
+        },
+      }),
+    ])
+
+    const bobRecieving = await bob.processJWT(aliceIssuance)
+
+    let interxns = await alice.sdk.storage.get.interactionIds()
+    expect(interxns).toHaveLength(1)
+    const bobsFlow = bobRecieving.flow as CredentialOfferFlow
+    expect(bobsFlow.state.credentialsAllValid).toBeTruthy()
+    await bobInterxn.storeSelectedCredentials()
+
+    await expect(bob.credentials.query()).resolves.toHaveLength(1)
+    await expect(
+      bob.sdk.storage.get.identity(bob.idw.did),
+    ).resolves.toBeDefined()
+    await expect(bob.sdk.storage.get.interactionIds()).resolves.toHaveLength(1)
+
+    await bob.deleteIdentityData()
+    await expect(bob.credentials.query()).resolves.toHaveLength(0)
+    await expect(
+      bob.sdk.storage.get.identity(bob.idw.did),
+    ).resolves.toBeUndefined()
+    await expect(bob.sdk.storage.get.interactionIds()).resolves.toHaveLength(0)
+  })
+})
+
 describe('Query Credentials', () => {
   it('by issuer', async () => {
     let creds = [{ type: 'dummy' }, { type: 'anotherdummy' }]

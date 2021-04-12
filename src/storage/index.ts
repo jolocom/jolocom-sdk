@@ -101,6 +101,11 @@ export interface IStorageGet {
 
 export interface IStorageDelete {
   verifiableCredential(id: string): Promise<void>
+  identity(did: string): Promise<void>
+  encryptedWallet(did: string): Promise<void>
+
+  verifiableCredentials(query: CredentialQuery): Promise<void>
+  interactions(attrs?: InteractionTokenQuery): Promise<void>
 }
 
 export interface IStorage {

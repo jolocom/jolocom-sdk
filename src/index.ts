@@ -2,7 +2,7 @@ import { SoftwareKeyProvider } from 'jolocom-lib'
 import { SDKError, ErrorCode } from './errors'
 export { SDKError, ErrorCode }
 
-import { IStorage, IPasswordStore } from './storage'
+import { IStorage, IPasswordStore, InteractionQueryAttrs } from './storage'
 export { NaivePasswordStore } from './storage'
 export { JolocomLib } from 'jolocom-lib'
 export { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'
@@ -288,5 +288,21 @@ export class JolocomSDK {
       timestamp: Date.now(),
     })
     await this.storage.store.identity(id)
+  }
+
+  public async deleteIdentityData(did: string): Promise<void> {
+    let identity = await this.resolve(did)
+    await this.storage.delete.encryptedWallet(did)
+    await this.storage.delete.verifiableCredentials([
+      { subject: did },
+      { issuer: did },
+    ])
+    await this.storage.delete.identity(did)
+    let query: InteractionQueryAttrs[] = []
+    identity.publicKeySection.forEach((pk) => {
+      let keyId = `${did}${pk.id}`
+      query.push({ initiator: keyId }, { responder: keyId })
+    })
+    await this.storage.delete.interactions(query)
   }
 }
