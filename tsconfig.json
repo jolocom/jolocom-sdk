@@ -69,6 +69,11 @@
     "suppressImplicitAnyIndexErrors": true,
     "noEmitHelpers": true,
     "skipLibCheck": true,
+
+    "paths": {
+      // NOTE: paths need to be reflected in jest.config.js and tests/tsconfig.json
+      "@jolocom/sdk": ["./src"]
+    }
   },
   "exclude": [],
   "include": ["./src/**/*"],
