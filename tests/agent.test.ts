@@ -2,6 +2,7 @@ import { destroyAgent, createAgent, meetAgent } from './util'
 import { Agent, FlowType } from '../src'
 import { AuthenticationFlow } from '../src/interactionManager/authenticationFlow'
 import { AuthorizationFlow } from '../src/interactionManager/authorizationFlow'
+import { CredentialOfferFlow } from '../src/interactionManager/credentialOfferFlow'
 
 const conn1Name = 'agentTest1'
 const conn2Name = 'agentTest2'
@@ -195,4 +196,83 @@ describe('findInteraction', () => {
   // TODO
   // test findInteraction working with completed credOffer (multiple tokens that
   // need proper sorting!)
+})
+
+describe('Query Credentials', () => {
+  it('by issuer', async () => {
+    let creds = [{ type: 'dummy' }, { type: 'anotherdummy' }]
+
+    const credOffer = await alice.credOfferToken({
+      callbackURL: '',
+      offeredCredentials: creds,
+    })
+    const bobInterxn = await bob.processJWT(credOffer.encode())
+    const bobResponse = await bobInterxn.createCredentialOfferResponseToken(
+      creds,
+    )
+    await bob.processJWT(bobResponse)
+    const aliceInteraction = await alice.processJWT(bobResponse)
+
+    const aliceIssuance = await aliceInteraction.createCredentialReceiveToken([
+      await alice.credentials.issue({
+        metadata: {
+          type: ['VerifiableCredential', creds[0].type],
+          name: creds[0].type,
+          context: [],
+        },
+        subject: bob.idw.did,
+        claim: {
+          givenName: 'Bob',
+          familyName: 'Agent',
+        },
+      }),
+    ])
+
+    const bobRecieving = await bob.processJWT(aliceIssuance)
+
+    let interxns = await alice.sdk.storage.get.interactionIds()
+    expect(interxns).toHaveLength(1)
+    const bobsFlow = bobRecieving.flow as CredentialOfferFlow
+    expect(bobsFlow.state.credentialsAllValid).toBeTruthy()
+    await bobInterxn.storeSelectedCredentials()
+
+    await bob.credentials.issue({
+      metadata: {
+        type: ['VerifiableCredential', creds[1].type],
+        name: creds[0].type,
+        context: [],
+      },
+      subject: bob.idw.did,
+      claim: {
+        givenName: 'Bobby',
+        familyName: 'Agent',
+      },
+    })
+
+    await expect(
+      bob.credentials.query({ issuer: alice.idw.did }),
+    ).resolves.toHaveLength(1)
+    await expect(
+      bob.credentials.query({ issuer: bob.idw.did }),
+    ).resolves.toHaveLength(1)
+    await expect(
+      bob.credentials.query({ subject: bob.idw.did }),
+    ).resolves.toHaveLength(2)
+
+    await expect(
+      bob.credentials.query({ type: ['VerifiableCredential', creds[0].type] }),
+    ).resolves.toHaveLength(1)
+    await expect(
+      bob.credentials.query({ type: ['VerifiableCredential', 'notherelol'] }),
+    ).resolves.toHaveLength(0)
+
+    /**
+     * TODO: not supported on this API yet
+    await expect(bob.credentials.query({ types: [['VerifiableCredential', creds[1].type]] })).resolves.toHaveLength(1)
+
+    await expect(bob.credentials.query({ claim: { givenName: '' } })).resolves.toHaveLength(1)
+
+    await expect(bob.credentials.query({ claim: { somethingelse: '' } })).resolves.toHaveLength(0)
+    */
+  })
 })

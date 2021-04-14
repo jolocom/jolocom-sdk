@@ -12,7 +12,7 @@
     "typeorm": "ts-node -O '{\"module\": \"commonjs\"}' -r ./bin/repl.ts node_modules/.bin/typeorm",
     "lint": "eslint --ext .ts --ext .tsx .",
     "format": "yarn lint --fix",
-    "test": "node --async-stack-traces node_modules/.bin/jest --coverage --collectCoverageFrom=src/**/*.ts --coverageDirectory=coverage",
+    "test": "jest --coverage --collectCoverageFrom=src/**/*.ts --coverageDirectory=coverage",
     "docs": "./bin/build_docs.sh",
     "docs:serve": "./bin/build_docs.sh serve"
   },
@@ -25,7 +25,7 @@
     "@babel/preset-typescript": "^7.10.4",
     "@babel/runtime": "^7.11.2",
     "@jolocom/local-resolver-registrar": "^1.0.1",
-    "@jolocom/sdk-storage-typeorm": "^4.1.0",
+    "@jolocom/sdk-storage-typeorm": "^4.2.0",
     "@types/jest": "^26.0.10",
     "@types/node": "^13.9.8",
     "@types/node-fetch": "^2.5.5",
