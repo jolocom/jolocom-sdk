@@ -58,12 +58,23 @@ export interface IStorageStore {
   interactionToken(token: JSONWebToken<any>): Promise<void>
 }
 
-export interface InteractionTokenAttrs {
+export interface InteractionTokenQueryAttrs {
   nonce?: string
   type?: string
   issuer?: string
 }
-export type InteractionTokenQuery = InteractionTokenAttrs | InteractionTokenAttrs[]
+export type InteractionTokenQuery =
+  | InteractionTokenQueryAttrs
+  | InteractionTokenQueryAttrs[]
+
+export interface InteractionQueryAttrs {
+  id?: string
+  type?: string
+  types?: string[]
+  initiator?: string
+  responder?: string
+}
+export type InteractionQuery = InteractionQueryAttrs | InteractionQueryAttrs[]
 
 export interface IStorageGet {
   settingsObject(): Promise<{ [key: string]: any }>
@@ -83,7 +94,7 @@ export interface IStorageGet {
     options?: QueryOptions,
   ): Promise<Array<JSONWebToken<any>>>
   interactionIds(
-    query?: InteractionTokenQuery,
+    query?: InteractionQuery,
     options?: QueryOptions,
   ): Promise<Array<string>>
 }

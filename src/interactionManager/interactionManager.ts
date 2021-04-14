@@ -96,7 +96,7 @@ export class InteractionManager {
    * @param reverse - if true, return the list in reverse storage order
    */
   public async listInteractions<T>(opts?: {
-    flows?: Array<FlowType | { firstMessageType: string }>,
+    flows?: Array<FlowType | { firstMessageType: string, type: string }>,
     take?: number,
     skip?: number,
     reverse?: boolean
@@ -107,7 +107,7 @@ export class InteractionManager {
       ...(opts.reverse && { order: { id: 'DESC' as 'DESC' } })
     }
     const attrs = opts && opts.flows && opts.flows.map(f => ({
-      type: typeof f === "string" ? firstMessageForFlowType[f] : f.firstMessageType
+      type: typeof f === "string" ? f : f.type
     }))
     const ids = await this.ctx.storage.get.interactionIds(attrs, queryOpts)
     return Promise.all(ids.map((id: string) => this.getInteraction(id)))
