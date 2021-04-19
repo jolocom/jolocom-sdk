@@ -16,7 +16,7 @@ export interface EncryptedWalletAttributes {
   timestamp: number
 }
 
-export interface FindOptions {
+export interface QueryOptions {
   skip?: number
   take?: number
   order?: { [k: string]: 'ASC' | 'DESC' }
@@ -50,10 +50,10 @@ export interface InteractionTokenAttrs {
 export interface IStorageGet {
   settingsObject(): Promise<{ [key: string]: any }>
   setting(key: string): Promise<any>
-  verifiableCredential(query?: object, findOptions?: FindOptions): Promise<SignedCredential[]>
+  verifiableCredential(query?: object, options?: QueryOptions): Promise<SignedCredential[]>
   // FIXME types
   attributesByType(type: string[]): Promise<{ type: string[]; results: any[] }>
-  vCredentialsByAttributeValue(attribute: string, findOptions?: FindOptions): Promise<SignedCredential[]>
+  vCredentialsByAttributeValue(attribute: string, options?: QueryOptions): Promise<SignedCredential[]>
   encryptedWallet(id?: string): Promise<EncryptedWalletAttributes | null>
   credentialMetadata(
     credential: SignedCredential,
@@ -62,11 +62,11 @@ export interface IStorageGet {
   identity(did: string): Promise<Identity | undefined>
   interactionTokens(
     attrs?: InteractionTokenAttrs,
-    findOptions?: FindOptions,
+    options?: QueryOptions,
   ): Promise<Array<JSONWebToken<any>>>
   interactionIds(
     attrs?: InteractionTokenAttrs | InteractionTokenAttrs[],
-    findOptions?: FindOptions,
+    options?: QueryOptions,
   ): Promise<Array<string>>
 }
 

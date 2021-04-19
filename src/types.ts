@@ -1,5 +1,6 @@
 import { PublicProfileClaimMetadata } from '@jolocom/protocol-ts'
 import { CredentialOfferRenderInfo, CredentialOfferMetadata } from 'jolocom-lib/js/interactionTokens/types'
+import { QueryOptions } from './storage'
 
 /**
  * @dev Simply using all claims required by the public profile
@@ -81,4 +82,12 @@ export enum ChannelTransportType {
  */
 export interface ChannelTransportDesc extends TransportDesc {
   type: ChannelTransportType
+}
+
+export interface ObjectKeeper<T, C, Q> {
+  get(id: string): Promise<T>
+  create?(args: C): Promise<T>
+  query?(attrs?: Q, options?: QueryOptions): Promise<T[]>
+  update?(obj: T): Promise<boolean>
+  delete?(attrs: Q): Promise<boolean>
 }
