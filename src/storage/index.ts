@@ -16,6 +16,23 @@ export interface EncryptedWalletAttributes {
   timestamp: number
 }
 
+export interface CredentialQueryAttrs {
+  id?: string
+  issuer?: string
+  subject?: string
+  type?: string[]
+
+  /*
+   * TODO
+  types?: string[][]
+  claim?: {
+    [key: string]: string | number | boolean | JsonLdObject | JsonLdObject[]
+  }
+  */
+}
+
+export type CredentialQuery = CredentialQueryAttrs | CredentialQueryAttrs[]
+
 export interface QueryOptions {
   skip?: number
   take?: number
@@ -46,14 +63,15 @@ export interface InteractionTokenAttrs {
   type?: string
   issuer?: string
 }
+export type InteractionTokenQuery = InteractionTokenAttrs | InteractionTokenAttrs[]
 
 export interface IStorageGet {
   settingsObject(): Promise<{ [key: string]: any }>
   setting(key: string): Promise<any>
-  verifiableCredential(query?: object, options?: QueryOptions): Promise<SignedCredential[]>
-  // FIXME types
-  attributesByType(type: string[]): Promise<{ type: string[]; results: any[] }>
-  vCredentialsByAttributeValue(attribute: string, options?: QueryOptions): Promise<SignedCredential[]>
+  verifiableCredential(
+    query?: CredentialQuery,
+    options?: QueryOptions,
+  ): Promise<SignedCredential[]>
   encryptedWallet(id?: string): Promise<EncryptedWalletAttributes | null>
   credentialMetadata(
     credential: SignedCredential,
@@ -61,11 +79,11 @@ export interface IStorageGet {
   publicProfile(did: string): Promise<IdentitySummary>
   identity(did: string): Promise<Identity | undefined>
   interactionTokens(
-    attrs?: InteractionTokenAttrs,
+    query?: InteractionTokenQuery,
     options?: QueryOptions,
   ): Promise<Array<JSONWebToken<any>>>
   interactionIds(
-    attrs?: InteractionTokenAttrs | InteractionTokenAttrs[],
+    query?: InteractionTokenQuery,
     options?: QueryOptions,
   ): Promise<Array<string>>
 }

@@ -1,7 +1,7 @@
 import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credentialOfferRequest'
 import { CredentialOfferResponse } from 'jolocom-lib/js/interactionTokens/credentialOfferResponse'
 import { CredentialsReceive } from 'jolocom-lib/js/interactionTokens/credentialsReceive'
-import { InteractionType, CredentialOfferResponseSelection, CredentialDefinition } from '@jolocom/protocol-ts'
+import { InteractionType, CredentialOfferResponseSelection } from '@jolocom/protocol-ts'
 import { JolocomLib } from 'jolocom-lib'
 import { last } from 'ramda'
 import { CredentialType } from '../credentials'
@@ -14,6 +14,8 @@ import {
   isCredentialReceive,
 } from './guards'
 import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
+import { CredentialMetadataSummary } from '../types'
+import { generateIdentitySummary } from '../util'
 
 export class CredentialOfferFlow extends Flow<
   CredentialOfferRequest | CredentialOfferResponse | CredentialsReceive
@@ -164,10 +166,25 @@ export class CredentialOfferFlow extends Flow<
   }
 
   public getOfferDisplay() {
+    const metadatas = this.getOfferedCredentialMetadata()
     return this.state.offerSummary.map((oc, idx) => {
       const claim = this.state.issued[idx]?.claim
-      const credType = new CredentialType(oc.type, oc.credential || {} as CredentialDefinition)
+      // NOTE: currently CredentialOffer assumes a fixed value of the type array
+      const fullType = ['VerifiableCredential', oc.type]
+      const credType = new CredentialType(fullType, metadatas[oc.type])
       return credType.display(claim)
     })
+  }
+
+  public getOfferedCredentialMetadata(): Record<string, CredentialMetadataSummary> {
+    const issuer = generateIdentitySummary(this.ctx.participants.requester!)
+    const metadatas = {}
+    this.state.offerSummary.forEach(metadata => {
+      metadatas[metadata.type] = {
+        ...metadata,
+        issuer,
+      }
+    })
+    return metadatas
   }
 }

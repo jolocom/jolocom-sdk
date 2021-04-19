@@ -30,16 +30,16 @@ import {
   ICredentialRequestAttrs,
   CredentialOfferRequestAttrs,
   ICredentialsReceiveAttrs,
+  BaseMetadata,
+  ISignedCredCreationArgs,
 } from '@jolocom/protocol-ts'
-import { BaseMetadata } from '@jolocom/protocol-ts'
-import { ISignedCredCreationArgs } from 'jolocom-lib/js/credentials/signedCredential/types'
 import { Flow } from './interactionManager/flow'
 import { Identity } from 'jolocom-lib/js/identity/identity'
 import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRequest'
 import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credentialOfferRequest'
 import { CredentialsReceive } from 'jolocom-lib/js/interactionTokens/credentialsReceive'
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
-import { CredentialType } from './credentials'
+import { CredentialIssuer } from './credentials'
 
 /**
  * The `Agent` class mainly provides an abstraction around the {@link
@@ -81,6 +81,8 @@ export class Agent {
   public resolver: IResolver
   public storage: IStorage
 
+  public credentials: CredentialIssuer
+
   public constructor({
     sdk,
     passwordStore,
@@ -96,6 +98,9 @@ export class Agent {
     this.resolve = this.sdk.resolve.bind(this.sdk)
     this.resolver = this.sdk.resolver
     this.storage = this.sdk.storage
+    this.credentials = new CredentialIssuer(this, () => {
+      return { subject: this.identityWallet.did }
+    })
   }
 
   /**
@@ -518,10 +523,19 @@ export class Agent {
           ...oc.issuer
         }
         if (oc.credential) {
-          const credType = new CredentialType(oc.type, oc.credential)
-          oc = credType.onCreateOffer(oc)
+          // NOTE: currently CredentialOffer assumes a fixed value of the type array
+          const credentialDefaults = { schema: '', name: oc.type }
+          return {
+            ...oc,
+            credential: {
+              ...credentialDefaults,
+              ...oc.credential,
+              ...oc.credential,
+            },
+          }
+        } else {
+          return oc
         }
-        return oc
       }),
     }, await this.passwordStore.getPassword())
 
@@ -637,14 +651,12 @@ export class Agent {
    * @param credParams - credential attributes
    * @returns SignedCredential instance
    * @category Credential Management
+   * @deprecated
    */
   public async signedCredential<T extends BaseMetadata>(
     credParams: ISignedCredCreationArgs<T>,
   ) {
-    return await this.idw.create.signedCredential(
-      credParams,
-      await this.passwordStore.getPassword(),
-    )
+    return this.credentials.issue(credParams)
   }
 
   /**

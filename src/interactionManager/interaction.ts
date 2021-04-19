@@ -60,6 +60,7 @@ import { generateIdentitySummary } from '../util'
 import { last } from 'ramda'
 import { TransportAPI, TransportDesc, InteractionTransportType } from '../types'
 import { Transportable } from '../transports'
+import { CredentialQuery } from 'src/storage'
 
 export const flows = [
   AuthenticationFlow,
@@ -608,17 +609,13 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     }
   }
 
-  public async getAttributesByType(type: string[]) {
-    return this.ctx.ctx.storage.get.attributesByType(type)
-  }
-
   public async getStoredCredentialById(id: string) {
     return this.ctx.ctx.storage.get.verifiableCredential({
       id,
     })
   }
 
-  public async getVerifiableCredential(query?: object) {
+  public async getVerifiableCredential(query?: CredentialQuery) {
     return this.ctx.ctx.storage.get.verifiableCredential(query)
   }
 
@@ -671,35 +668,17 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
    */
   public async storeCredentialMetadata() {
     this.checkFlow(FlowType.CredentialOffer)
-
-    const { offerSummary, selection, credentialsValidity } = this.flow
-      .state as CredentialOfferFlowState
-
-    if (!selection.length) {
-      throw new SDKError(ErrorCode.SaveCredentialMetadataFailed)
+    const flow = <CredentialOfferFlow><unknown>this.flow
+    try {
+      const metadatas = Object.values(await flow.getOfferedCredentialMetadata())
+      return Promise.all(
+        metadatas.map(metadata =>
+          this.ctx.ctx.credentials.storeCredentialType(metadata)
+        )
+      )
+    } catch(err) {
+      console.error("storeCredentialMetadata failed", err)
+      throw new SDKError(ErrorCode.SaveCredentialMetadataFailed, err)
     }
-
-    const issuer = generateIdentitySummary(this.participants.requester!)
-
-    return Promise.all(
-      selection.map(({ type }, i) => {
-        const metadata = offerSummary.find(metadata => metadata.type === type)
-
-        if (metadata && credentialsValidity[i]) {
-          return this.ctx.ctx.storage.store.credentialMetadata({
-            ...metadata,
-            issuer,
-          })
-        }
-
-        return
-      }),
-    )
-  }
-
-  public async storeIssuerProfile() {
-    return this.ctx.ctx.storage.store.issuerProfile(
-      generateIdentitySummary(this.participants.requester!),
-    )
   }
 }

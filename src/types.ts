@@ -1,4 +1,4 @@
-import { PublicProfileClaimMetadata } from '@jolocom/protocol-ts'
+import { PublicProfileClaimMetadata, CredentialDefinition } from '@jolocom/protocol-ts'
 import { CredentialOfferRenderInfo, CredentialOfferMetadata } from 'jolocom-lib/js/interactionTokens/types'
 import { QueryOptions } from './storage'
 
@@ -25,6 +25,7 @@ export interface CredentialMetadata {
   type: string
   renderInfo?: CredentialOfferRenderInfo
   metadata?: CredentialOfferMetadata
+  credential?: CredentialDefinition
 }
 
 /**

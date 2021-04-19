@@ -13,6 +13,7 @@ import { IResolver } from 'jolocom-lib/js/didMethods/types'
 import { Identity } from 'jolocom-lib/js/identity/identity'
 import { Agent } from './agent'
 import { TransportKeeper } from './transports'
+import { CredentialKeeper } from './credentials'
 export { Agent } from './agent'
 
 export * from './types'
@@ -40,6 +41,7 @@ export class JolocomSDK {
   public didMethods = new DidMethodKeeper()
   public transports = new TransportKeeper()
   public storage: IStorage
+  public credentials: CredentialKeeper
 
   /**
    * The toplevel resolver which simply invokes {@link resolve}
@@ -58,6 +60,8 @@ export class JolocomSDK {
     // FIXME the prefix bit is required just to match IResolver
     // but does anything need it at that level?
     this.resolver = { prefix: '', resolve: this.resolve.bind(this) }
+
+    this.credentials = new CredentialKeeper(this.storage, this.resolver)
 
     // if we are running on NodeJS, then autoconfig some things if possible
     if (process && process.version) this._autoconfigForNodeJS()
@@ -98,7 +102,7 @@ export class JolocomSDK {
         .getForDid(did)
         .resolver.resolve(did)
 
-      await this.storage.store.identity(resolved).catch(err => {
+      await this.storage.store.identity(resolved).catch((err) => {
         console.error('Failed to store Identity after resolving', err)
       })
 

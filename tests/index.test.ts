@@ -1,6 +1,6 @@
 import { destroyAgent, getSdk } from "./util"
-import { JolocomSDK } from "src"
-import { CredentialOfferFlowState } from "src/interactionManager/types"
+import { JolocomSDK } from "../src"
+import { CredentialOfferFlowState } from "../src/interactionManager/types"
 
 const connName = "test"
 
