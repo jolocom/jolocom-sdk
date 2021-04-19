@@ -75,8 +75,10 @@ export const flows = [
 ]
 
 const interactionFlowForMessage = {}
+const interactionFlowForFlowType = {}
 flows.forEach(f => {
   interactionFlowForMessage[f.firstMessageType] = f
+  interactionFlowForFlowType[f.type] = f
 })
 
 /**
@@ -95,6 +97,17 @@ flows.forEach(f => {
  *
  */
 export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable {
+  public static getTypes() {
+    // @ts-ignore
+    return Object.values(interactionFlowForMessage).map(v => v.type)
+  }
+  public static getRequestTokenType(interxnType: string) {
+    return interactionFlowForFlowType[interxnType]?.firstMessageType
+  }
+  public static getFlowForType(interxnType: string) {
+    return interactionFlowForFlowType[interxnType]
+  }
+
   private messages: Array<JSONWebToken<any>> = []
 
   /**
