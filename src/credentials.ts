@@ -1,17 +1,17 @@
 import {
   CredentialDefinition,
-  CredentialOffer,
   CredentialManifestDisplayMapping,
   ClaimEntry,
   BaseMetadata,
   ISignedCredCreationArgs,
   ISignedCredentialAttrs,
+  CredentialRenderTypes,
 } from '@jolocom/protocol-ts'
 import { jsonpath } from './util'
 import { QueryOptions, IStorage, CredentialQuery } from './storage'
 import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
 import { Agent } from './agent'
-import { ObjectKeeper } from './types'
+import { ObjectKeeper, CredentialMetadataSummary, IdentitySummary } from './types'
 import { IResolver } from 'jolocom-lib/js/didMethods/types'
 import { validateJsonLd } from 'jolocom-lib/js/linkedData'
 
@@ -22,7 +22,8 @@ export interface DisplayVal {
 }
 
 export interface CredentialDisplay {
-  type: string
+  type: string[],
+  issuerProfile?: IdentitySummary,
   name: string
   schema: string
   styles: CredentialDefinition['styles']
@@ -36,12 +37,18 @@ export interface CredentialDisplay {
 
 // TODO actually move into jolocom-lib??
 export class CredentialType {
-  type: string
-  def: CredentialDefinition
+  public readonly type: string[]
+  public readonly renderAs: CredentialRenderTypes
+  public readonly issuerProfile?: IdentitySummary
+  public readonly definition: CredentialDefinition
 
-  constructor(type: string, def: CredentialDefinition) {
+  constructor(type: string[], metadata?: CredentialMetadataSummary) {
     this.type = type
-    this.def = def
+    this.definition = metadata?.credential || {} as CredentialDefinition
+    // NOTE: support for deprecated 'renderInfo'
+    this.renderAs = metadata?.renderInfo?.renderAs || CredentialRenderTypes.claim
+    // TODO add check against schema in definition
+    this.issuerProfile = metadata?.issuer
   }
 
   display(claim: ClaimEntry): CredentialDisplay {
@@ -49,9 +56,9 @@ export class CredentialType {
       properties: [],
     }
 
-    if (this.def.display) {
-      Object.keys(this.def.display).forEach((k) => {
-        const val = this.def.display![k]
+    if (this.definition.display) {
+      Object.keys(this.definition.display).forEach((k) => {
+        const val = this.definition.display![k]
         if (Array.isArray(val)) {
           // it's the 'properties' array
           display[k] = val.map((dm) => this._processDisplayMapping(dm, claim))
@@ -64,11 +71,12 @@ export class CredentialType {
 
     return {
       type: this.type,
-      name: this.def.name || this.type,
-      schema: this.def.schema || '',
+      issuerProfile: this.issuerProfile,
+      name: this.definition.name || this.type.join(", "),
+      schema: this.definition.schema || '',
       display: display,
       styles: {
-        ...this.def.styles,
+        ...this.definition.styles,
       },
     }
   }
@@ -90,18 +98,6 @@ export class CredentialType {
       label: dm.label,
       key,
       value: value !== undefined ? value : dm.text,
-    }
-  }
-
-  onCreateOffer(offer: CredentialOffer): CredentialOffer {
-    const credentialDefaults = { schema: '', name: offer.type }
-    return {
-      ...offer,
-      credential: {
-        ...credentialDefaults,
-        ...this.def,
-        ...offer.credential,
-      },
     }
   }
 }
@@ -158,12 +154,26 @@ export class CredentialKeeper
     return true
   }
 
+  async storeCredentialType(metadata: CredentialMetadataSummary) {
+    await this.storage.store.credentialMetadata(metadata)
+    await this.storage.store.issuerProfile(metadata.issuer)
+  }
+
   async getCredentialType(cred: SignedCredential): Promise<CredentialType> {
-    const vcType = cred.type[1]
     const metadata = await this.storage.get.credentialMetadata(cred)
+
+    if (!metadata.issuer) {
+      try {
+        metadata.issuer = await this.storage.get.publicProfile(cred.issuer)
+      } catch(err) {
+        console.error(`could not lookup issuer ${cred.issuer}`, err)
+        // pass
+      }
+    }
+
     return new CredentialType(
-      vcType,
-      metadata?.credential || ({} as CredentialDefinition),
+      cred.type,
+      metadata
     )
   }
 

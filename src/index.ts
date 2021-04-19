@@ -2,7 +2,7 @@ import { SoftwareKeyProvider } from 'jolocom-lib'
 import { SDKError, ErrorCode } from './errors'
 export { SDKError, ErrorCode }
 
-import { IStorage, IPasswordStore, InteractionQueryAttrs } from './storage'
+import { IStorage, IPasswordStore } from './storage'
 export { NaivePasswordStore } from './storage'
 export { JolocomLib } from 'jolocom-lib'
 export { JSONWebToken } from 'jolocom-lib/js/interactionTokens/JSONWebToken'

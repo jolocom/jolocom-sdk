@@ -39,7 +39,7 @@ import { CredentialRequest } from 'jolocom-lib/js/interactionTokens/credentialRe
 import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credentialOfferRequest'
 import { CredentialsReceive } from 'jolocom-lib/js/interactionTokens/credentialsReceive'
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
-import { CredentialType, CredentialIssuer } from './credentials'
+import { CredentialIssuer } from './credentials'
 
 /**
  * The `Agent` class mainly provides an abstraction around the {@link
@@ -523,10 +523,19 @@ export class Agent {
           ...oc.issuer
         }
         if (oc.credential) {
-          const credType = new CredentialType(oc.type, oc.credential)
-          oc = credType.onCreateOffer(oc)
+          // NOTE: currently CredentialOffer assumes a fixed value of the type array
+          const credentialDefaults = { schema: '', name: oc.type }
+          return {
+            ...oc,
+            credential: {
+              ...credentialDefaults,
+              ...oc.credential,
+              ...oc.credential,
+            },
+          }
+        } else {
+          return oc
         }
-        return oc
       }),
     }, await this.passwordStore.getPassword())
 
