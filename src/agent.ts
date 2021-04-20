@@ -40,7 +40,7 @@ import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credent
 import { CredentialsReceive } from 'jolocom-lib/js/interactionTokens/credentialsReceive'
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { CredentialIssuer } from './credentials'
-import { AgentExportOptions, IExportedAgent } from './backup'
+import { AgentExportOptions, IExportedAgent } from './types'
 
 /**
  * The `Agent` class mainly provides an abstraction around the {@link

@@ -1,4 +1,4 @@
-import { SoftwareKeyProvider } from 'jolocom-lib'
+import { SoftwareKeyProvider, JolocomLib } from 'jolocom-lib'
 import { SDKError, ErrorCode } from './errors'
 export { SDKError, ErrorCode }
 
@@ -14,6 +14,8 @@ import { Identity } from 'jolocom-lib/js/identity/identity'
 import { Agent } from './agent'
 import { TransportKeeper } from './transports'
 import { CredentialKeeper } from './credentials'
+import { AgentExportOptions, IExportedAgent, EXPORT_SCHEMA_VERSION, ExportedAgentData} from './types'
+import { getExportOptions } from './util'
 export { Agent } from './agent'
 
 export * from './types'
@@ -218,6 +220,86 @@ export class JolocomSDK {
   ): Promise<Agent> {
     const agent = this._makeAgent(passOrStore, didMethodName)
     await agent.loadFromMnemonic(mnemonic)
+    return agent
+  }
+
+  /**
+   * Export Agent as a serializable JSON object
+   *
+   * @param agent - the agent to export
+   * @param options - export options
+   *
+   * @category Agent
+   */
+  public async exportAgent(agent: Agent, options?: AgentExportOptions): Promise<IExportedAgent> {
+    options = getExportOptions(options)
+
+    let exagent: IExportedAgent = {
+      version: EXPORT_SCHEMA_VERSION,
+      did: agent.idw.did,
+      timestamp: Date.now(),
+      data: ''
+    }
+    const encryptedWalletInfo = await agent.storage.get.encryptedWallet(exagent.did)
+    const interxnTokens = await agent.storage.get.interactionTokens()
+    const exportedData: ExportedAgentData = {
+      encryptedWallet: encryptedWalletInfo?.encryptedWallet,
+    }
+
+    if (options.credentials) {
+      exportedData.credentials = await agent.credentials.export()
+      exportedData.credentialsMetadata = await agent.credentials.types.export()
+    }
+
+    if (options.interactions) {
+      exportedData.interactionTokens = interxnTokens.map(t => t.encode())
+    }
+
+    const agentData = Buffer.from(JSON.stringify(exportedData))
+    exagent.data = agentData.toString('base64')
+
+    return exagent
+  }
+
+
+  /**
+   * Import a previously exported Agent, adding its data to the database and
+   * loading it immediately
+   *
+   * @param exagent - the exported agent to export
+   * @param options - import options, including password
+   *
+   * @category Agent
+   */
+  public async importAgent(exagent: IExportedAgent, options?: AgentExportOptions): Promise<Agent> {
+    options = getExportOptions(options)
+    const agentData: ExportedAgentData = JSON.parse(Buffer.from(exagent.data, 'base64').toString())
+
+    if (!agentData.encryptedWallet) throw new SDKError(ErrorCode.NoWallet)
+    await this.storage.store.encryptedWallet({
+      id: exagent.did,
+      timestamp: exagent.timestamp,
+      encryptedWallet: agentData.encryptedWallet
+    })
+    const agent = await this.loadAgent(options.password, exagent.did)
+
+    // TODO: check for rejected imports
+    if (agentData.credentialsMetadata)
+      await agent.credentials.types.import(agentData.credentialsMetadata)
+    if (agentData.credentials)
+      await agent.credentials.import(agentData.credentials)
+    if (agentData.interactions) {
+      throw new Error('todo') // TODO
+    }
+    if (agentData.interactionTokens) {
+      // TODO add batch insert support on storage
+      await Promise.all(agentData.interactionTokens.map(jwt => {
+        const token = JolocomLib.parse.interactionToken.fromJWT(jwt)
+        return agent.storage.store.interactionToken(token)
+      }))
+      // TODO return rejected stuff?
+    }
+
     return agent
   }
 
