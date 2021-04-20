@@ -15,6 +15,7 @@ import { Agent } from './agent'
 import { ObjectKeeper, CredentialMetadataSummary, IdentitySummary } from './types'
 import { IResolver } from 'jolocom-lib/js/didMethods/types'
 import { validateJsonLd } from 'jolocom-lib/js/linkedData'
+import { SDKError, ErrorCode } from './errors'
 
 export interface DisplayVal {
   label?: string
@@ -203,7 +204,8 @@ export class CredentialKeeper
     ObjectKeeper<
       SignedCredential,
       ISignedCredCreationArgs<any>,
-      CredentialQuery
+      CredentialQuery,
+      ISignedCredentialAttrs
     > {
   protected storage: IStorage
   protected resolver: IResolver
@@ -242,6 +244,32 @@ export class CredentialKeeper
       ...attrs,
       ...filterVals,
     })
+  }
+
+  async export(query?: CredentialQuery, options?: QueryOptions): Promise<ISignedCredentialAttrs[]> {
+    const creds = await this.query(query, options)
+    //const credTypes = await Promise.all(creds.map(c => this.getCredentialType(c)))
+    //const metas = credTypes.map(credType => credType.summary())
+
+    // NOTE: reversing here to make imports reproduce the same table order
+    return creds.reverse().map(c => c.toJSON())
+  }
+
+  async import(data: ISignedCredentialAttrs[]): Promise<[ISignedCredentialAttrs, SDKError][]> {
+    const rejected: [ISignedCredentialAttrs, SDKError][]  = []
+    await Promise.all(data.map(async credJson => {
+      try {
+        const signer = await this.resolver.resolve(credJson.issuer)
+        const cred = await JolocomLib.parseAndValidate.signedCredential(credJson, signer)
+        await this.storage.store.verifiableCredential(cred)
+      } catch (err) {
+        console.error("credential import failed", err)
+        // TODO better error breakdown
+        err = err instanceof SDKError ? err : new SDKError(ErrorCode.Unknown, err)
+        rejected.push([credJson, err])
+      }
+    }))
+    return rejected
   }
 
   async delete(attrs?: CredentialQuery) {

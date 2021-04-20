@@ -40,6 +40,7 @@ import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credent
 import { CredentialsReceive } from 'jolocom-lib/js/interactionTokens/credentialsReceive'
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { CredentialIssuer } from './credentials'
+import { AgentExportOptions, IExportedAgent } from './backup'
 
 /**
  * The `Agent` class mainly provides an abstraction around the {@link
@@ -673,5 +674,10 @@ export class Agent {
 
   public async deleteIdentityData() {
     await this.sdk.deleteIdentityData(this.idw.did)
+  }
+
+
+  public async export(opts?: AgentExportOptions): Promise<IExportedAgent> {
+    return this.sdk.exportAgent(this, opts)
   }
 }
