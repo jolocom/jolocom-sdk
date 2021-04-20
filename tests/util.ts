@@ -3,6 +3,7 @@ import { createConnection, getConnection, ConnectionOptions } from 'typeorm'
 import { JolocomTypeormStorage } from '@jolocom/sdk-storage-typeorm'
 
 import { Agent, JolocomSDK, NaivePasswordStore } from '../src'
+import { CredentialOfferFlow } from '../src/interactionManager/credentialOfferFlow'
 
 const defaultAgentName = 'j'
 const defaultDidMethodName = 'jun'
@@ -60,4 +61,46 @@ export async function meetAgent(alice: Agent, bob: Agent, both = true) {
   await alice.didMethod.registrar.encounter(bobEL)
 
   if (both) await meetAgent(bob, alice, false)
+}
+
+export async function basicCredOffer(
+  issuer: Agent,
+  holder: Agent,
+  creds = [{ type: 'dummy' }, { type: 'anotherdummy' }]
+) {
+  const credOffer = await issuer.credOfferToken({
+    callbackURL: '',
+    offeredCredentials: creds,
+  })
+  const bobInterxn = await holder.processJWT(credOffer.encode())
+  const bobResponse = await bobInterxn.createCredentialOfferResponseToken(
+    creds,
+  )
+  await holder.processJWT(bobResponse)
+  const aliceInteraction = await issuer.processJWT(bobResponse)
+
+  const aliceIssuance = await aliceInteraction.createCredentialReceiveToken(
+    await Promise.all(creds.map(cred => {
+      return issuer.credentials.issue({
+        metadata: {
+          type: ['VerifiableCredential', cred.type],
+          name: cred.type,
+          context: [],
+        },
+        subject: holder.idw.did,
+        claim: {
+          givenName: 'Bob',
+          familyName: 'Agent',
+        },
+      })
+    }))
+  )
+
+  const bobRecieving = await holder.processJWT(aliceIssuance)
+
+  let interxns = await issuer.sdk.storage.get.interactionIds()
+  expect(interxns).toHaveLength(1)
+  const bobsFlow = bobRecieving.flow as CredentialOfferFlow
+  expect(bobsFlow.state.credentialsAllValid).toBeTruthy()
+  await bobInterxn.storeSelectedCredentials()
 }
