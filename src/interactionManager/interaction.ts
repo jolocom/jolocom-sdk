@@ -657,6 +657,7 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
    */
   public async storeSelectedCredentials() {
     this.checkFlow(FlowType.CredentialOffer)
+    await this.storeCredentialMetadata()
 
     const { issued, credentialsValidity } = this.flow
       .state as CredentialOfferFlowState
