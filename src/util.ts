@@ -3,6 +3,8 @@ import { randomBytes } from 'crypto'
 import {
   IdentitySummary,
   IssuerPublicProfileSummary,
+  AgentExportOptions,
+  DEFAULT_EXPORT_OPTIONS,
 } from './types'
 import { Identity } from 'jolocom-lib/js/identity/identity'
 
@@ -85,4 +87,11 @@ export const jsonpath = function simpleJsonPath(p: string, obj: object | any[]):
       return obj[k]
     }
   }, obj)
+}
+
+export const getExportOptions = (options?: AgentExportOptions) => {
+  return {
+    ...DEFAULT_EXPORT_OPTIONS,
+    ...options
+  }
 }
