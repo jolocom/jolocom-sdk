@@ -686,7 +686,7 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
       const metadatas = Object.values(await flow.getOfferedCredentialMetadata())
       return Promise.all(
         metadatas.map(metadata =>
-          this.ctx.ctx.credentials.storeCredentialType(metadata)
+          this.ctx.ctx.credentials.types.create(metadata)
         )
       )
     } catch(err) {
