@@ -162,7 +162,7 @@ export class CredentialKeeper
   async getCredentialType(cred: SignedCredential): Promise<CredentialType> {
     const metadata = await this.storage.get.credentialMetadata(cred)
 
-    if (!metadata.issuer) {
+    if (metadata.issuer) {
       try {
         metadata.issuer = await this.storage.get.publicProfile(cred.issuer)
       } catch(err) {
