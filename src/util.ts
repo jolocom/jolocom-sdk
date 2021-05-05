@@ -3,8 +3,8 @@ import { randomBytes } from 'crypto'
 import {
   IdentitySummary,
   IssuerPublicProfileSummary,
-  DeleteIdentityDataOptions,
-  DEFAULT_DELETE_DATA_OPTIONS,
+  DeleteAgentOptions,
+  DEFAULT_DELETE_AGENT_OPTIONS,
 } from './types'
 import { Identity } from 'jolocom-lib/js/identity/identity'
 
@@ -92,6 +92,6 @@ export const jsonpath = function simpleJsonPath(
   }, obj)
 }
 
-export const getDeleteIdentityDataOptions = (
-  options?: DeleteIdentityDataOptions,
-): DeleteIdentityDataOptions => ({ ...DEFAULT_DELETE_DATA_OPTIONS, ...options })
+export const getDeleteAgentOptions = (
+  options?: DeleteAgentOptions,
+): DeleteAgentOptions => ({ ...DEFAULT_DELETE_AGENT_OPTIONS, ...options })

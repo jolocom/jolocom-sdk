@@ -14,8 +14,8 @@ import { Identity } from 'jolocom-lib/js/identity/identity'
 import { Agent } from './agent'
 import { TransportKeeper } from './transports'
 import { CredentialKeeper } from './credentials'
-import { DeleteIdentityDataOptions } from './types'
-import { getDeleteIdentityDataOptions } from './util'
+import { DeleteAgentOptions } from './types'
+import { getDeleteAgentOptions } from './util'
 export { Agent } from './agent'
 
 export * from './types'
@@ -298,12 +298,12 @@ export class JolocomSDK {
    * @param did - Identity's DID
    * @param options - Delete options
    */
-  public async deleteIdentityData(
+  public async deleteAgent(
     did: string,
-    options?: DeleteIdentityDataOptions,
+    options?: DeleteAgentOptions,
   ): Promise<void> {
     // TODO: add settings
-    options = getDeleteIdentityDataOptions(options)
+    options = getDeleteAgentOptions(options)
 
     let identity = await this.resolve(did)
     if (options.encryptedWallet) await this.storage.delete.encryptedWallet(did)

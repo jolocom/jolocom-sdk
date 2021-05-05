@@ -102,7 +102,7 @@ export interface ObjectKeeper<T, C, Q> {
 /**
  * @category Delete
  */
-export interface DeleteIdentityDataOptions {
+export interface DeleteAgentOptions {
   encryptedWallet?: boolean
   identity?: boolean
   credentials?: boolean
@@ -112,7 +112,7 @@ export interface DeleteIdentityDataOptions {
 /**
  * @category Delete
  */
-export const DEFAULT_DELETE_DATA_OPTIONS: DeleteIdentityDataOptions = {
+export const DEFAULT_DELETE_AGENT_OPTIONS: DeleteAgentOptions = {
   encryptedWallet: true,
   identity: true,
   credentials: true,
