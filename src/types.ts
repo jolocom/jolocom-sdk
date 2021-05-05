@@ -109,6 +109,9 @@ export interface DeleteIdentityDataOptions {
   interactions?: boolean
 }
 
+/**
+ * @category Delete
+ */
 export const DEFAULT_DELETE_DATA_OPTIONS: DeleteIdentityDataOptions = {
   encryptedWallet: true,
   identity: true,
