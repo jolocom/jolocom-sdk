@@ -25,7 +25,10 @@ import {
   SigningRequest,
 } from './interactionManager/types'
 import { Interaction } from './interactionManager/interaction'
-import { ResolutionType, ResolutionRequest } from './interactionManager/resolutionFlow'
+import {
+  ResolutionType,
+  ResolutionRequest,
+} from './interactionManager/resolutionFlow'
 import {
   ICredentialRequestAttrs,
   CredentialOfferRequestAttrs,
@@ -40,6 +43,7 @@ import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credent
 import { CredentialsReceive } from 'jolocom-lib/js/interactionTokens/credentialsReceive'
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { CredentialIssuer } from './credentials'
+import { DeleteAgentOptions } from './types'
 
 /**
  * The `Agent` class mainly provides an abstraction around the {@link
@@ -330,12 +334,21 @@ export class Agent {
    *
    * @category Interaction Management
    */
-  public async processJWT(jwt: JSONWebToken<any> | string, transportAPI?: TransportAPI): Promise<Interaction> {
-    const token = typeof jwt === 'string' ? JolocomLib.parse.interactionToken.fromJWT(jwt) : jwt
+  public async processJWT(
+    jwt: JSONWebToken<any> | string,
+    transportAPI?: TransportAPI,
+  ): Promise<Interaction> {
+    const token =
+      typeof jwt === 'string'
+        ? JolocomLib.parse.interactionToken.fromJWT(jwt)
+        : jwt
     let interxn
 
     try {
-      interxn = await this.interactionManager.getInteraction(token.nonce, transportAPI)
+      interxn = await this.interactionManager.getInteraction(
+        token.nonce,
+        transportAPI,
+      )
     } catch (err) {
       if (err.message !== ErrorCode.NoSuchInteraction) throw err
     }
@@ -376,7 +389,9 @@ export class Agent {
    * @returns Promise<Interaction> the associated Interaction object
    * @category Interaction Management
    */
-  public async findInteraction<F extends Flow<any>>(inp: string | JSONWebToken<any>): Promise<Interaction<F>> {
+  public async findInteraction<F extends Flow<any>>(
+    inp: string | JSONWebToken<any>,
+  ): Promise<Interaction<F>> {
     let id
     if (typeof inp === 'string') {
       try {
@@ -514,30 +529,33 @@ export class Agent {
   public async credOfferToken(
     offer: CredentialOfferRequestAttrs,
   ): Promise<JSONWebToken<CredentialOfferRequest>> {
-    const token = await this.idw.create.interactionTokens.request.offer({
-      callbackURL: offer.callbackURL,
-      offeredCredentials: offer.offeredCredentials.map(oc => {
-        oc.issuer = {
-          id: this.idw.did,
-          // name: TODO get name from PublicProfile credential?
-          ...oc.issuer
-        }
-        if (oc.credential) {
-          // NOTE: currently CredentialOffer assumes a fixed value of the type array
-          const credentialDefaults = { schema: '', name: oc.type }
-          return {
-            ...oc,
-            credential: {
-              ...credentialDefaults,
-              ...oc.credential,
-              ...oc.credential,
-            },
+    const token = await this.idw.create.interactionTokens.request.offer(
+      {
+        callbackURL: offer.callbackURL,
+        offeredCredentials: offer.offeredCredentials.map(oc => {
+          oc.issuer = {
+            id: this.idw.did,
+            // name: TODO get name from PublicProfile credential?
+            ...oc.issuer,
           }
-        } else {
-          return oc
-        }
-      }),
-    }, await this.passwordStore.getPassword())
+          if (oc.credential) {
+            // NOTE: currently CredentialOffer assumes a fixed value of the type array
+            const credentialDefaults = { schema: '', name: oc.type }
+            return {
+              ...oc,
+              credential: {
+                ...credentialDefaults,
+                ...oc.credential,
+                ...oc.credential,
+              },
+            }
+          } else {
+            return oc
+          }
+        }),
+      },
+      await this.passwordStore.getPassword(),
+    )
 
     await this.interactionManager.start(token)
     return token
@@ -667,11 +685,11 @@ export class Agent {
    * @returns Control Proof string
    */
   public async getProofOfControlAuthority(): Promise<string> {
-    const split = this.idw.did.split(":")
+    const split = this.idw.did.split(':')
     return await this.storage.eventDB.read(split[2])
   }
 
-  public async deleteIdentityData() {
-    await this.sdk.deleteIdentityData(this.idw.did)
+  public async delete(options?: DeleteAgentOptions) {
+    await this.sdk.deleteAgent(this.idw.did, options)
   }
 }

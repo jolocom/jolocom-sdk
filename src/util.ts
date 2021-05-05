@@ -3,6 +3,8 @@ import { randomBytes } from 'crypto'
 import {
   IdentitySummary,
   IssuerPublicProfileSummary,
+  DeleteAgentOptions,
+  DEFAULT_DELETE_AGENT_OPTIONS,
 } from './types'
 import { Identity } from 'jolocom-lib/js/identity/identity'
 
@@ -55,7 +57,10 @@ export async function generateSecureRandomBytes(
  * @param p - a path into the object, as in the example
  * @param obj - an object or array
  */
-export const jsonpath = function simpleJsonPath(p: string, obj: object | any[]): any {
+export const jsonpath = function simpleJsonPath(
+  p: string,
+  obj: object | any[],
+): any {
   let trimmedP = p.trim()
   if (trimmedP[0] != '$') return
 
@@ -86,3 +91,7 @@ export const jsonpath = function simpleJsonPath(p: string, obj: object | any[]):
     }
   }, obj)
 }
+
+export const getDeleteAgentOptions = (
+  options?: DeleteAgentOptions,
+): DeleteAgentOptions => ({ ...DEFAULT_DELETE_AGENT_OPTIONS, ...options })
