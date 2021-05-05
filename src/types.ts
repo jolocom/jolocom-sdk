@@ -1,5 +1,12 @@
-import { PublicProfileClaimMetadata, CredentialDefinition, ISignedCredentialAttrs } from '@jolocom/protocol-ts'
-import { CredentialOfferRenderInfo, CredentialOfferMetadata } from 'jolocom-lib/js/interactionTokens/types'
+import {
+  PublicProfileClaimMetadata,
+  CredentialDefinition,
+  ISignedCredentialAttrs,
+} from '@jolocom/protocol-ts'
+import {
+  CredentialOfferRenderInfo,
+  CredentialOfferMetadata,
+} from 'jolocom-lib/js/interactionTokens/types'
 import { QueryOptions } from './storage'
 import { SDKError } from './errors'
 
@@ -144,4 +151,24 @@ export interface IExportedAgent {
   did: string            // exported DID
   timestamp: number      // time of export
   data: string           // base64 encoded data
+}
+
+/**
+ * @category Delete
+ */
+export interface DeleteAgentOptions {
+  encryptedWallet?: boolean
+  identity?: boolean
+  credentials?: boolean
+  interactions?: boolean
+}
+
+/**
+ * @category Delete
+ */
+export const DEFAULT_DELETE_AGENT_OPTIONS: DeleteAgentOptions = {
+  encryptedWallet: true,
+  identity: true,
+  credentials: true,
+  interactions: true,
 }

@@ -14,8 +14,8 @@ import { Identity } from 'jolocom-lib/js/identity/identity'
 import { Agent } from './agent'
 import { TransportKeeper } from './transports'
 import { CredentialKeeper } from './credentials'
-import { AgentExportOptions, IExportedAgent, EXPORT_SCHEMA_VERSION, ExportedAgentData} from './types'
-import { getExportOptions } from './util'
+import { AgentExportOptions, IExportedAgent, EXPORT_SCHEMA_VERSION, ExportedAgentData, DeleteAgentOptions } from './types'
+import { getExportOptions, getDeleteAgentOptions } from './util'
 export { Agent } from './agent'
 
 export * from './types'
@@ -104,7 +104,7 @@ export class JolocomSDK {
         .getForDid(did)
         .resolver.resolve(did)
 
-      await this.storage.store.identity(resolved).catch((err) => {
+      await this.storage.store.identity(resolved).catch(err => {
         console.error('Failed to store Identity after resolving', err)
       })
 
@@ -372,19 +372,34 @@ export class JolocomSDK {
     await this.storage.store.identity(id)
   }
 
-  public async deleteIdentityData(did: string): Promise<void> {
+  /**
+   * Deletes data associated with an identity
+   *
+   * @param did - Identity's DID
+   * @param options - Delete options
+   */
+  public async deleteAgent(
+    did: string,
+    options?: DeleteAgentOptions,
+  ): Promise<void> {
+    // TODO: add settings
+    options = getDeleteAgentOptions(options)
+
     let identity = await this.resolve(did)
-    await this.storage.delete.encryptedWallet(did)
-    await this.storage.delete.verifiableCredentials([
-      { subject: did },
-      { issuer: did },
-    ])
-    await this.storage.delete.identity(did)
-    let query: InteractionQueryAttrs[] = []
-    identity.publicKeySection.forEach((pk) => {
-      let keyId = `${did}${pk.id}`
-      query.push({ initiator: keyId }, { responder: keyId })
-    })
-    await this.storage.delete.interactions(query)
+    if (options.encryptedWallet) await this.storage.delete.encryptedWallet(did)
+    if (options.identity) await this.storage.delete.identity(did)
+    if (options.credentials)
+      await this.storage.delete.verifiableCredentials([
+        { subject: did },
+        { issuer: did },
+      ])
+    if (options.interactions) {
+      let query: InteractionQueryAttrs[] = []
+      identity.publicKeySection.forEach(pk => {
+        let keyId = `${did}${pk.id}`
+        query.push({ initiator: keyId }, { responder: keyId })
+      })
+      await this.storage.delete.interactions(query)
+    }
   }
 }

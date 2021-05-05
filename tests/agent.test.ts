@@ -22,15 +22,16 @@ afterEach(async () => {
   await destroyAgent(conn2Name)
 })
 
-
 describe('processJWT', () => {
-  it("does not start a new interaction if token processing fails", async () => {
+  it('does not start a new interaction if token processing fails', async () => {
     const credOffer = await alice.credOfferToken({
       callbackURL: '',
       offeredCredentials: [{ type: 'dummy' }],
     })
     const bobInterxn = await bob.processJWT(credOffer.encode())
-    const credResp = await bobInterxn.createCredentialOfferResponseToken([{ type: 'not dummy' }])
+    const credResp = await bobInterxn.createCredentialOfferResponseToken([
+      { type: 'not dummy' },
+    ])
 
     const startSpy = jest.spyOn(alice.interactionManager, 'start')
     await expect(alice.processJWT(credResp.encode())).rejects.toThrow()
@@ -38,20 +39,23 @@ describe('processJWT', () => {
     startSpy.mockRestore()
   })
 
-  it("does not call processInteractionToken after starting a new interaction", async () => {
+  it('does not call processInteractionToken after starting a new interaction', async () => {
     const credOffer = await alice.authRequestToken({
       callbackURL: '',
-      description: 'test'
+      description: 'test',
     })
     const startOrig = bob.interactionManager.start.bind(bob.interactionManager)
     let processInteractionTokenSpy: jest.SpyInstance
-    const startSpy = jest.spyOn(bob.interactionManager, 'start').mockImplementation(
-      async (token, transportAPI) => {
+    const startSpy = jest
+      .spyOn(bob.interactionManager, 'start')
+      .mockImplementation(async (token, transportAPI) => {
         const interxn = await startOrig(token, transportAPI)
-        processInteractionTokenSpy = jest.spyOn(interxn, 'processInteractionToken')
+        processInteractionTokenSpy = jest.spyOn(
+          interxn,
+          'processInteractionToken',
+        )
         return interxn
-      }
-    )
+      })
     await bob.processJWT(credOffer.encode())
     await expect(startSpy).toHaveBeenCalledTimes(1)
 
@@ -69,7 +73,7 @@ describe('listInteractions', () => {
     for (let t in [1, 2, 3, 4]) {
       const aliceRequest = await alice.authRequestToken({
         callbackURL: 'no',
-        description: 'authntest'+t
+        description: 'authntest' + t,
       })
       const bobInterxn = await bob.processJWT(aliceRequest.encode())
       const bobResponse = (
@@ -80,7 +84,7 @@ describe('listInteractions', () => {
     for (let t in [1, 2]) {
       const aliceRequest = await alice.authorizationRequestToken({
         callbackURL: 'no',
-        description: 'authztest'+t
+        description: 'authztest' + t,
       })
       const bobInterxn = await bob.processJWT(aliceRequest.encode())
       const bobResponse = (
@@ -91,13 +95,15 @@ describe('listInteractions', () => {
 
     const authnInterxns = await alice.interactionManager.listInteractions({
       flows: [AuthenticationFlow],
-      take: 2
+      take: 2,
     })
     const authzInterxns = await alice.interactionManager.listInteractions({
       flows: [AuthorizationFlow],
-      take: 2
+      take: 2,
     })
-    const allInterxns = await alice.interactionManager.listInteractions({ skip: 3 })
+    const allInterxns = await alice.interactionManager.listInteractions({
+      skip: 3,
+    })
     expect(authnInterxns).toHaveLength(2)
     expect(authzInterxns).toHaveLength(2)
     expect(allInterxns).toHaveLength(3)
@@ -108,7 +114,7 @@ describe('listInteractions', () => {
     for (let t in [1, 2, 3, 4]) {
       const aliceRequest = await alice.authRequestToken({
         callbackURL: 'no',
-        description: 'authntest'+t
+        description: 'authntest' + t,
       })
       const bobInterxn = await bob.processJWT(aliceRequest.encode())
       ids.push(bobInterxn.id)
@@ -120,24 +126,29 @@ describe('listInteractions', () => {
 
     const authnInterxns = await alice.interactionManager.listInteractions({
       flows: [FlowType.Authentication],
-      take: 2
+      take: 2,
     })
     expect(authnInterxns).toHaveLength(2)
     expect(authnInterxns[0].id).toEqual(ids[0])
 
-    const reversedAuthnInterxns = await alice.interactionManager.listInteractions({
-      flows: [FlowType.Authentication],
-      take: 2,
-      reverse: true
-    })
+    const reversedAuthnInterxns = await alice.interactionManager.listInteractions(
+      {
+        flows: [FlowType.Authentication],
+        take: 2,
+        reverse: true,
+      },
+    )
     expect(reversedAuthnInterxns).toHaveLength(2)
-    expect(reversedAuthnInterxns[0].id).toEqual(ids[ids.length-1])
+    expect(reversedAuthnInterxns[0].id).toEqual(ids[ids.length - 1])
   })
 })
 
 describe('findInteraction', () => {
   it('finds an interaction based on a JSONWebToken', async () => {
-    const jwt = await alice.authRequestToken({ callbackURL: '', description: 'test' })
+    const jwt = await alice.authRequestToken({
+      callbackURL: '',
+      description: 'test',
+    })
     const found = await alice.findInteraction(jwt)
     expect(found).toBeDefined
     expect(found.id).toEqual(jwt.nonce)
@@ -145,7 +156,10 @@ describe('findInteraction', () => {
   })
 
   it('finds an interaction based on an encoded jwt', async () => {
-    const jwt = await alice.authRequestToken({ callbackURL: '', description: 'test' })
+    const jwt = await alice.authRequestToken({
+      callbackURL: '',
+      description: 'test',
+    })
     const found = await alice.findInteraction(jwt.encode())
     expect(found).toBeDefined
     expect(found.id).toEqual(jwt.nonce)
@@ -153,7 +167,10 @@ describe('findInteraction', () => {
   })
 
   it('finds an interaction based on an id', async () => {
-    const jwt = await alice.authRequestToken({ callbackURL: '', description: 'test' })
+    const jwt = await alice.authRequestToken({
+      callbackURL: '',
+      description: 'test',
+    })
     const found = await alice.findInteraction(jwt.nonce)
     expect(found).toBeDefined
     expect(found.id).toEqual(jwt.nonce)
@@ -164,7 +181,10 @@ describe('findInteraction', () => {
     it('returns an interaction even if already expired', async () => {
       jest.useFakeTimers('modern')
       jest.setSystemTime(0)
-      const jwt = await alice.authRequestToken({ callbackURL: 'dummy', description: 'test' })
+      const jwt = await alice.authRequestToken({
+        callbackURL: 'dummy',
+        description: 'test',
+      })
       jest.useRealTimers()
       const alice2 = await alice.sdk.initAgent({})
       const interxn = await alice2.findInteraction(jwt.nonce)
@@ -173,7 +193,10 @@ describe('findInteraction', () => {
     })
 
     it('returns an interaction that has a transportAPI', async () => {
-      const jwt = await alice.authRequestToken({ callbackURL: 'dummy', description: 'test' })
+      const jwt = await alice.authRequestToken({
+        callbackURL: 'dummy',
+        description: 'test',
+      })
 
       const alice2 = await alice.sdk.initAgent({})
       const interxn = await alice2.findInteraction(jwt.nonce)
@@ -182,7 +205,10 @@ describe('findInteraction', () => {
     })
 
     it('returns the reconstructed instance if called again', async () => {
-      const jwt = await alice.authRequestToken({ callbackURL: 'dummy', description: 'test' })
+      const jwt = await alice.authRequestToken({
+        callbackURL: 'dummy',
+        description: 'test',
+      })
 
       const alice2 = await alice.sdk.initAgent({})
       const interxn = await alice2.findInteraction(jwt.nonce)
@@ -208,7 +234,7 @@ describe('Delete identity', () => {
     ).resolves.toBeDefined()
     await expect(bob.sdk.storage.get.interactionIds()).resolves.toHaveLength(1)
 
-    await bob.deleteIdentityData()
+    await bob.delete()
     await expect(bob.credentials.query()).resolves.toHaveLength(0)
     await expect(
       bob.sdk.storage.get.identity(bob.idw.did),

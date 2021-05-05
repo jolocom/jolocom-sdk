@@ -5,6 +5,8 @@ import {
   IssuerPublicProfileSummary,
   AgentExportOptions,
   DEFAULT_EXPORT_OPTIONS,
+  DeleteAgentOptions,
+  DEFAULT_DELETE_AGENT_OPTIONS,
 } from './types'
 import { Identity } from 'jolocom-lib/js/identity/identity'
 
@@ -57,7 +59,10 @@ export async function generateSecureRandomBytes(
  * @param p - a path into the object, as in the example
  * @param obj - an object or array
  */
-export const jsonpath = function simpleJsonPath(p: string, obj: object | any[]): any {
+export const jsonpath = function simpleJsonPath(
+  p: string,
+  obj: object | any[],
+): any {
   let trimmedP = p.trim()
   if (trimmedP[0] != '$') return
 
@@ -95,3 +100,7 @@ export const getExportOptions = (options?: AgentExportOptions) => {
     ...options
   }
 }
+
+export const getDeleteAgentOptions = (
+  options?: DeleteAgentOptions,
+): DeleteAgentOptions => ({ ...DEFAULT_DELETE_AGENT_OPTIONS, ...options })
