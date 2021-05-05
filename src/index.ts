@@ -305,19 +305,16 @@ export class JolocomSDK {
     // TODO: add settings
     options = getDeleteIdentityDataOptions(options)
 
-    if (options?.encryptedWallet) await this.storage.delete.encryptedWallet(did)
-
-    if (options?.identity) await this.storage.delete.identity(did)
-
-    if (options?.credentials)
+    let identity = await this.resolve(did)
+    if (options.encryptedWallet) await this.storage.delete.encryptedWallet(did)
+    if (options.identity) await this.storage.delete.identity(did)
+    if (options.credentials)
       await this.storage.delete.verifiableCredentials([
         { subject: did },
         { issuer: did },
       ])
-
-    if (options?.interactions) {
+    if (options.interactions) {
       let query: InteractionQueryAttrs[] = []
-      let identity = await this.resolve(did)
       identity.publicKeySection.forEach(pk => {
         let keyId = `${did}${pk.id}`
         query.push({ initiator: keyId }, { responder: keyId })
