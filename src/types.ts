@@ -1,5 +1,11 @@
-import { PublicProfileClaimMetadata, CredentialDefinition } from '@jolocom/protocol-ts'
-import { CredentialOfferRenderInfo, CredentialOfferMetadata } from 'jolocom-lib/js/interactionTokens/types'
+import {
+  PublicProfileClaimMetadata,
+  CredentialDefinition,
+} from '@jolocom/protocol-ts'
+import {
+  CredentialOfferRenderInfo,
+  CredentialOfferMetadata,
+} from 'jolocom-lib/js/interactionTokens/types'
 import { QueryOptions } from './storage'
 
 /**
@@ -91,4 +97,21 @@ export interface ObjectKeeper<T, C, Q> {
   query?(attrs?: Q, options?: QueryOptions): Promise<T[]>
   update?(obj: T): Promise<boolean>
   delete?(attrs: Q): Promise<boolean>
+}
+
+/**
+ * @category Delete
+ */
+export interface DeleteIdentityDataOptions {
+  encryptedWallet?: boolean
+  identity?: boolean
+  credentials?: boolean
+  interactions?: boolean
+}
+
+export const DEFAULT_DELETE_DATA_OPTIONS: DeleteIdentityDataOptions = {
+  encryptedWallet: true,
+  identity: true,
+  credentials: true,
+  interactions: true,
 }
