@@ -36,7 +36,7 @@ describe('Agent export/import', () => {
       bob.interactionManager.listInteractions()
     ).resolves.toHaveLength(1)
 
-    await bob.deleteIdentityData()
+    await bob.delete()
     await expect(
       bob.sdk.storage.get.identity(bob.idw.did),
     ).resolves.toBeUndefined()

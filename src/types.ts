@@ -128,7 +128,7 @@ export interface ExportedAgentData {
 /**
  * @category Export/Import
  */
-export interface AgentExportOptions {
+export interface ExportAgentOptions {
   password?: string      // defaults to the agent's password TODO
   credentials?: boolean  // whether to include credentials, default true
   interactions?: boolean // whether to include interactions, default true
@@ -138,7 +138,7 @@ export interface AgentExportOptions {
 /**
  * @category Export/Import
  */
-export const DEFAULT_EXPORT_OPTIONS: AgentExportOptions = {
+export const DEFAULT_EXPORT_OPTIONS: ExportAgentOptions = {
   credentials: true,
   interactions: true
 }

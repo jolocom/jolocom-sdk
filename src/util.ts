@@ -3,7 +3,7 @@ import { randomBytes } from 'crypto'
 import {
   IdentitySummary,
   IssuerPublicProfileSummary,
-  AgentExportOptions,
+  ExportAgentOptions,
   DEFAULT_EXPORT_OPTIONS,
   DeleteAgentOptions,
   DEFAULT_DELETE_AGENT_OPTIONS,
@@ -94,7 +94,7 @@ export const jsonpath = function simpleJsonPath(
   }, obj)
 }
 
-export const getExportOptions = (options?: AgentExportOptions) => {
+export const getExportAgentOptions = (options?: ExportAgentOptions) => {
   return {
     ...DEFAULT_EXPORT_OPTIONS,
     ...options

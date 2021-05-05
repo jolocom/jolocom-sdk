@@ -14,8 +14,8 @@ import { Identity } from 'jolocom-lib/js/identity/identity'
 import { Agent } from './agent'
 import { TransportKeeper } from './transports'
 import { CredentialKeeper } from './credentials'
-import { AgentExportOptions, IExportedAgent, EXPORT_SCHEMA_VERSION, ExportedAgentData, DeleteAgentOptions } from './types'
-import { getExportOptions, getDeleteAgentOptions } from './util'
+import { DeleteAgentOptions, ExportAgentOptions, ExportedAgentData, IExportedAgent, EXPORT_SCHEMA_VERSION } from './types'
+import { getDeleteAgentOptions, getExportAgentOptions } from './util'
 export { Agent } from './agent'
 
 export * from './types'
@@ -231,8 +231,8 @@ export class JolocomSDK {
    *
    * @category Agent
    */
-  public async exportAgent(agent: Agent, options?: AgentExportOptions): Promise<IExportedAgent> {
-    options = getExportOptions(options)
+  public async exportAgent(agent: Agent, options?: ExportAgentOptions): Promise<IExportedAgent> {
+    options = getExportAgentOptions(options)
 
     let exagent: IExportedAgent = {
       version: EXPORT_SCHEMA_VERSION,
@@ -271,16 +271,19 @@ export class JolocomSDK {
    *
    * @category Agent
    */
-  public async importAgent(exagent: IExportedAgent, options?: AgentExportOptions): Promise<Agent> {
-    options = getExportOptions(options)
+  public async importAgent(exagent: IExportedAgent, options?: ExportAgentOptions): Promise<Agent> {
+    options = getExportAgentOptions(options)
     const agentData: ExportedAgentData = JSON.parse(Buffer.from(exagent.data, 'base64').toString())
 
-    if (!agentData.encryptedWallet) throw new SDKError(ErrorCode.NoWallet)
-    await this.storage.store.encryptedWallet({
-      id: exagent.did,
-      timestamp: exagent.timestamp,
-      encryptedWallet: agentData.encryptedWallet
-    })
+    let encryptedWallet = await this.storage.get.encryptedWallet(exagent.did)
+    if (!encryptedWallet) {
+      if (!agentData.encryptedWallet) throw new SDKError(ErrorCode.NoWallet)
+      await this.storage.store.encryptedWallet({
+        id: exagent.did,
+        timestamp: exagent.timestamp,
+        encryptedWallet: agentData.encryptedWallet
+      })
+    }
     const agent = await this.loadAgent(options.password, exagent.did)
 
     // TODO: check for rejected imports
