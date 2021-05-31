@@ -6,10 +6,17 @@ import { TransportAPI } from '../types'
 import { SDKError, ErrorCode } from '../errors'
 import { FlowType } from './types'
 
+import { Emitter } from '../events'
+
 const firstMessageForFlowType = {}
 flows.forEach(f => {
   firstMessageForFlowType[f.type] = f.firstMessageType
 })
+
+export interface InteractionEvents {
+  interactionCreated: (interxn: Interaction) => void,
+  interactionUpdated: (interxn: Interaction) => void,
+}
 
 /**
  * The {@link InteractionManager} is an entry point to dealing with {@link
@@ -25,15 +32,13 @@ flows.forEach(f => {
  *
  * @category Interactions
  */
-export class InteractionManager {
-  public readonly ctx: Agent
-
+export class InteractionManager extends Emitter<InteractionEvents> {
   public interactions: {
     [NONCE: string]: Interaction<Flow<any>>
   } = {}
 
-  public constructor(ctx: Agent) {
-    this.ctx = ctx
+  public constructor(public readonly ctx: Agent) {
+    super()
   }
 
   public async start<F extends Flow<any>>(

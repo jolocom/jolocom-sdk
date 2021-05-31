@@ -177,7 +177,7 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
 
     // we process all the tokens sequentially, withot revalidating
     for (let message of messages) {
-      await interaction._processToken(message)
+      await interaction._processToken(message, true)
     }
     return interaction
   }
@@ -420,6 +420,7 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
 
   private async _processToken<T>(
     token: JSONWebToken<T>,
+    fromStorage = false
   ): Promise<boolean> {
     if (!this.participants.requester) {
       // TODO what happens if the signer isnt resolvable
@@ -468,6 +469,10 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     const res = await this.flow.handleInteractionToken(token.interactionToken, token.interactionType)
     this.messages.push(token)
 
+    if (!fromStorage) {
+      const eventName = this.messages.length === 1 ? 'interactionCreated' : 'interactionUpdated'
+      this.ctx.emit(eventName, this)
+    }
     return res
   }
 
