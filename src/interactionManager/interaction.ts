@@ -34,9 +34,7 @@ import {
   AuthorizationFlowState,
 } from './types'
 
-import {
-  InteractionManager,
-} from './interactionManager'
+import { InteractionManager } from './interactionManager'
 
 import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
 import { CredentialOfferResponse } from 'jolocom-lib/js/interactionTokens/credentialOfferResponse'
@@ -71,12 +69,12 @@ export const flows = [
   SigningFlow,
   EncryptionFlow,
   DecryptionFlow,
-  ResolutionFlow
+  ResolutionFlow,
 ]
 
 const interactionFlowForMessage = {}
 const interactionFlowForFlowType = {}
-flows.forEach(f => {
+flows.forEach((f) => {
   interactionFlowForMessage[f.firstMessageType] = f
   interactionFlowForFlowType[f.type] = f
 })
@@ -96,10 +94,12 @@ flows.forEach(f => {
  * directly interaction with the {@link Flow} instance.
  *
  */
-export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable {
+export class Interaction<
+  F extends Flow<any> = Flow<any>
+> extends Transportable {
   public static getTypes() {
     // @ts-ignore
-    return Object.values(interactionFlowForMessage).map(v => v.type)
+    return Object.values(interactionFlowForMessage).map((v) => v.type)
   }
   public static getRequestTokenType(interxnType: string) {
     return interactionFlowForFlowType[interxnType]?.firstMessageType
@@ -140,7 +140,7 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     ctx: InteractionManager,
     id: string,
     interactionType: string,
-    transportAPI?: TransportAPI
+    transportAPI?: TransportAPI,
   ) {
     super(transportAPI)
 
@@ -165,14 +165,14 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     messages: Array<JSONWebToken<any>>,
     ctx: InteractionManager,
     id: string,
-    transportAPI?: TransportAPI
+    transportAPI?: TransportAPI,
   ): Promise<Interaction<F>> {
     const firstToken = messages[0]
     const interaction = new Interaction<F>(
       ctx,
       firstToken.nonce,
       firstToken.interactionType,
-      transportAPI
+      transportAPI,
     )
 
     // we process all the tokens sequentially, withot revalidating
@@ -211,7 +211,6 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     return this.participants[counterRole]
   }
 
-
   // TODO Try to write a respond function that collapses these
 
   /**
@@ -222,13 +221,16 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
       InteractionType.Authentication,
     ) as JSONWebToken<Authentication>
     const { description } = this.getSummary().state as AuthenticationFlowState
-    const pca = await this.ctx.ctx.getProofOfControlAuthority().then(pca => ({ pca })).catch(_ => ({}))
+    const pca = await this.ctx.ctx
+      .getProofOfControlAuthority()
+      .then((pca) => ({ pca }))
+      .catch((_) => ({}))
 
     return this.ctx.ctx.identityWallet.create.interactionTokens.response.auth(
       {
         description,
         callbackURL: request.interactionToken.callbackURL,
-        ...pca
+        ...pca,
       },
       await this.ctx.ctx.passwordStore.getPassword(),
       request,
@@ -242,13 +244,16 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     const request = this.findMessageByType(
       EstablishChannelType.EstablishChannelRequest,
     ) as JSONWebToken<EstablishChannelRequest>
-    const pca = await this.ctx.ctx.getProofOfControlAuthority().then(pca => ({ pca })).catch(_ => ({}))
+    const pca = await this.ctx.ctx
+      .getProofOfControlAuthority()
+      .then((pca) => ({ pca }))
+      .catch((_) => ({}))
 
     return this.ctx.ctx.identityWallet.create.message(
       {
         message: { transportIdx },
         typ: EstablishChannelType.EstablishChannelResponse,
-        ...pca
+        ...pca,
       },
       await this.ctx.ctx.passwordStore.getPassword(),
       request,
@@ -262,12 +267,15 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     const reqMessage = (this.flow.state as ResolutionFlowState).request
     const uriToResolve = (reqMessage && reqMessage.uri) || this.ctx.ctx.idw.did
 
-    const pca = await this.ctx.ctx.getProofOfControlAuthority().then(pca => ({ pca })).catch(_ => ({}))
+    const pca = await this.ctx.ctx
+      .getProofOfControlAuthority()
+      .then((pca) => ({ pca }))
+      .catch((_) => ({}))
 
     const stateId = last(uriToResolve.split(':')) || ''
     const stateProof = await this.ctx.ctx.storage.eventDB
       .read(stateId)
-      .catch((_: any) => "")
+      .catch((_: any) => '')
 
     return this.ctx.ctx.identityWallet.create.message(
       {
@@ -284,7 +292,7 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
           methodMetadata: { stateProof },
         },
         typ: ResolutionType.ResolutionResponse,
-        ...pca
+        ...pca,
       },
       await this.ctx.ctx.passwordStore.getPassword(),
       request,
@@ -301,7 +309,10 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
 
     const { description, imageURL, action } = this.getSummary()
       .state as AuthorizationFlowState
-    const pca = await this.ctx.ctx.getProofOfControlAuthority().then(pca => ({ pca })).catch(_ => ({}))
+    const pca = await this.ctx.ctx
+      .getProofOfControlAuthority()
+      .then((pca) => ({ pca }))
+      .catch((_) => ({}))
 
     return this.ctx.ctx.identityWallet.create.message(
       {
@@ -311,7 +322,7 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
           ...(action && { action }),
         },
         typ: AuthorizationType.AuthorizationResponse,
-        ...pca
+        ...pca,
       },
       await this.ctx.ctx.passwordStore.getPassword(),
       request,
@@ -328,16 +339,19 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
 
     const credentials = await Promise.all(
       selectedCredentials.map(
-        async id => (await this.getVerifiableCredential({ id }))[0],
+        async (id) => (await this.getVerifiableCredential({ id }))[0],
       ),
     )
-    const pca = await this.ctx.ctx.getProofOfControlAuthority().then(pca => ({ pca })).catch(_ => ({}))
+    const pca = await this.ctx.ctx
+      .getProofOfControlAuthority()
+      .then((pca) => ({ pca }))
+      .catch((_) => ({}))
 
     return this.ctx.ctx.identityWallet.create.interactionTokens.response.share(
       {
         callbackURL: request.interactionToken.callbackURL,
-        suppliedCredentials: credentials.map(c => c.toJSON()),
-        ...pca
+        suppliedCredentials: credentials.map((c) => c.toJSON()),
+        ...pca,
       },
       await this.ctx.ctx.passwordStore.getPassword(),
       request,
@@ -353,12 +367,15 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     const credentialOfferRequest = this.findMessageByType(
       InteractionType.CredentialOfferRequest,
     ) as JSONWebToken<CredentialOfferRequest>
-    const pca = await this.ctx.ctx.getProofOfControlAuthority().then(pca => ({ pca })).catch(_ => ({}))
+    const pca = await this.ctx.ctx
+      .getProofOfControlAuthority()
+      .then((pca) => ({ pca }))
+      .catch((_) => ({}))
 
     const credentialOfferResponseAttr = {
       callbackURL: credentialOfferRequest.interactionToken.callbackURL,
       selectedCredentials: selectedOffering,
-      ...pca
+      ...pca,
     }
 
     return this.ctx.ctx.identityWallet.create.interactionTokens.response.offer(
@@ -379,7 +396,7 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     const flowState = this.flow.state as CredentialOfferFlowState
     const password = await this.ctx.ctx.passwordStore.getPassword()
     return Promise.all(
-      flowState.selectedTypes.map(async type => {
+      flowState.selectedTypes.map(async (type) => {
         const offerTypeHandler = offerMap && offerMap[type]
         const credDesc = offerTypeHandler && (await offerTypeHandler())
 
@@ -411,7 +428,7 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
 
     return this.ctx.ctx.identityWallet.create.interactionTokens.response.issue(
       {
-        signedCredentials: creds.map(c => c.toJSON()),
+        signedCredentials: creds.map((c) => c.toJSON()),
       },
       await this.ctx.ctx.passwordStore.getPassword(),
       request,
@@ -420,7 +437,7 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
 
   private async _processToken<T>(
     token: JSONWebToken<T>,
-    fromStorage = false
+    fromStorage = false,
   ): Promise<boolean> {
     if (!this.participants.requester) {
       // TODO what happens if the signer isnt resolvable
@@ -460,17 +477,23 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
           // TODO throw on failure? processInteractionToken returns bool
           await this.ctx.ctx.processJWT(msg)
         }
-        this.transportAPI =
-          await this.ctx.ctx.sdk.transports.start(transportDesc, onMessage)
+        this.transportAPI = await this.ctx.ctx.sdk.transports.start(
+          transportDesc,
+          onMessage,
+        )
       }
     }
 
     // TODO if handling fails, should we still be pushing the token??
-    const res = await this.flow.handleInteractionToken(token.interactionToken, token.interactionType)
+    const res = await this.flow.handleInteractionToken(
+      token.interactionToken,
+      token.interactionType,
+    )
     this.messages.push(token)
 
     if (!fromStorage) {
-      const eventName = this.messages.length === 1 ? 'interactionCreated' : 'interactionUpdated'
+      const eventName =
+        this.messages.length === 1 ? 'interactionCreated' : 'interactionUpdated'
       this.ctx.emit(eventName, this)
     }
     return res
@@ -494,8 +517,10 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     try {
       await this.ctx.ctx.idw.validateJWT(
         token,
-        this.messages.length ? this.messages[this.messages.length - 1] : undefined,
-        this.ctx.ctx.resolver
+        this.messages.length
+          ? this.messages[this.messages.length - 1]
+          : undefined,
+        this.ctx.ctx.resolver,
       )
     } catch (err) {
       throw new SDKError(ErrorCode.InvalidToken, err)
@@ -539,7 +564,10 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     } else {
       throw new Error('bad encryption target: ' + msg.target)
     }
-    const pca = await this.ctx.ctx.getProofOfControlAuthority().then(pca => ({ pca })).catch(_ => ({}))
+    const pca = await this.ctx.ctx
+      .getProofOfControlAuthority()
+      .then((pca) => ({ pca }))
+      .catch((_) => ({}))
 
     return this.ctx.ctx.identityWallet.create.message(
       {
@@ -548,7 +576,7 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
           result: result.toString('base64'),
         },
         typ: EncryptionType.EncryptionResponse,
-        ...pca
+        ...pca,
       },
       await this.ctx.ctx.passwordStore.getPassword(),
       encRequest,
@@ -566,7 +594,10 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     ) as JSONWebToken<DecryptionRequest>
 
     const password = await this.ctx.ctx.passwordStore.getPassword()
-    const pca = await this.ctx.ctx.getProofOfControlAuthority().then(pca => ({ pca })).catch(_ => ({}))
+    const pca = await this.ctx.ctx
+      .getProofOfControlAuthority()
+      .then((pca) => ({ pca }))
+      .catch((_) => ({}))
 
     const data = Buffer.from(
       decRequest.payload.interactionToken!.request.data,
@@ -580,7 +611,7 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
           result: result.toString('base64'),
         },
         typ: DecryptionType.DecryptionResponse,
-        ...pca
+        ...pca,
       },
       password,
       decRequest,
@@ -597,7 +628,10 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
       SigningType.SigningRequest,
     ) as JSONWebToken<SigningRequest>
     const pass = await this.ctx.ctx.passwordStore.getPassword()
-    const pca = await this.ctx.ctx.getProofOfControlAuthority().then(pca => ({ pca })).catch(_ => ({}))
+    const pca = await this.ctx.ctx
+      .getProofOfControlAuthority()
+      .then((pca) => ({ pca }))
+      .catch((_) => ({}))
 
     return this.ctx.ctx.identityWallet.create.message(
       {
@@ -613,7 +647,7 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
           ).toString('base64'),
         },
         typ: SigningType.SigningResponse,
-        ...pca
+        ...pca,
       },
       pass,
       sigRequest,
@@ -673,11 +707,10 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
     return Promise.all(
       issued
         .filter((cred, i) => credentialsValidity[i])
-        .map(async cred => {
+        .map(async (cred) => {
           await this.ctx.ctx.storage.store.verifiableCredential(cred)
           return cred
-        }
-        ),
+        }),
     )
   }
 
@@ -686,16 +719,16 @@ export class Interaction<F extends Flow<any> = Flow<any>> extends Transportable 
    */
   public async storeCredentialMetadata() {
     this.checkFlow(FlowType.CredentialOffer)
-    const flow = <CredentialOfferFlow><unknown>this.flow
+    const flow = <CredentialOfferFlow>(<unknown>this.flow)
     try {
       const metadatas = Object.values(await flow.getOfferedCredentialMetadata())
       return Promise.all(
-        metadatas.map(metadata =>
-          this.ctx.ctx.credentials.storeCredentialType(metadata)
-        )
+        metadatas.map((metadata) =>
+          this.ctx.ctx.credentials.storeCredentialType(metadata),
+        ),
       )
-    } catch(err) {
-      console.error("storeCredentialMetadata failed", err)
+    } catch (err) {
+      console.error('storeCredentialMetadata failed', err)
       throw new SDKError(ErrorCode.SaveCredentialMetadataFailed, err)
     }
   }

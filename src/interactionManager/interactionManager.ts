@@ -9,13 +9,13 @@ import { FlowType } from './types'
 import { Emitter } from '../events'
 
 const firstMessageForFlowType = {}
-flows.forEach(f => {
+flows.forEach((f) => {
   firstMessageForFlowType[f.type] = f.firstMessageType
 })
 
 export interface InteractionEvents {
-  interactionCreated: (interxn: Interaction) => void,
-  interactionUpdated: (interxn: Interaction) => void,
+  interactionCreated: (interxn: Interaction) => void
+  interactionUpdated: (interxn: Interaction) => void
 }
 
 /**
@@ -43,13 +43,13 @@ export class InteractionManager extends Emitter<InteractionEvents> {
 
   public async start<F extends Flow<any>>(
     token: JSONWebToken<any>,
-    transportAPI?: TransportAPI
+    transportAPI?: TransportAPI,
   ): Promise<Interaction<F>> {
     const interaction = new Interaction<F>(
       this,
       token.nonce,
       token.interactionType,
-      transportAPI
+      transportAPI,
     )
     this.interactions[token.nonce] = interaction
     await interaction.processInteractionToken(token)
@@ -68,7 +68,10 @@ export class InteractionManager extends Emitter<InteractionEvents> {
    *                       interaction from storage
    * @throws SDKError(ErrorCode.NoSuchInteraction) if not found
    */
-  public async getInteraction<F extends Flow<any>>(id: string, transportAPI?: TransportAPI) {
+  public async getInteraction<F extends Flow<any>>(
+    id: string,
+    transportAPI?: TransportAPI,
+  ) {
     // NOTE FIXME TODO
     // should getInteraction be taking a transportAPI argument?
     // what if the transportAPI is specified but interaction is loaded from
@@ -84,7 +87,12 @@ export class InteractionManager extends Emitter<InteractionEvents> {
     const messages = await this.ctx.storage.get.interactionTokens({ nonce: id })
     if (messages.length === 0) throw new SDKError(ErrorCode.NoSuchInteraction)
 
-    const interxn = await Interaction.fromMessages(messages, this, id, transportAPI)
+    const interxn = await Interaction.fromMessages(
+      messages,
+      this,
+      id,
+      transportAPI,
+    )
 
     this.interactions[id] = interxn
 
@@ -101,19 +109,22 @@ export class InteractionManager extends Emitter<InteractionEvents> {
    * @param reverse - if true, return the list in reverse storage order
    */
   public async listInteractions<T>(opts?: {
-    flows?: Array<FlowType | { firstMessageType: string, type: string }>,
-    take?: number,
-    skip?: number,
+    flows?: Array<FlowType | { firstMessageType: string; type: string }>
+    take?: number
+    skip?: number
     reverse?: boolean
   }): Promise<Interaction[]> {
     let queryOpts = opts && {
       take: opts.take,
       skip: opts.skip,
-      ...(opts.reverse && { order: { id: 'DESC' as 'DESC' } })
+      ...(opts.reverse && { order: { id: 'DESC' as 'DESC' } }),
     }
-    const attrs = opts && opts.flows && opts.flows.map(f => ({
-      type: typeof f === "string" ? f : f.type
-    }))
+    const attrs =
+      opts &&
+      opts.flows &&
+      opts.flows.map((f) => ({
+        type: typeof f === 'string' ? f : f.type,
+      }))
     const ids = await this.ctx.storage.get.interactionIds(attrs, queryOpts)
     return Promise.all(ids.map((id: string) => this.getInteraction(id)))
   }
