@@ -123,16 +123,10 @@ export class CredentialTypeKeeper
       CredentialQuery
     > {
 
-  protected storage: IStorage
-  protected credKeeper: CredentialKeeper
-
   constructor(
-    credKeeper: CredentialKeeper,
-    storage: IStorage,
-  ) {
-    this.storage = storage
-    this.credKeeper = credKeeper
-  }
+    protected credKeeper: CredentialKeeper,
+    protected storage: IStorage,
+  ) { }
 
   buildId(issuer: string, credentialType: string | string[]): string {
     if (typeof credentialType === 'string') {
@@ -142,10 +136,31 @@ export class CredentialTypeKeeper
     return `${issuer}${credentialType[credentialType.length - 1]}`
   }
 
-  async get(id: string, issuerDid?: string) {
+  getFullCredentialTypeList(credType: string | string[]): string[] {
+    if (!credType) throw new Error('credential type required')
+    // NOTE: 'VerifiableCredential' currently implied in the lib/protocol
+    if (Array.isArray(credType)) {
+      if (credType[0] !== 'VerifiableCredential') {
+        return ['VerifiableCredential', ...credType]
+      } else {
+        return credType
+      }
+    } else {
+      return ['VerifiableCredential', credType]
+    }
+  }
+
+  getByIssuerAndType(issuerDid: string, credType: string | string[]) {
+    const fullCredType = this.getFullCredentialTypeList(credType)
+    return this.get(this.buildId(issuerDid, fullCredType), issuerDid, fullCredType)
+  }
+
+  async get(id: string, issuerDid?: string, fullCredType?: string | string[]) {
     const meta = await this.storage.get.credentialMetadataById(id)
     // NOTE: sometimes there's no issuer data stored...
     issuerDid = issuerDid || meta.issuer?.did
+    fullCredType = this.getFullCredentialTypeList(fullCredType || meta.type)
+
     if (!meta.issuer?.publicProfile) {
       try {
         meta.issuer = await this.storage.get.publicProfile(issuerDid)
@@ -154,23 +169,16 @@ export class CredentialTypeKeeper
         // pass
       }
     }
-    // NOTE: VerifiableCredential currently implied in the lib/protocol
-    return new CredentialType(['VerifiableCredential', meta.type], meta)
-  }
-
-  getByIssuerAndType(issuerDid: string, credentialType: string | string[]) {
-    return this.get(this.buildId(issuerDid, credentialType), issuerDid)
-    //const metadata = await this.storage.get.credentialMetadata(cred)
+    return new CredentialType(fullCredType, meta)
   }
 
   async create(meta: CredentialMetadataSummary) {
-    if (!meta.type) throw new Error('credential type required')
+    const fullCredType = this.getFullCredentialTypeList(meta.type)
     await this.storage.store.credentialMetadata(meta)
     if (meta.issuer?.publicProfile) {
       await this.storage.store.issuerProfile(meta.issuer)
     }
-    // NOTE: VerifiableCredential currently implied in the lib/protocol
-    return new CredentialType(['VerifiableCredential', meta.type], meta)
+    return new CredentialType(fullCredType, meta)
   }
 
   async forCredential(cred: SignedCredential): Promise<CredentialType> {
@@ -207,20 +215,17 @@ export class CredentialKeeper
       CredentialQuery,
       ISignedCredentialAttrs
     > {
-  protected storage: IStorage
-  protected resolver: IResolver
-  private _applyFilter: () => CredentialQuery | undefined
 
   readonly types: CredentialTypeKeeper
 
+  private _applyFilter: () => CredentialQuery | undefined
+
   constructor(
-    storage: IStorage,
-    resolver: IResolver,
+    protected storage: IStorage,
+    protected resolver: IResolver,
     filter?: CredentialQuery | (() => CredentialQuery),
   ) {
-    this.storage = storage
     this.types = new CredentialTypeKeeper(this, this.storage)
-    this.resolver = resolver
     this._applyFilter = typeof filter === 'function' ? filter : () => filter
   }
 
@@ -296,14 +301,11 @@ export class CredentialKeeper
 }
 
 export class CredentialIssuer extends CredentialKeeper {
-  private agent: Agent
-
   constructor(
-    agent: Agent,
+    private agent: Agent,
     filter?: CredentialQuery | (() => CredentialQuery),
   ) {
     super(agent.storage, agent.resolver, filter)
-    this.agent = agent
   }
 
   /**
