@@ -1,5 +1,7 @@
+import { claimsMetadata } from '@jolocom/protocol-ts'
 import { destroyAgent, createAgent, meetAgent, basicCredOffer } from './util'
 import { Agent } from '../src'
+import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
 
 const conn1Name = 'agentTest1'
 const conn2Name = 'agentTest2'
@@ -21,12 +23,31 @@ afterEach(async () => {
 })
 
 
+const credSorter = (c1: SignedCredential, c2: SignedCredential) => {
+  if (c1.id < c2.id) {
+    return -1
+  } else if (c1.id > c2.id) {
+    return 1
+  } else {
+    return 0
+  }
+}
+
 describe('Agent export/import', () => {
   test("basics", async () => {
     let creds = [{ type: 'dummy' }, { type: 'anotherdummy' }]
     await basicCredOffer(alice, bob, creds)
+    await bob.credentials.issue({
+      metadata: claimsMetadata.name,
+      claim: {
+        givenName: 'bob',
+        familyName: 'alsobob'
+      },
+      subject: bob.idw.did
+    })
 
     const bobsCreds = await bob.credentials.query()
+    bobsCreds.sort(credSorter)
     const bobsCredDisplays = await Promise.all(
       bobsCreds.map(cred => bob.credentials.display(cred))
     )
@@ -44,6 +65,8 @@ describe('Agent export/import', () => {
     const newBob = await alice.sdk.importAgent(exportedBob)
     expect(newBob.idw.did).toEqual(bob.idw.did)
     const newBobsCreds = await newBob.credentials.query()
+    newBobsCreds.sort(credSorter)
+    await expect(newBobsCreds.length).toEqual(bobsCreds.length)
     await expect(newBobsCreds).toEqual(bobsCreds)
     await expect(
       Promise.all(newBobsCreds.map(cred => newBob.credentials.display(cred)))
