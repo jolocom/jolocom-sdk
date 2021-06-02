@@ -17,7 +17,7 @@ module.exports = {
     },
   },
   moduleFileExtensions: ['ts', 'node', 'js', 'json'],
-  testMatch: ['**/tests/*.test.ts'],
+  testMatch: ['**/tests/**/*.test.ts'],
   testPathIgnorePatterns: ['/node_modules/.*'],
   moduleNameMapper: pathsToModuleNameMapper(
     compilerOptions.paths,
