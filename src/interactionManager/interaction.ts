@@ -58,7 +58,7 @@ import { generateIdentitySummary } from '../util'
 import { last } from 'ramda'
 import { TransportAPI, TransportDesc, InteractionTransportType } from '../types'
 import { Transportable } from '../transports'
-import { CredentialQuery } from 'src/storage'
+import { CredentialQuery } from '../storage'
 
 export const flows = [
   AuthenticationFlow,
