@@ -43,7 +43,7 @@ import { CredentialOfferRequest } from 'jolocom-lib/js/interactionTokens/credent
 import { CredentialsReceive } from 'jolocom-lib/js/interactionTokens/credentialsReceive'
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { CredentialIssuer } from './credentials'
-import { DeleteAgentOptions } from './types'
+import { DeleteAgentOptions, ExportAgentOptions, IExportedAgent } from './types'
 
 /**
  * The `Agent` class mainly provides an abstraction around the {@link
@@ -212,6 +212,7 @@ export class Agent {
       this.resolver,
     )
 
+    // ???? TODO FIXME
     await this.storage.store.identity(identityWallet.identity)
 
     // This sets the didMethod so that it doesn't return a different value if
@@ -691,5 +692,15 @@ export class Agent {
 
   public async delete(options?: DeleteAgentOptions) {
     await this.sdk.deleteAgent(this.idw.did, options)
+  }
+
+
+  public async export(opts?: ExportAgentOptions): Promise<IExportedAgent> {
+    return this.sdk.exportAgent(this, opts)
+  }
+
+  public async import(exagent: IExportedAgent, opts?: ExportAgentOptions): Promise<void> {
+    if (this.idw.did !== exagent.did) throw new SDKError(ErrorCode.Unknown)
+    await this.sdk.importAgent(exagent, opts)
   }
 }

@@ -87,6 +87,7 @@ export interface IStorageGet {
   credentialMetadata(
     credential: SignedCredential,
   ): Promise<CredentialMetadataSummary>
+  credentialMetadataById(id: string): Promise<CredentialMetadataSummary>
   publicProfile(did: string): Promise<IdentitySummary>
   identity(did: string): Promise<Identity | undefined>
   interactionTokens(

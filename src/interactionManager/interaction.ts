@@ -696,6 +696,7 @@ export class Interaction<
    */
   public async storeSelectedCredentials() {
     this.checkFlow(FlowType.CredentialOffer)
+    await this.storeCredentialMetadata()
 
     const { issued, credentialsValidity } = this.flow
       .state as CredentialOfferFlowState
@@ -723,9 +724,9 @@ export class Interaction<
     try {
       const metadatas = Object.values(await flow.getOfferedCredentialMetadata())
       return Promise.all(
-        metadatas.map((metadata) =>
-          this.ctx.ctx.credentials.storeCredentialType(metadata),
-        ),
+        metadatas.map(metadata =>
+          this.ctx.ctx.credentials.types.create(metadata)
+        )
       )
     } catch (err) {
       console.error('storeCredentialMetadata failed', err)

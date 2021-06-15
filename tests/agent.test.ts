@@ -1,8 +1,7 @@
-import { destroyAgent, createAgent, meetAgent } from './util'
+import { destroyAgent, createAgent, meetAgent, basicCredOffer } from './util'
 import { Agent, FlowType } from '../src'
 import { AuthenticationFlow } from '../src/interactionManager/authenticationFlow'
 import { AuthorizationFlow } from '../src/interactionManager/authorizationFlow'
-import { CredentialOfferFlow } from '../src/interactionManager/credentialOfferFlow'
 
 const conn1Name = 'agentTest1'
 const conn2Name = 'agentTest2'
@@ -227,40 +226,7 @@ describe('findInteraction', () => {
 describe('Delete identity', () => {
   it('deletes the agent identity, credentials, and interaction tokens', async () => {
     let creds = [{ type: 'dummy' }]
-
-    const credOffer = await alice.credOfferToken({
-      callbackURL: '',
-      offeredCredentials: creds,
-    })
-    const bobInterxn = await bob.processJWT(credOffer.encode())
-    const bobResponse = await bobInterxn.createCredentialOfferResponseToken(
-      creds,
-    )
-    await bob.processJWT(bobResponse)
-    const aliceInteraction = await alice.processJWT(bobResponse)
-
-    const aliceIssuance = await aliceInteraction.createCredentialReceiveToken([
-      await alice.credentials.issue({
-        metadata: {
-          type: ['VerifiableCredential', creds[0].type],
-          name: creds[0].type,
-          context: [],
-        },
-        subject: bob.idw.did,
-        claim: {
-          givenName: 'Bob',
-          familyName: 'Agent',
-        },
-      }),
-    ])
-
-    const bobRecieving = await bob.processJWT(aliceIssuance)
-
-    let interxns = await alice.sdk.storage.get.interactionIds()
-    expect(interxns).toHaveLength(1)
-    const bobsFlow = bobRecieving.flow as CredentialOfferFlow
-    expect(bobsFlow.state.credentialsAllValid).toBeTruthy()
-    await bobInterxn.storeSelectedCredentials()
+    await basicCredOffer(alice, bob, creds)
 
     await expect(bob.credentials.query()).resolves.toHaveLength(1)
     await expect(
@@ -280,41 +246,7 @@ describe('Delete identity', () => {
 describe('Query Credentials', () => {
   it('by issuer', async () => {
     let creds = [{ type: 'dummy' }, { type: 'anotherdummy' }]
-
-    const credOffer = await alice.credOfferToken({
-      callbackURL: '',
-      offeredCredentials: creds,
-    })
-    const bobInterxn = await bob.processJWT(credOffer.encode())
-    const bobResponse = await bobInterxn.createCredentialOfferResponseToken(
-      creds,
-    )
-    await bob.processJWT(bobResponse)
-    const aliceInteraction = await alice.processJWT(bobResponse)
-
-    const aliceIssuance = await aliceInteraction.createCredentialReceiveToken([
-      await alice.credentials.issue({
-        metadata: {
-          type: ['VerifiableCredential', creds[0].type],
-          name: creds[0].type,
-          context: [],
-        },
-        subject: bob.idw.did,
-        claim: {
-          givenName: 'Bob',
-          familyName: 'Agent',
-        },
-      }),
-    ])
-
-    const bobRecieving = await bob.processJWT(aliceIssuance)
-
-    let interxns = await alice.sdk.storage.get.interactionIds()
-    expect(interxns).toHaveLength(1)
-    const bobsFlow = bobRecieving.flow as CredentialOfferFlow
-    expect(bobsFlow.state.credentialsAllValid).toBeTruthy()
-    await bobInterxn.storeSelectedCredentials()
-
+    await basicCredOffer(alice, bob, creds)
     await bob.credentials.issue({
       metadata: {
         type: ['VerifiableCredential', creds[1].type],
@@ -330,13 +262,13 @@ describe('Query Credentials', () => {
 
     await expect(
       bob.credentials.query({ issuer: alice.idw.did }),
-    ).resolves.toHaveLength(1)
+    ).resolves.toHaveLength(2)
     await expect(
       bob.credentials.query({ issuer: bob.idw.did }),
     ).resolves.toHaveLength(1)
     await expect(
       bob.credentials.query({ subject: bob.idw.did }),
-    ).resolves.toHaveLength(2)
+    ).resolves.toHaveLength(3)
 
     await expect(
       bob.credentials.query({ type: ['VerifiableCredential', creds[0].type] }),

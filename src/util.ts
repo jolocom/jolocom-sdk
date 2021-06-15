@@ -3,6 +3,8 @@ import { randomBytes } from 'crypto'
 import {
   IdentitySummary,
   IssuerPublicProfileSummary,
+  ExportAgentOptions,
+  DEFAULT_EXPORT_OPTIONS,
   DeleteAgentOptions,
   DEFAULT_DELETE_AGENT_OPTIONS,
 } from './types'
@@ -90,6 +92,13 @@ export const jsonpath = function simpleJsonPath(
       return obj[k]
     }
   }, obj)
+}
+
+export const getExportAgentOptions = (options?: ExportAgentOptions) => {
+  return {
+    ...DEFAULT_EXPORT_OPTIONS,
+    ...options
+  }
 }
 
 export const getDeleteAgentOptions = (
