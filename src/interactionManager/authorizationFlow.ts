@@ -37,17 +37,13 @@ export class AuthorizationFlow extends Flow<
   }
 
   public async consumeAuthorizationRequest(request: AuthorizationRequest) {
-    if (!request.description) return false
-
-    if (!this.state.description.length) {
-      const { description, imageURL, action } = request
-      this.state.description = description
-      imageURL && (this.state.imageURL = imageURL)
-      action && (this.state.action = action)
-      return true
+    const { description, imageURL, action } = request
+    this.state = {
+      description: description ?? this.state.description,
+      ...(imageURL && { imageURL }),
+      ...(action && { action }),
     }
-
-    return false
+    return true
   }
 
   public async consumeAuthorizationResponse(response: AuthorizationResponse) {
