@@ -37,8 +37,12 @@ export class AuthorizationFlow extends Flow<
   }
 
   public async consumeAuthorizationRequest(request: AuthorizationRequest) {
-    const { callbackURL, ...responseProps } = request
-    this.state = responseProps
+    const { description, imageURL, action } = request
+    this.state = {
+      description: description ?? this.state.description,
+      ...(imageURL && { imageURL }),
+      ...(action && { action }),
+    }
     return true
   }
 
