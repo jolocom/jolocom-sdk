@@ -299,7 +299,7 @@ describe('Credential Issuance interaction', () => {
     const aliceInteraction = await alice.processJWT(bobResponse)
     const aliceIssuanceCredentials = await aliceInteraction.issueSelectedCredentials(
       {
-        ['ProofOfNameCredential']: async () => ({
+        ProofOfNameCredential: async () => ({
           metadata: claimsMetadata.name,
           subject: bob.idw.did,
           ...claim,
