@@ -1,12 +1,14 @@
 import {
   PublicProfileClaimMetadata,
   CredentialDefinition,
+  ISignedCredentialAttrs,
 } from '@jolocom/protocol-ts'
 import {
   CredentialOfferRenderInfo,
   CredentialOfferMetadata,
 } from 'jolocom-lib/js/interactionTokens/types'
 import { QueryOptions } from './storage'
+import { SDKError } from './errors'
 
 /**
  * @dev Simply using all claims required by the public profile
@@ -91,12 +93,64 @@ export interface ChannelTransportDesc extends TransportDesc {
   type: ChannelTransportType
 }
 
-export interface ObjectKeeper<T, C, Q> {
-  get(id: string): Promise<T>
-  create?(args: C): Promise<T>
-  query?(attrs?: Q, options?: QueryOptions): Promise<T[]>
-  update?(obj: T): Promise<boolean>
-  delete?(attrs: Q): Promise<boolean>
+export interface ObjectKeeper<
+  Type,
+  CreateArgs = any,
+  QueryArgs = CreateArgs,
+  ExportType = CreateArgs
+> {
+  get(id: string): Promise<Type>
+  create?(args: CreateArgs): Promise<Type>
+  query?(query?: QueryArgs, options?: QueryOptions): Promise<Type[]>
+  //update?(obj: Type): Promise<boolean>
+  delete?(query: QueryArgs): Promise<boolean>
+
+  export?(query?: QueryArgs, options?: QueryOptions): Promise<ExportType[]>
+  import?(data: ExportType[]): Promise<[ExportType, SDKError][]>
+}
+
+/**
+ * @category Export/Import
+ */
+export const EXPORT_SCHEMA_VERSION = "1.0.0"
+
+/**
+ * @category Export/Import
+ */
+export interface ExportedAgentData {
+  encryptedWallet?: string,
+  credentials?: ISignedCredentialAttrs[]
+  credentialsMetadata?: CredentialMetadataSummary[]
+  interactions?: any[] // TODO
+  interactionTokens?: string[] // TODO
+}
+
+/**
+ * @category Export/Import
+ */
+export interface ExportAgentOptions {
+  password?: string      // defaults to the agent's password TODO
+  credentials?: boolean  // whether to include credentials, default true
+  interactions?: boolean // whether to include interactions, default true
+  //caches?: boolean       // whether to include caches (resolved identities), default false
+}
+
+/**
+ * @category Export/Import
+ */
+export const DEFAULT_EXPORT_OPTIONS: ExportAgentOptions = {
+  credentials: true,
+  interactions: true
+}
+
+/**
+ * @category Export/Import
+ */
+export interface IExportedAgent {
+  version: string        // EXPORT_SCHEMA_VERSION of exporter
+  did: string            // exported DID
+  timestamp: number      // time of export
+  data: string           // base64 encoded data
 }
 
 /**
