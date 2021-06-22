@@ -252,5 +252,102 @@ describe('Credential Issuance interaction', () => {
     expect(bobsFlow.getSelectionResult()).toEqual(alicesFlowState.selectedTypes)
   })
 
+  const claimNullValueThrowDataProvider = () => [
+    {
+      claim: {
+        givenName: null,
+      },
+    },
+    {
+      claim: {
+        givenName: null,
+        familyName: null,
+      },
+    },
+    {
+      claim: {
+        givenName: 'Bob',
+        familyName: null,
+      },
+    },
+    {
+      claim: {
+        givenName: null,
+        fullName: 'Agent',
+      },
+    },
+  ]
+
+  const createInteractionForNullPropertyValueCheck = async (
+    alice: Agent,
+    bob: Agent,
+    claim: any,
+  ) => {
+    const aliceCredOffer = await alice.credOfferToken({
+      callbackURL: 'nowhere',
+      offeredCredentials: [{ type: claimsMetadata['name'].type[1] }],
+    })
+    const bobInteraction = await bob.processJWT(aliceCredOffer.encode())
+    const bobResponse = (
+      await bobInteraction.createCredentialOfferResponseToken([
+        { type: claimsMetadata.name.type[1] },
+      ])
+    ).encode()
+
+    await bob.processJWT(bobResponse)
+
+    const aliceInteraction = await alice.processJWT(bobResponse)
+    const aliceIssuanceCredentials = await aliceInteraction.issueSelectedCredentials(
+      {
+        ['ProofOfNameCredential']: async () => ({
+          metadata: claimsMetadata.name,
+          subject: bob.idw.did,
+          ...claim,
+        }),
+      },
+    )
+    const aliceIssuance = await aliceInteraction.createCredentialReceiveToken(
+      aliceIssuanceCredentials,
+    )
+
+    return await bob.processJWT(aliceIssuance)
+  }
+
+  test.each(claimNullValueThrowDataProvider())(
+    'with %o that have null value will throw',
+    async claim => {
+      // making alice resolvable by bob
+      await meetAgent(bob, alice, false)
+      // ensure alice is resolvable by bob
+      await expect(bob.resolve(alice.idw.did)).resolves.toMatchObject(
+        Promise.resolve(alice.idw.didDocument.toJSON()),
+      )
+
+      const interaction = await createInteractionForNullPropertyValueCheck(alice, bob, claim)
+
+      await expect(interaction.storeSelectedCredentials()).rejects.toThrow()
+    },
   )
+
+  test('with claim that have valid value will not throw', async () => {
+    // making alice resolvable by bob
+    await meetAgent(bob, alice, false)
+    // ensure alice is resolvable by bob
+    await expect(bob.resolve(alice.idw.did)).resolves.toMatchObject(
+      Promise.resolve(alice.idw.didDocument.toJSON()),
+    )
+
+    const interaction = await createInteractionForNullPropertyValueCheck(
+      alice,
+      bob,
+      {
+        claim: {
+          givenName: 'Bob',
+          fullName: 'Agent',
+        },
+      },
+    )
+
+    await expect(interaction.storeSelectedCredentials()).resolves.not.toThrow()
+  })
 })
