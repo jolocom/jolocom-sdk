@@ -278,11 +278,7 @@ describe('Credential Issuance interaction', () => {
     },
   ]
 
-  const createInteractionForNullPropertyValueCheck = async (
-    alice: Agent,
-    bob: Agent,
-    claim: any,
-  ) => {
+  const createInteractionForNullPropertyValueCheck = async (alice: Agent, bob: Agent) => {
     const aliceCredOffer = await alice.credOfferToken({
       callbackURL: 'nowhere',
       offeredCredentials: [{ type: claimsMetadata['name'].type[1] }],
@@ -296,21 +292,7 @@ describe('Credential Issuance interaction', () => {
 
     await bob.processJWT(bobResponse)
 
-    const aliceInteraction = await alice.processJWT(bobResponse)
-    const aliceIssuanceCredentials = await aliceInteraction.issueSelectedCredentials(
-      {
-        ProofOfNameCredential: async () => ({
-          metadata: claimsMetadata.name,
-          subject: bob.idw.did,
-          ...claim,
-        }),
-      },
-    )
-    const aliceIssuance = await aliceInteraction.createCredentialReceiveToken(
-      aliceIssuanceCredentials,
-    )
-
-    return await bob.processJWT(aliceIssuance)
+    return await alice.processJWT(bobResponse)
   }
 
   test.each(claimNullValueThrowDataProvider())(
@@ -323,9 +305,17 @@ describe('Credential Issuance interaction', () => {
         Promise.resolve(alice.idw.didDocument.toJSON()),
       )
 
-      const interaction = await createInteractionForNullPropertyValueCheck(alice, bob, claim)
+      const interaction = await createInteractionForNullPropertyValueCheck(alice, bob)
+      const issuanceCredentials = async () => await interaction.issueSelectedCredentials(
+        {
+          ProofOfNameCredential: async () => ({
+            metadata: claimsMetadata.name,
+            subject: bob.idw.did,
+            ...claim,
+          }),
+        })
 
-      await expect(interaction.storeSelectedCredentials()).rejects.toThrow()
+      await expect(issuanceCredentials()).rejects.toThrow()
     },
   )
 
@@ -337,17 +327,19 @@ describe('Credential Issuance interaction', () => {
       Promise.resolve(alice.idw.didDocument.toJSON()),
     )
 
-    const interaction = await createInteractionForNullPropertyValueCheck(
-      alice,
-      bob,
+    const interaction = await createInteractionForNullPropertyValueCheck(alice, bob)
+    const issuanceCredentials = async () => await interaction.issueSelectedCredentials(
       {
-        claim: {
-          givenName: 'Bob',
-          fullName: 'Agent',
-        },
-      },
-    )
+        ProofOfNameCredential: async () => ({
+          metadata: claimsMetadata.name,
+          subject: bob.idw.did,
+          claim: {
+            givenName: 'Bob',
+            fullName: 'Agent',
+          },
+        }),
+      })
 
-    await expect(interaction.storeSelectedCredentials()).resolves.not.toThrow()
+    await expect(issuanceCredentials()).resolves.not.toThrow()
   })
 })
