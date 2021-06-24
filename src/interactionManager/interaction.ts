@@ -404,10 +404,13 @@ export class Interaction<
         const subject = (credDesc && credDesc.subject) || this.counterparty?.did
         if (!subject) throw new Error('no subject for credential')
 
+        const claim = (credDesc && credDesc.claim) || {}
+        this.assertClaimValid(claim)
+
         return this.ctx.ctx.idw.create.signedCredential(
           {
             metadata,
-            claim: credDesc?.claim,
+            claim,
             subject,
           },
           password,
@@ -731,6 +734,14 @@ export class Interaction<
     } catch (err) {
       console.error('storeCredentialMetadata failed', err)
       throw new SDKError(ErrorCode.SaveCredentialMetadataFailed, err)
+    }
+  }
+
+  private assertClaimValid(claim: object) {
+    for (const [key, value] of Object.entries(claim)) {
+      if (value === null || value === undefined) {
+        throw new Error(`Credential issuance. Claim '${key}' value must be defined.`)
+      }
     }
   }
 }
