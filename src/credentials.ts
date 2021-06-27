@@ -16,6 +16,7 @@ import { ObjectKeeper, CredentialMetadataSummary, IdentitySummary } from './type
 import { IResolver } from 'jolocom-lib/js/didMethods/types'
 import { validateJsonLd } from 'jolocom-lib/js/linkedData'
 import { SDKError, ErrorCode } from './errors'
+import { ClaimInterface } from 'cred-types-jolocom-core/types'
 
 export interface DisplayVal {
   label?: string
@@ -309,27 +310,61 @@ export class CredentialIssuer extends CredentialKeeper {
   }
 
   /**
-   * Creates and signs a Credential, and commits it to storage.
+   * Creates and signs a Credential.
    *
    * @param credParams - credential attributes
    * @returns SignedCredential instance
+   * @throws Error on credential claim with 'null' or 'undefined' value
    * @category Credential Management
    */
   async create<T extends BaseMetadata>(credParams: ISignedCredCreationArgs<T>) {
-    const cred = await this.agent.idw.create.signedCredential(
+    this.assertClaimValueDefined((credParams.claim || {}) as ClaimInterface)
+
+    return await this.agent.idw.create.signedCredential(
       credParams,
       await this.agent.passwordStore.getPassword(),
     )
+  }
 
+  /**
+   * Persists signed credential to the storage.
+   *
+   * @param credential - signed credential
+   * @returns void
+   * @category Credential Management
+   */
+  async persist(credential: SignedCredential) {
     // FIXME TODO: issuers currently can't store the cred in their DB because it
     // requires a foreign link to the subject... so only self-signed creds work
     // Otherwise it throws
-    if (cred.issuer === cred.subject) {
-      await this.storage.store.verifiableCredential(cred)
+    if (credential.issuer !== credential.subject) {
+      return
     }
 
-    return cred
+    await this.storage.store.verifiableCredential(credential)
   }
 
-  issue = this.create
+  /**
+   * Creates, signs and persists a Credential.
+   *
+   * @param credParams - credential attributes
+   * @returns SignedCredential instance
+   * @throws Error on credential claim with 'null' or 'undefined' value
+   * @category Credential Management
+   */
+  async issue<T extends BaseMetadata>(credParams: ISignedCredCreationArgs<T>) {
+    const credential = await this.create(credParams)
+
+    await this.persist(credential)
+
+    return credential
+  }
+
+  private assertClaimValueDefined(claim: object) {
+    for (const [key, value] of Object.entries(claim)) {
+      if (value === null || value === undefined) {
+        throw new Error(`Credential issuance. Claim '${key}' value must be defined.`)
+      }
+    }
+  }
 }
