@@ -73,32 +73,32 @@ export async function basicCredOffer(
     offeredCredentials: creds,
   })
   const bobInterxn = await holder.processJWT(credOffer.encode())
-  const bobResponse = await bobInterxn.createCredentialOfferResponseToken(
-    creds,
-  )
+  const bobResponse = await bobInterxn.createCredentialOfferResponseToken(creds)
   await holder.processJWT(bobResponse)
   const aliceInteraction = await issuer.processJWT(bobResponse)
 
   const aliceIssuance = await aliceInteraction.createCredentialReceiveToken(
-    await Promise.all(creds.map(cred => {
-      return issuer.credentials.issue({
-        metadata: {
-          type: ['VerifiableCredential', cred.type],
-          name: cred.type,
-          context: [],
-        },
-        subject: holder.idw.did,
-        claim: {
-          givenName: 'Bob',
-          familyName: 'Agent',
-        },
-      })
-    }))
+    await Promise.all(
+      creds.map(async cred =>
+        issuer.credentials.issue({
+          metadata: {
+            type: ['VerifiableCredential', cred.type],
+            name: cred.type,
+            context: [],
+          },
+          subject: holder.idw.did,
+          claim: {
+            givenName: 'Bob',
+            familyName: 'Agent',
+          },
+        }),
+      ),
+    ),
   )
 
   const bobRecieving = await holder.processJWT(aliceIssuance)
 
-  let interxns = await issuer.sdk.storage.get.interactionIds()
+  const interxns = await issuer.sdk.storage.get.interactionIds()
   expect(interxns).toHaveLength(1)
   const bobsFlow = bobRecieving.flow as CredentialOfferFlow
   expect(bobsFlow.state.credentialsAllValid).toBeTruthy()
