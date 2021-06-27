@@ -394,7 +394,7 @@ export class Interaction<
     ) => Promise<{ claim: any; metadata?: any; subject?: string }>
   }): Promise<SignedCredential[]> {
     const flowState = this.flow.state as CredentialOfferFlowState
-    const password = await this.ctx.ctx.passwordStore.getPassword()
+
     return Promise.all(
       flowState.selectedTypes.map(async (type) => {
         const offerTypeHandler = offerMap && offerMap[type]
@@ -405,16 +405,12 @@ export class Interaction<
         if (!subject) throw new Error('no subject for credential')
 
         const claim = (credDesc && credDesc.claim) || {}
-        this.assertClaimValid(claim)
 
-        return this.ctx.ctx.idw.create.signedCredential(
-          {
-            metadata,
-            claim,
-            subject,
-          },
-          password,
-        )
+        return this.ctx.ctx.credentials.create({
+          metadata,
+          claim,
+          subject,
+        })
       }),
     )
   }
@@ -734,14 +730,6 @@ export class Interaction<
     } catch (err) {
       console.error('storeCredentialMetadata failed', err)
       throw new SDKError(ErrorCode.SaveCredentialMetadataFailed, err)
-    }
-  }
-
-  private assertClaimValid(claim: object) {
-    for (const [key, value] of Object.entries(claim)) {
-      if (value === null || value === undefined) {
-        throw new Error(`Credential issuance. Claim '${key}' value must be defined.`)
-      }
     }
   }
 }
