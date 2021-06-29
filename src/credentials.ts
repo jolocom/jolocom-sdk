@@ -337,6 +337,8 @@ export class CredentialIssuer extends CredentialKeeper {
     // requires a foreign link to the subject... so only self-signed creds work
     // Otherwise it throws
     if (credential.issuer !== credential.subject) {
+      console.warn('Credential persistence. Only self-signed credentials can be stored.')
+
       return
     }
 

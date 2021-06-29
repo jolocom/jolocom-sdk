@@ -1,8 +1,14 @@
 import { claimsMetadata } from 'jolocom-lib'
 import { Agent } from '../src'
-import { destroyAgent, createAgent, meetAgent } from './util'
+import {
+  destroyAgent,
+  createAgent,
+  meetAgent,
+  testConsoleThenReturnValue,
+} from './util'
 import { CredentialOfferFlowState } from 'src/interactionManager/types'
 import { CredentialOfferFlow } from 'src/interactionManager/credentialOfferFlow'
+import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
 
 const conn1Name = 'issuance1'
 const conn2Name = 'issuance2'
@@ -89,16 +95,21 @@ describe('Credential Issuance interaction', () => {
     await bob.processJWT(bobResponse)
 
     const aliceInteraction = await alice.processJWT(bobResponse)
-
     const aliceIssuance = await aliceInteraction.createCredentialReceiveToken([
-      await alice.credentials.create({
-        metadata: claimsMetadata.name,
-        subject: bob.idw.did,
-        claim: {
-          givenName: 'Bob',
-          familyName: 'Agent',
-        },
-      }),
+      (await testConsoleThenReturnValue({
+        channel: 'warn',
+        callback: async () =>
+          await alice.credentials.create({
+            metadata: claimsMetadata.name,
+            subject: bob.idw.did,
+            claim: {
+              givenName: 'Bob',
+              familyName: 'Agent',
+            },
+          }),
+        expectedInvokeTimes: 1,
+        expectedMessage: 'Credential persistence. Only self-signed credentials can be stored.',
+      })) as SignedCredential,
     ])
 
     const bobRecieving = await bob.processJWT(aliceIssuance)
