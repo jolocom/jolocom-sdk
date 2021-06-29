@@ -37,7 +37,7 @@ describe('Agent export/import', () => {
   test("basics", async () => {
     let creds = [{ type: 'dummy' }, { type: 'anotherdummy' }]
     await basicCredOffer(alice, bob, creds)
-    await bob.credentials.issue({
+    await bob.credentials.create({
       metadata: claimsMetadata.name,
       claim: {
         givenName: 'bob',

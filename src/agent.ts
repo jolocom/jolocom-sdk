@@ -675,7 +675,7 @@ export class Agent {
   public async signedCredential<T extends BaseMetadata>(
     credParams: ISignedCredCreationArgs<T>,
   ) {
-    return this.credentials.issue(credParams)
+    return this.credentials.create(credParams)
   }
 
   /**

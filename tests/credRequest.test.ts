@@ -30,7 +30,7 @@ test('Credential Request interaction', async () => {
   )
 
   // Bob self-issues a name credential
-  const bobSelfSignedCred = await bob.credentials.issue({
+  const bobSelfSignedCred = await bob.credentials.create({
     metadata: claimsMetadata.name,
     subject: bob.idw.did,
     claim: {

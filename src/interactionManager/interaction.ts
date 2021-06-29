@@ -394,7 +394,7 @@ export class Interaction<
     ) => Promise<{ claim: any; metadata?: any; subject?: string }>
   }): Promise<SignedCredential[]> {
     const flowState = this.flow.state as CredentialOfferFlowState
-    const password = await this.ctx.ctx.passwordStore.getPassword()
+
     return Promise.all(
       flowState.selectedTypes.map(async (type) => {
         const offerTypeHandler = offerMap && offerMap[type]
@@ -404,14 +404,13 @@ export class Interaction<
         const subject = (credDesc && credDesc.subject) || this.counterparty?.did
         if (!subject) throw new Error('no subject for credential')
 
-        return this.ctx.ctx.idw.create.signedCredential(
-          {
-            metadata,
-            claim: credDesc?.claim,
-            subject,
-          },
-          password,
-        )
+        const claim = (credDesc && credDesc.claim) || {}
+
+        return this.ctx.ctx.credentials.issue({
+          metadata,
+          claim,
+          subject,
+        })
       }),
     )
   }
