@@ -310,7 +310,7 @@ export class CredentialIssuer extends CredentialKeeper {
   }
 
   /**
-   * Creates and signs a Credential.
+   * Creates, signs and persists a Credential.
    *
    * @param credParams - credential attributes
    * @returns SignedCredential instance
@@ -318,12 +318,11 @@ export class CredentialIssuer extends CredentialKeeper {
    * @category Credential Management
    */
   async create<T extends BaseMetadata>(credParams: ISignedCredCreationArgs<T>) {
-    this.assertClaimValueDefined((credParams.claim || {}) as ClaimInterface)
+    const credential = await this.issue(credParams)
 
-    return await this.agent.idw.create.signedCredential(
-      credParams,
-      await this.agent.passwordStore.getPassword(),
-    )
+    await this.persist(credential)
+
+    return credential
   }
 
   /**
@@ -345,7 +344,7 @@ export class CredentialIssuer extends CredentialKeeper {
   }
 
   /**
-   * Creates, signs and persists a Credential.
+   * Creates and signs a Credential.
    *
    * @param credParams - credential attributes
    * @returns SignedCredential instance
@@ -353,11 +352,12 @@ export class CredentialIssuer extends CredentialKeeper {
    * @category Credential Management
    */
   async issue<T extends BaseMetadata>(credParams: ISignedCredCreationArgs<T>) {
-    const credential = await this.create(credParams)
+    this.assertClaimValueDefined((credParams.claim || {}) as ClaimInterface)
 
-    await this.persist(credential)
-
-    return credential
+    return await this.agent.idw.create.signedCredential(
+      credParams,
+      await this.agent.passwordStore.getPassword(),
+    )
   }
 
   private assertClaimValueDefined(claim: object) {

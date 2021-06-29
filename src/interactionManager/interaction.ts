@@ -406,7 +406,7 @@ export class Interaction<
 
         const claim = (credDesc && credDesc.claim) || {}
 
-        return this.ctx.ctx.credentials.create({
+        return this.ctx.ctx.credentials.issue({
           metadata,
           claim,
           subject,

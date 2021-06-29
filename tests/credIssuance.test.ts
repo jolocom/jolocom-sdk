@@ -91,7 +91,7 @@ describe('Credential Issuance interaction', () => {
     const aliceInteraction = await alice.processJWT(bobResponse)
 
     const aliceIssuance = await aliceInteraction.createCredentialReceiveToken([
-      await alice.credentials.issue({
+      await alice.credentials.create({
         metadata: claimsMetadata.name,
         subject: bob.idw.did,
         claim: {

@@ -247,7 +247,7 @@ describe('Query Credentials', () => {
   it('by issuer', async () => {
     let creds = [{ type: 'dummy' }, { type: 'anotherdummy' }]
     await basicCredOffer(alice, bob, creds)
-    await bob.credentials.issue({
+    await bob.credentials.create({
       metadata: {
         type: ['VerifiableCredential', creds[1].type],
         name: creds[0].type,
