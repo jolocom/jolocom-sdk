@@ -104,3 +104,23 @@ export async function basicCredOffer(
   expect(bobsFlow.state.credentialsAllValid).toBeTruthy()
   await bobInterxn.storeSelectedCredentials()
 }
+
+export const testConsoleThenReturnValue = async (config: {
+  channel: 'error' | 'info' | 'log' | 'warn'
+  callback: () => {}
+  expectedInvokeTimes: number
+  expectedMessage?: string
+}) => {
+  const stub = jest.spyOn(global.console, config.channel).mockImplementation()
+  const valueToReturn = await config.callback()
+
+  expect(stub).toHaveBeenCalledTimes(config.expectedInvokeTimes)
+
+  if (config.expectedMessage !== null) {
+    expect(stub).toHaveBeenLastCalledWith(config.expectedMessage)
+  }
+
+  stub.mockRestore()
+
+  return valueToReturn
+}
