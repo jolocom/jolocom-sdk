@@ -1,6 +1,6 @@
 {
   "name": "@jolocom/sdk",
-  "version": "1.3.0-rc2",
+  "version": "1.3.0",
   "main": "js/index.js",
   "files": [
     "js/"
@@ -44,7 +44,7 @@
     "eslint-plugin-react": "^7.12.4",
     "fs-extra": "^8.1.0",
     "jest": "^26.4.2",
-    "jolocom-lib": "^5.2.0",
+    "jolocom-lib": "^5.2.1",
     "mockdate": "^2.0.2",
     "node-fetch": "^2.6.0",
     "prettier": "^1.18.2",
@@ -62,7 +62,7 @@
     "yarn": "^1.22.0"
   },
   "peerDependencies": {
-    "jolocom-lib": "^5.2.0"
+    "jolocom-lib": "^5.2.1"
   },
   "dependencies": {
     "@jolocom/protocol-ts": "^0.5.4",
