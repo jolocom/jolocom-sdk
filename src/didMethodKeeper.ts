@@ -27,9 +27,19 @@ export class DidMethodKeeper {
   }
 
   getForDid(did: string) {
-    const methodName = did.split(':')[1]
-    if (!methodName) throw new Error('could not parse DID: ' + did)
-    return this.get(methodName)
+    const withoutPrefix = did.substr(4)
+
+    if (!withoutPrefix || !did.startsWith('did:')) {
+      throw new Error('DID method resolving. Could not parse DID: "' + did + '"!')
+    }
+
+    for (const [key, value] of Object.entries(this.methods)) {
+      if (withoutPrefix.startsWith(key)) {
+        return value
+      }
+    }
+
+    throw new Error('DID method resolving. DID method for DID "' + did + '" is not registered!')
   }
 
   setDefault(method: IDidMethod) {
