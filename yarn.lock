@@ -4705,10 +4705,10 @@ jest@^26.4.2:
     import-local "^3.0.2"
     jest-cli "^26.4.2"
 
-jolocom-lib@^5.2.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-5.2.0.tgz#8ac056ad5ff6b0069b99e3957f5da03db28ed266"
-  integrity sha512-gYBWt5sKjoF33FlKV8G6p09WAojFM4ExBFmeye7+eCvdf+ebBSgSRdxiuZ+lsMf3dZhTE3Nc23fTUkvnAxvzCg==
+jolocom-lib@^5.2.1:
+  version "5.2.1"
+  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-5.2.1.tgz#162ec4fd4597e1ec3539dade519bd82c57ed7864"
+  integrity sha512-2Bb1yDp5gtnRuVvsQVUscxyIBtYesch73if6jucAyqVl4CJXQYYZsGOvJDYHzzfX+h62b3pt0XknfsMih5DyWQ==
   dependencies:
     "@hawkingnetwork/ed25519-hd-key-rn" "^1.0.1"
     "@jolocom/jolo-did-registrar" "^1.0.0"
