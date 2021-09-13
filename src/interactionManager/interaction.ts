@@ -488,7 +488,11 @@ export class Interaction<
       token.interactionToken,
       token.interactionType,
     )
-    this.messages.push(token)
+    if (
+      this.messages.find(msg => msg.interactionType === token.interactionType)
+    ) {
+      this.messages.push(token)
+    }
 
     if (!fromStorage) {
       const eventName =
