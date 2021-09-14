@@ -489,7 +489,7 @@ export class Interaction<
       token.interactionType,
     )
     if (
-      this.messages.find(msg => msg.interactionType === token.interactionType)
+      !this.messages.find(msg => msg.interactionType === token.interactionType)
     ) {
       this.messages.push(token)
     }
