@@ -1,0 +1,497 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Agent = void 0;
+const storage_1 = require("./storage");
+const jolocom_lib_1 = require("jolocom-lib");
+const errors_1 = require("./errors");
+const native_core_1 = require("@jolocom/native-core");
+const utils_1 = require("jolocom-lib/js/didMethods/utils");
+const crypto_1 = require("jolocom-lib/js/utils/crypto");
+const interactionManager_1 = require("./interactionManager/interactionManager");
+const channels_1 = require("./channels");
+const types_1 = require("./interactionManager/types");
+const resolutionFlow_1 = require("./interactionManager/resolutionFlow");
+const credentials_1 = require("./credentials");
+/**
+ * The `Agent` class mainly provides an abstraction around the {@link
+ * IdentityWallet} and {@link InteractionManager} components. It provides glue
+ * code for:
+ * - Identities: create and load identities
+ * - Interactions: find interactions, and process incoming tokens
+ * - Interaction Requests: start interactions by creating a new request message
+ * - Credential Issuance: issue credentials
+ *
+ *
+ * The {@link JolocomSDK} has further convenience methods for Agent
+ * construction: {@link JolocomSDK.createAgent},
+ * {@link JolocomSDK.loadAgent}, {@link JolocomSDK.initAgent}
+ */
+class Agent {
+    constructor({ sdk, passwordStore, didMethod, }) {
+        /*
+          TODO: use the Keeper pattern
+                so we can do sdk.identities.create()
+                              sdk.interactions.create()
+                              sdk.interactions.find()
+                              etc
+      
+        identities: IdentityKeeper
+        interactions: InteractionKeeper
+      
+        */
+        this.interactionManager = new interactionManager_1.InteractionManager(this);
+        this.channels = new channels_1.ChannelKeeper(this);
+        this.passwordStore = passwordStore || new storage_1.NaivePasswordStore();
+        this.sdk = sdk;
+        this._didMethod = didMethod;
+        this.resolve = this.sdk.resolve.bind(this.sdk);
+        this.resolver = this.sdk.resolver;
+        this.storage = this.sdk.storage;
+        this.credentials = new credentials_1.CredentialIssuer(this, () => {
+            return { subject: this.identityWallet.did };
+        });
+    }
+    /**
+     * The DID method that this Agent was constructed with, or otherwise the SDK's
+     * default DID method
+     */
+    get didMethod() {
+        return this._didMethod || this.sdk.didMethods.getDefault();
+    }
+    /**
+     * The Agent's IdentityWallet instance.
+     *
+     * @throws SDKError(ErrorCode.NoWallet) if there is none
+     */
+    get identityWallet() {
+        if (this._identityWallet)
+            return this._identityWallet;
+        throw new errors_1.SDKError(errors_1.ErrorCode.NoWallet);
+    }
+    /**
+     * Shortcut for {@link identityWallet}
+     */
+    get idw() {
+        return this.identityWallet;
+    }
+    /**
+     * The Agent's KeyProvider instance.
+     *
+     * @throws SDKError(ErrorCode.NoKeyProvider) if there is none
+     */
+    get keyProvider() {
+        if (this._keyProvider)
+            return this._keyProvider;
+        throw new errors_1.SDKError(errors_1.ErrorCode.NoKeyProvider);
+    }
+    /**
+     * Create and store new Identity using the Agent's {@link didMethod}
+     *
+     * @returns the newly created {@link IdentityWallet}
+     *
+     * @category Identity Management
+     */
+    async createNewIdentity() {
+        const pass = await this.passwordStore.getPassword();
+        this._keyProvider = await jolocom_lib_1.SoftwareKeyProvider.newEmptyWallet(native_core_1.walletUtils, '', pass);
+        this._identityWallet = await utils_1.createIdentityFromKeyProvider(this._keyProvider, pass, this.didMethod.registrar);
+        await this.sdk.storeIdentityData(this._identityWallet.identity, this._keyProvider);
+        // This sets the didMethod so that it doesn't return a different value if
+        // the SDK default is changed in runtime
+        this._didMethod = this.didMethod;
+        return this._identityWallet;
+    }
+    async getAlsoKnownAs() {
+        const alsoKnownAs = this.idw.didDocument.alsoKnownAs || [];
+        const alsos = {};
+        alsoKnownAs.forEach(did => {
+            alsos[did.split(':')[1]] = did;
+        });
+        return alsos;
+    }
+    async addAlsoKnownAs(didMethodName, didMethodArg) {
+        const didMethod = this.sdk.didMethods.get(didMethodName);
+        const also = await didMethod.resolver.resolve(didMethodArg);
+        this.idw.identity.addAlsoKnownAs(also);
+        await this.storage.store.identity(this.idw.identity);
+        return also;
+    }
+    /**
+     * Load an Identity from storage, given its DID.
+     *
+     * If no DID is specified, the first Identity found in storage will be loaded.
+     *
+     * @param did - DID of Identity to be loaded from DB
+     * @returns An IdentityWallet corrosponding to the given DID
+     *
+     * @category Identity Management
+     */
+    async loadIdentity(did) {
+        const encryptedWalletInfo = await this.storage.get.encryptedWallet(did);
+        if (!encryptedWalletInfo) {
+            throw new errors_1.SDKError(errors_1.ErrorCode.NoWallet);
+        }
+        let encryptionPass;
+        try {
+            encryptionPass = await this.passwordStore.getPassword();
+        }
+        catch (e) {
+            // This may fail if the application was uninstalled and reinstalled, as
+            // the android keystore is cleared on uninstall, but the database may
+            // still remain, due to having been auto backed up!
+            throw new errors_1.SDKError(errors_1.ErrorCode.NoPassword, e);
+        }
+        this._keyProvider = new jolocom_lib_1.SoftwareKeyProvider(native_core_1.walletUtils, Buffer.from(encryptedWalletInfo.encryptedWallet, 'base64'), encryptedWalletInfo.id);
+        const identityWallet = await utils_1.authAsIdentityFromKeyProvider(this._keyProvider, encryptionPass, this.resolver);
+        // ???? TODO FIXME
+        await this.storage.store.identity(identityWallet.identity);
+        // This sets the didMethod so that it doesn't return a different value if
+        // the SDK default is changed in runtime
+        this._didMethod = this.didMethod;
+        return (this._identityWallet = identityWallet);
+    }
+    /**
+     * Loads an Identity based on a BIP39 mnemonic phrase
+     *
+     * @param mnemonic - a BIP39 mnemonic phrase to use
+     * @returns An IdentityWallet holding an Identity created by the configured
+     *          DID Method given the entropy encoded in the mnemonic phrase
+     *
+     * @category Identity Management
+     */
+    async loadFromMnemonic(mnemonic) {
+        const pass = await this.passwordStore.getPassword();
+        if (!this.didMethod.recoverFromSeed) {
+            throw new Error(`Recovery not implemented for method ${this.didMethod.prefix}`);
+        }
+        const { identityWallet, succesfullyResolved, } = await this.didMethod.recoverFromSeed(Buffer.from(crypto_1.mnemonicToEntropy(mnemonic), 'hex'), pass);
+        if (!succesfullyResolved) {
+            throw new Error(`Identity for did ${identityWallet.did} not anchored, can't load`);
+        }
+        this._identityWallet = identityWallet;
+        //@ts-ignore private property, but no other reference present
+        this._keyProvider = identityWallet._keyProvider;
+        await this.sdk.storeIdentityData(this._identityWallet.identity, this._keyProvider);
+        // This sets the didMethod so that it doesn't return a different value if
+        // the SDK default is changed in runtime
+        this._didMethod = this.didMethod;
+        return identityWallet;
+    }
+    /**
+     * Creates and registers an Identity based on a BIP39 mnemonic phrase
+     *
+     * @param mnemonic - a BIP39 mnemonic phrase to use
+     * @param shouldOverwrite - if true, overwrite any pre-existing identity in
+     *                          storage (default false)
+     * @returns An IdentityWallet holding an Identity created by the configured
+     *          DID Method given the entropy encoded in the mnemonic phrase
+     *
+     * @category Identity Management
+     */
+    async createFromMnemonic(mnemonic, shouldOverwrite) {
+        const pass = await this.passwordStore.getPassword();
+        if (!this.didMethod.recoverFromSeed) {
+            throw new Error(`Recovery not implemented for method ${this.didMethod.prefix}`);
+        }
+        const { identityWallet, succesfullyResolved, } = await this.didMethod.recoverFromSeed(Buffer.from(crypto_1.mnemonicToEntropy(mnemonic), 'hex'), pass);
+        if (!shouldOverwrite && succesfullyResolved) {
+            throw new Error(`Identity for did ${identityWallet.did} already anchored, and shouldOverwrite? was set to ${shouldOverwrite}`);
+        }
+        this._identityWallet = identityWallet;
+        //@ts-ignore private property on idw, but no other reference present
+        this._keyProvider = identityWallet._keyProvider;
+        await this.didMethod.registrar.create(this.keyProvider, pass);
+        await this.sdk.storeIdentityData(this._identityWallet.identity, this._keyProvider);
+        // This sets the didMethod so that it doesn't return a different value if
+        // the SDK default is changed in runtime
+        this._didMethod = this.didMethod;
+        return identityWallet;
+    }
+    /**
+     * Parses a recieved interaction token in JWT format and process it through
+     * the interaction system, returning the corresponding Interaction
+     *
+     * @param jwt recieved jwt string or parsed JSONWebToken
+     * @returns Promise<Interaction> the associated Interaction object
+     * @throws AppError<InvalidToken> with `origError` set to the original token
+     *                                validation error from the jolocom library
+     *
+     * @category Interaction Management
+     */
+    async processJWT(jwt, transportAPI) {
+        const token = typeof jwt === 'string'
+            ? jolocom_lib_1.JolocomLib.parse.interactionToken.fromJWT(jwt)
+            : jwt;
+        let interxn;
+        try {
+            interxn = await this.interactionManager.getInteraction(token.nonce, transportAPI);
+        }
+        catch (err) {
+            if (err.message !== errors_1.ErrorCode.NoSuchInteraction)
+                throw err;
+        }
+        // extract ProofOfControlAuthority (PCA) and process it if available
+        if (token.payload.pca) {
+            // update local state
+            await this.sdk.didMethods
+                .getForDid(token.issuer)
+                .registrar.encounter(token.payload.pca);
+        }
+        if (!interxn) {
+            // NOTE: interactionManager.start internally calls
+            // processInteractionToken and storage.store
+            interxn = await this.interactionManager.start(token, transportAPI);
+        }
+        else if (interxn.lastMessage.encode() !== jwt) {
+            // NOTE FIXME TODO #multitenancy
+            // we only process the message if it is not last message seen (see "else if" condition)
+            // this is to allow for some flexibility with how processJWT is called,
+            // mostly because of how there is no separation between interaction tokens
+            // stored by different agents sharing the same database.
+            //
+            // When agent multi-tenancy is implemented properly, we can remove this
+            // flexibility and instead always run processInteractionToken on incoming
+            // JWTs
+            await interxn.processInteractionToken(token);
+            await this.storage.store.interactionToken(token);
+        }
+        return interxn;
+    }
+    /**
+     * Find an interaction, by id or by jwt, or by JSONWebToken object
+     *
+     * @param inp id, JWT string, or JSONWebToken object
+     * @returns Promise<Interaction> the associated Interaction object
+     * @category Interaction Management
+     */
+    async findInteraction(inp) {
+        let id;
+        if (typeof inp === 'string') {
+            try {
+                const token = jolocom_lib_1.JolocomLib.parse.interactionToken.fromJWT(inp);
+                id = token.nonce;
+            }
+            catch (_a) {
+                // not a JWT, but maybe it's the nonce itself?
+                id = inp;
+            }
+        }
+        else if (inp && inp.nonce) {
+            id = inp.nonce;
+        }
+        else {
+            throw new errors_1.SDKError(errors_1.ErrorCode.NoSuchInteraction);
+        }
+        //@ts-ignore
+        return await this.interactionManager.getInteraction(id);
+    }
+    /**
+     * Creates a signed, base64 encoded Authentication Request, given a
+     * callbackURL
+     *
+     * @param callbackURL - the callbackURL to which the Authentication Response
+     *                      should be sent
+     * @returns Base64 encoded signed Authentication Request
+     * @category Interaction Requests
+     */
+    async authRequestToken(auth) {
+        const token = await this.idw.create.interactionTokens.request.auth(auth, await this.passwordStore.getPassword());
+        await this.interactionManager.start(token);
+        return token;
+    }
+    /**
+     * Creates a signed, base64 encoded Resolution Request, given a URI
+     *
+     * @param uri - URI to request resolution for
+     * @returns Base64 encoded signed Resolution Request
+     * @category Interaction Requests
+     */
+    async resolutionRequestToken(req = {}) {
+        const token = await this.idw.create.message({
+            message: req,
+            typ: resolutionFlow_1.ResolutionType.ResolutionRequest,
+        }, await this.passwordStore.getPassword());
+        await this.interactionManager.start(token);
+        return token;
+    }
+    /**
+     * Creates a signed, base64 encoded Authorization Request, given the request
+     * attributes
+     *
+     * @param request - Authrization Request Attributes
+     * @returns Base64 encoded signed Authentication Request
+     * @category Interaction Requests
+     */
+    async authorizationRequestToken(request) {
+        const token = await this.idw.create.message({
+            message: request,
+            typ: types_1.AuthorizationType.AuthorizationRequest,
+        }, await this.passwordStore.getPassword());
+        await this.interactionManager.start(token);
+        return token;
+    }
+    /**
+     * Creates a signed, base64 encoded JWT for an EstablishChannelRequest interaction token
+     *
+     * @param request - EstablishChannelRequest Attributes
+     * @returns Base64 encoded signed EstablishChannelRequest
+     * @category Interaction Requests
+     */
+    async establishChannelRequestToken(request) {
+        const token = await this.idw.create.message({
+            message: request,
+            typ: types_1.EstablishChannelType.EstablishChannelRequest,
+        }, await this.passwordStore.getPassword());
+        await this.interactionManager.start(token);
+        return token;
+    }
+    /**
+     * Creates a signed, base64 encoded Credential Request, given a set of requirements
+     *
+     * @param request - Credential Request Attributes
+     * @returns Base64 encoded signed credential request
+     * @category Interaction Requests
+     */
+    async credRequestToken(request) {
+        const token = await this.idw.create.interactionTokens.request.share(request, await this.passwordStore.getPassword());
+        await this.interactionManager.start(token);
+        return token;
+    }
+    /**
+     * Returns a base64 encoded signed credential offer token, given
+     * request attributes
+     *
+     * @param offer - credential offer attributes
+     * @returns A base64 encoded signed credential offer token offering
+     * credentials according to `offer`
+     * @category Interaction Requests
+     */
+    async credOfferToken(offer) {
+        const token = await this.idw.create.interactionTokens.request.offer({
+            callbackURL: offer.callbackURL,
+            offeredCredentials: offer.offeredCredentials.map(oc => {
+                oc.issuer = {
+                    id: this.idw.did,
+                    // name: TODO get name from PublicProfile credential?
+                    ...oc.issuer,
+                };
+                if (oc.credential) {
+                    // NOTE: currently CredentialOffer assumes a fixed value of the type array
+                    const credentialDefaults = { schema: '', name: oc.type };
+                    return {
+                        ...oc,
+                        credential: {
+                            ...credentialDefaults,
+                            ...oc.credential,
+                            ...oc.credential,
+                        },
+                    };
+                }
+                else {
+                    return oc;
+                }
+            }),
+        }, await this.passwordStore.getPassword());
+        await this.interactionManager.start(token);
+        return token;
+    }
+    /**
+     * Returns a base64 encoded signed credential issuance token, given
+     * issuance attributes and a recieved token selecting desired issuance
+     *
+     * @param issuance - credential issuance attributes
+     * @param selection - base64 encoded credential offer response token
+     * @returns A base64 encoded signed issuance token containing verifiable
+     * credentials
+     * @category Credential Management
+     */
+    async credIssuanceToken(issuance, selection) {
+        const token = await this.idw.create.interactionTokens.response.issue(issuance, await this.passwordStore.getPassword(), jolocom_lib_1.JolocomLib.parse.interactionToken.fromJWT(selection));
+        return token;
+    }
+    /**
+     * @category Interaction Requests
+     */
+    async rpcDecRequest(req) {
+        const token = await this.idw.create.message({
+            message: {
+                callbackURL: req.callbackURL,
+                request: {
+                    target: req.target,
+                    data: req.toDecrypt.toString('base64'),
+                },
+            },
+            typ: types_1.DecryptionType.DecryptionRequest,
+        }, await this.passwordStore.getPassword());
+        await this.interactionManager.start(token);
+        return token;
+    }
+    /**
+     * @category Interaction Requests
+     */
+    async rpcEncRequest(req) {
+        const token = await this.idw.create.message({
+            message: {
+                callbackURL: req.callbackURL,
+                request: {
+                    data: req.toEncrypt.toString('base64'),
+                    target: req.target,
+                },
+            },
+            typ: types_1.EncryptionType.EncryptionRequest,
+        }, await this.passwordStore.getPassword());
+        await this.interactionManager.start(token);
+        return token;
+    }
+    /**
+     * @category Interaction Requests
+     */
+    async signingRequest(req) {
+        const token = await this.idw.create.message({
+            message: {
+                callbackURL: req.callbackURL,
+                request: {
+                    data: req.toSign.toString('base64'),
+                },
+            },
+            typ: types_1.SigningType.SigningRequest,
+        }, await this.passwordStore.getPassword());
+        await this.interactionManager.start(token);
+        return token;
+    }
+    /**
+     * Returns a Signed Credential
+     *
+     * @param credParams - credential attributes
+     * @returns SignedCredential instance
+     * @category Credential Management
+     * @deprecated
+     */
+    async signedCredential(credParams) {
+        return this.credentials.create(credParams);
+    }
+    /**
+     * Returns the Proof of Control Authority for an Agent
+     * the PCA is a DID Method specific set of data which
+     * proves that the key holder also controls the Identifier
+     *
+     * @returns Control Proof string
+     */
+    async getProofOfControlAuthority() {
+        const split = this.idw.did.split(':');
+        return await this.storage.eventDB.read(split[2]);
+    }
+    async delete(options) {
+        await this.sdk.deleteAgent(this.idw.did, options);
+    }
+    async export(opts) {
+        return this.sdk.exportAgent(this, opts);
+    }
+    async import(exagent, opts) {
+        if (this.idw.did !== exagent.did)
+            throw new errors_1.SDKError(errors_1.ErrorCode.Unknown);
+        await this.sdk.importAgent(exagent, opts);
+    }
+}
+exports.Agent = Agent;
+//# sourceMappingURL=agent.js.map

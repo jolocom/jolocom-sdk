@@ -1,0 +1,1 @@
+{"version":3,"file":"flow.js","sourceRoot":"","sources":["../../src/interactionManager/flow.ts"],"names":[],"mappings":";;;AAOA,MAAsB,IAAI;IAOxB,YAAY,GAAgB;QAC1B,IAAI,CAAC,GAAG,GAAG,GAAG,CAAA;IAChB,CAAC;IAED,IAAI,IAAI;QACN,aAAa;QACb,OAAO,IAAI,CAAC,WAAW,CAAC,IAAI,CAAA;IAC9B,CAAC;IAEM,QAAQ;QACb,OAAO,IAAI,CAAC,KAAK,CAAA;IACnB,CAAC;CAMF;AAxBD,oBAwBC"}
