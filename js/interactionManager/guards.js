@@ -1,0 +1,27 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.isSigningResponse = exports.isSigningRequest = exports.isDecryptionResponse = exports.isDecryptionRequest = exports.isEncryptionResponse = exports.isEncryptionRequest = exports.isEstablishChannelResponse = exports.isEstablishChannelRequest = exports.isAuthorizationResponse = exports.isAuthorizationRequest = exports.isCredentialReceive = exports.isCredentialOfferResponse = exports.isCredentialOfferRequest = exports.isAuthenticationRequest = exports.isCredentialResponse = exports.isCredentialRequest = void 0;
+const credentialRequest_1 = require("jolocom-lib/js/interactionTokens/credentialRequest");
+const credentialResponse_1 = require("jolocom-lib/js/interactionTokens/credentialResponse");
+const authentication_1 = require("jolocom-lib/js/interactionTokens/authentication");
+const credentialOfferRequest_1 = require("jolocom-lib/js/interactionTokens/credentialOfferRequest");
+const credentialOfferResponse_1 = require("jolocom-lib/js/interactionTokens/credentialOfferResponse");
+const credentialsReceive_1 = require("jolocom-lib/js/interactionTokens/credentialsReceive");
+const types_1 = require("./types");
+exports.isCredentialRequest = (token) => token instanceof credentialRequest_1.CredentialRequest;
+exports.isCredentialResponse = (token) => token instanceof credentialResponse_1.CredentialResponse;
+exports.isAuthenticationRequest = (token) => token instanceof authentication_1.Authentication;
+exports.isCredentialOfferRequest = (token) => token instanceof credentialOfferRequest_1.CredentialOfferRequest;
+exports.isCredentialOfferResponse = (token) => token instanceof credentialOfferResponse_1.CredentialOfferResponse;
+exports.isCredentialReceive = (token) => token instanceof credentialsReceive_1.CredentialsReceive;
+exports.isAuthorizationRequest = (token, type) => type === types_1.AuthorizationType.AuthorizationRequest;
+exports.isAuthorizationResponse = (token, type) => type === types_1.AuthorizationType.AuthorizationResponse;
+exports.isEstablishChannelRequest = (token, type) => type === types_1.EstablishChannelType.EstablishChannelRequest;
+exports.isEstablishChannelResponse = (token, type) => type === types_1.EstablishChannelType.EstablishChannelResponse;
+exports.isEncryptionRequest = (token, type) => type === types_1.EncryptionType.EncryptionRequest;
+exports.isEncryptionResponse = (token, type) => type === types_1.EncryptionType.EncryptionResponse;
+exports.isDecryptionRequest = (token, type) => type === types_1.DecryptionType.DecryptionRequest;
+exports.isDecryptionResponse = (token, type) => type === types_1.DecryptionType.DecryptionResponse;
+exports.isSigningRequest = (token, type) => type === types_1.SigningType.SigningRequest;
+exports.isSigningResponse = (token, type) => type === types_1.SigningType.SigningResponse;
+//# sourceMappingURL=guards.js.map

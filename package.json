@@ -1,0 +1,78 @@
+{
+  "name": "@jolocom/sdk",
+  "version": "1.4.0-rc2",
+  "main": "js/index.js",
+  "files": [
+    "js/"
+  ],
+  "scripts": {
+    "build": "rm -rf js && tsc --rootDir src -p .",
+    "prepare": "yarn build",
+    "repl": "node --experimental-repl-await -r tsconfig-paths/register -r ts-node/register ./bin/repl.ts",
+    "typeorm": "ts-node -O '{\"module\": \"commonjs\"}' -r ./bin/repl.ts node_modules/.bin/typeorm",
+    "lint": "eslint --ext .ts --ext .tsx .",
+    "format": "yarn lint --fix",
+    "test": "jest --coverage --collectCoverageFrom=src/**/*.ts --coverageDirectory=coverage",
+    "docs": "./bin/build_docs.sh",
+    "docs:serve": "./bin/build_docs.sh serve"
+  },
+  "private": false,
+  "devDependencies": {
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.11.4",
+    "@babel/plugin-proposal-decorators": "^7.4.4",
+    "@babel/preset-env": "^7.11.0",
+    "@babel/preset-typescript": "^7.10.4",
+    "@babel/runtime": "^7.11.2",
+    "@jolocom/local-resolver-registrar": "^1.0.1",
+    "@jolocom/sdk-storage-typeorm": "^4.3.0-rc0",
+    "@types/jest": "^26.0.10",
+    "@types/node": "^13.9.8",
+    "@types/node-fetch": "^2.5.5",
+    "@types/ramda": "^0.26.8",
+    "@types/ws": "^7.2.6",
+    "@typescript-eslint/eslint-plugin": "^2.20.0",
+    "@typescript-eslint/parser": "^1.5.0",
+    "@zerollup/ts-transform-paths": "^1.7.17",
+    "assert": "^2.0.0",
+    "babel-plugin-inline-import": "^3.0.0",
+    "babel-plugin-transform-typescript-metadata": "^0.2.2",
+    "case-sensitive-paths-webpack-plugin": "^2.1.2",
+    "eslint": "^5.15.3",
+    "eslint-config-prettier": "^4.1.0",
+    "eslint-plugin-prettier": "^3.0.1",
+    "eslint-plugin-react": "^7.12.4",
+    "fs-extra": "^8.1.0",
+    "jest": "^26.4.2",
+    "jolocom-lib": "../lib2/jolocom-lib-v5.3.0-rc0.tgz",
+    "mockdate": "^2.0.2",
+    "node-fetch": "^2.6.0",
+    "prettier": "^1.18.2",
+    "regenerator-runtime": "^0.13.5",
+    "sqlite3": "^4",
+    "ts-jest": "^26.3.0",
+    "ts-loader": "3.5.0",
+    "ts-node": "^9.0.0",
+    "tsconfig-paths": "^3.9.0",
+    "tslib": "^1.7.1",
+    "typed-emitter": "^1.3.1",
+    "typedoc": "^0.19.2",
+    "typeorm": "0.2.24",
+    "typescript": "^3.7.5",
+    "yarn": "^1.22.0"
+  },
+  "peerDependencies": {
+    "jolocom-lib": "^5.2.1"
+  },
+  "dependencies": {
+    "@jolocom/protocol-ts": "../protocol-ts/jolocom-protocol-ts-v0.5.4.tgz",
+    "form-data": "^3.0.0",
+    "ramda": "^0.26.1"
+  },
+  "keywords": [
+    "Jolocom",
+    "Self-Sovereign Identity",
+    "jolocom-sdk",
+    "typeorm"
+  ]
+}
