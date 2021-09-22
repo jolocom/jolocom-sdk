@@ -4,6 +4,7 @@ export enum ErrorCode {
   SaveExternalCredentialFailed = 'SaveExtCred',
   SaveCredentialMetadataFailed = 'SaveCredMetadata',
   TransportNotSupported = 'UnsuportedTransport',
+  TransportSubscriptionNotSuported = 'TransportSubscriptionNotSuported',
 
   TokenExpired = 'TokenExpired',
   InvalidSignature = 'InvalidSignature',

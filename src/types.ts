@@ -47,19 +47,18 @@ export interface TransportDesc {
 /**
  * @category Transports
  */
-export type TransportMessageHandler = (msg: string) => Promise<void>
-export type TransportMessageErrorHandler = (err: Error) => void
+export type TransportMessageHandler = (
+  msg: string,
+  error?: Error,
+) => Promise<void>
 
 /**
  * @category Transports
  */
 export interface TransportHandler {
   configure?(...args: any[]): void
-  start(
-    d: TransportDesc,
-    cb?: TransportMessageHandler,
-    err?: TransportMessageErrorHandler,
-  ): TransportAPI
+  subscribe?(onMessage: TransportMessageHandler): void
+  start(d: TransportDesc, cb?: TransportMessageHandler): TransportAPI
 }
 
 /**

@@ -1,6 +1,11 @@
 import { SDKError, ErrorCode } from './errors'
 import { HTTPTransport } from './http'
-import { TransportHandler, TransportDesc, TransportMessageHandler, TransportAPI } from './types'
+import {
+  TransportHandler,
+  TransportDesc,
+  TransportMessageHandler,
+  TransportAPI,
+} from './types'
 import { WebSocketTransport } from './websocket'
 
 export class Transportable {
@@ -18,7 +23,6 @@ export class Transportable {
   set transportAPI(api: TransportAPI) {
     this._transportAPI = api
   }
-
 }
 
 export class TransportKeeper {
@@ -36,10 +40,16 @@ export class TransportKeeper {
     }
   }
 
-  public register(
-    typeName: string,
-    handler: TransportHandler
-  ) {
+  public subscribe(typeName: string, onMessage: TransportMessageHandler) {
+    const transportHandler = this._transportHandlers[typeName]
+    if (!transportHandler) throw new SDKError(ErrorCode.TransportNotSupported)
+    if (!transportHandler.subscribe)
+      throw new SDKError(ErrorCode.TransportSubscriptionNotSuported)
+
+    transportHandler.subscribe(onMessage)
+  }
+
+  public register(typeName: string, handler: TransportHandler) {
     this._transportHandlers[typeName] = handler
   }
 
