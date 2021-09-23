@@ -379,8 +379,7 @@ export class Agent {
       await interxn.processInteractionToken(token)
       await this.storage.store.interactionToken(token)
     } else if (interxn.lastMessage.encode() === jwt) {
-      // @ts-ignore
-      await interxn._processToken(token)
+      this.interactionManager.emit('interactionResumed', interxn)
     }
 
     return interxn
