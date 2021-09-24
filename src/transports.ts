@@ -40,9 +40,15 @@ export class TransportKeeper {
     }
   }
 
-  public subscribe(typeName: string, onMessage: TransportMessageHandler) {
+  private getTransportHandler(typeName: string) {
     const transportHandler = this._transportHandlers[typeName]
     if (!transportHandler) throw new SDKError(ErrorCode.TransportNotSupported)
+
+    return transportHandler
+  }
+
+  public subscribe(typeName: string, onMessage: TransportMessageHandler) {
+    const transportHandler = this.getTransportHandler(typeName)
     if (!transportHandler.subscribe)
       throw new SDKError(ErrorCode.TransportSubscriptionNotSuported)
 
@@ -59,11 +65,9 @@ export class TransportKeeper {
    */
   public async start(
     transport: TransportDesc,
-    onMessage?: TransportMessageHandler
+    onMessage?: TransportMessageHandler,
   ): Promise<TransportAPI> {
-    const transportHandler = this._transportHandlers[transport.type]
-    if (!transportHandler) throw new SDKError(ErrorCode.TransportNotSupported)
-
+    const transportHandler = this.getTransportHandler(transport.type)
     const transportAPI = transportHandler.start(transport, onMessage)
     transportAPI.desc = transport
     return transportAPI
