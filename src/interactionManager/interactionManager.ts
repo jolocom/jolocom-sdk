@@ -16,6 +16,7 @@ flows.forEach((f) => {
 export interface InteractionEvents {
   interactionCreated: (interxn: Interaction) => void
   interactionUpdated: (interxn: Interaction) => void
+  interactionResumed: (interxn: Interaction) => void
 }
 
 /**
