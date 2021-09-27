@@ -7,6 +7,7 @@
   ],
   "scripts": {
     "build": "rm -rf js && tsc --rootDir src -p .",
+    "watch": "tsc -w --pretty --rootDir src -p .",
     "prepare": "yarn build",
     "repl": "node --experimental-repl-await -r tsconfig-paths/register -r ts-node/register ./bin/repl.ts",
     "typeorm": "ts-node -O '{\"module\": \"commonjs\"}' -r ./bin/repl.ts node_modules/.bin/typeorm",
