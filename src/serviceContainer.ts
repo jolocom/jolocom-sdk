@@ -1,7 +1,7 @@
 export class ServiceContainer {
   private readonly services: Record<string, any> = {}
 
-  register(identifier: string, plugin: any, redefine = false) {
+  register(identifier: string, service: any, redefine = false) {
     const normalizedIdentifier = ServiceContainer.normalizeIdentifier(identifier)
 
     if (this.services.hasOwnProperty(normalizedIdentifier) && !redefine) {
@@ -10,7 +10,7 @@ export class ServiceContainer {
       )
     }
 
-    this.services[normalizedIdentifier] = plugin
+    this.services[normalizedIdentifier] = service
 
     return this
   }
