@@ -14,8 +14,17 @@ import { Identity } from 'jolocom-lib/js/identity/identity'
 import { Agent } from './agent'
 import { TransportKeeper } from './transports'
 import { CredentialKeeper } from './credentials'
-import { DeleteAgentOptions, ExportAgentOptions, ExportedAgentData, IExportedAgent, EXPORT_SCHEMA_VERSION } from './types'
+import {
+  DeleteAgentOptions,
+  ExportAgentOptions,
+  ExportedAgentData,
+  IExportedAgent,
+  EXPORT_SCHEMA_VERSION,
+  LoggerConfig,
+} from './types'
 import { getDeleteAgentOptions, getExportAgentOptions } from './util'
+import { ServiceContainer } from './serviceContainer'
+import { LoggerRegistrar } from './logger/loggerRegistrar'
 export { Agent } from './agent'
 
 export * from './types'
@@ -25,6 +34,7 @@ export { FlowType } from './interactionManager/types'
 export interface IJolocomSDKConfig {
   storage: IStorage
   eventDB?: InternalDb
+  logger?: LoggerConfig
 }
 
 export interface IInitAgentOptions {
@@ -44,6 +54,7 @@ export class JolocomSDK {
   public transports = new TransportKeeper()
   public storage: IStorage
   public credentials: CredentialKeeper
+  private readonly serviceContainer: ServiceContainer
 
   /**
    * The toplevel resolver which simply invokes {@link resolve}
@@ -53,6 +64,7 @@ export class JolocomSDK {
   public resolver: IResolver
 
   constructor(conf: IJolocomSDKConfig) {
+    this.serviceContainer = new ServiceContainer()
     this.storage = conf.storage
     const localDidMethod = new LocalDidMethod(
       conf.eventDB || this.storage.eventDB,
@@ -67,6 +79,8 @@ export class JolocomSDK {
 
     // if we are running on NodeJS, then autoconfig some things if possible
     if (process && process.version) this._autoconfigForNodeJS()
+
+    LoggerRegistrar.register(this.serviceContainer, conf.logger)
   }
 
   private _autoconfigForNodeJS() {
