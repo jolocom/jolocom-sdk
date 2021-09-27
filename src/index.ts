@@ -54,7 +54,7 @@ export class JolocomSDK {
   public transports = new TransportKeeper()
   public storage: IStorage
   public credentials: CredentialKeeper
-  private readonly serviceContainer: ServiceContainer
+  public readonly serviceContainer: ServiceContainer
 
   /**
    * The toplevel resolver which simply invokes {@link resolve}
