@@ -6,7 +6,7 @@ export class ServiceContainer {
 
     if (this.services.hasOwnProperty(normalizedIdentifier) && !redefine) {
       throw new Error(
-        `Service registration failed. Plugin with name: '${normalizedIdentifier}' already registered.`,
+        `Service registration failed. Service with name: '${normalizedIdentifier}' already registered.`,
       )
     }
 
