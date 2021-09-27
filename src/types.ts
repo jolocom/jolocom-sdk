@@ -9,6 +9,9 @@ import {
 } from 'jolocom-lib/js/interactionTokens/types'
 import { QueryOptions } from './storage'
 import { SDKError } from './errors'
+import { LoggerChannel } from './logger'
+import { Level } from './logger/level'
+import { OutputType } from './logger/outputType'
 
 /**
  * @dev Simply using all claims required by the public profile
@@ -171,4 +174,18 @@ export const DEFAULT_DELETE_AGENT_OPTIONS: DeleteAgentOptions = {
   identity: true,
   credentials: true,
   interactions: true,
+}
+
+export type LoggerChannelConfig = {
+  [name in LoggerChannel]: {
+    isEnabled?: boolean
+    level?: Level
+    outputType?: OutputType
+  }
+}
+
+export interface LoggerConfig {
+  isEnabled?: boolean
+  logsDir?: string
+  channelsConfig?: LoggerChannelConfig
 }
