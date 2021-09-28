@@ -157,6 +157,7 @@ export class JolocomSDK {
       sdk: this,
       passwordStore,
       didMethod,
+      serviceContainer: this.serviceContainer,
     })
   }
 

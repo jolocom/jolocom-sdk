@@ -44,6 +44,8 @@ import { CredentialsReceive } from 'jolocom-lib/js/interactionTokens/credentials
 import { Authentication } from 'jolocom-lib/js/interactionTokens/authentication'
 import { CredentialIssuer } from './credentials'
 import { DeleteAgentOptions, ExportAgentOptions, IExportedAgent } from './types'
+import { ServiceContainer } from './serviceContainer'
+import { Logger } from './logger'
 
 /**
  * The `Agent` class mainly provides an abstraction around the {@link
@@ -86,15 +88,18 @@ export class Agent {
   public storage: IStorage
 
   public credentials: CredentialIssuer
+  private logger: Logger
 
   public constructor({
     sdk,
     passwordStore,
     didMethod,
+    serviceContainer,
   }: {
     sdk: JolocomSDK
     passwordStore?: IPasswordStore
     didMethod?: IDidMethod
+    serviceContainer: ServiceContainer
   }) {
     this.passwordStore = passwordStore || new NaivePasswordStore()
     this.sdk = sdk
@@ -105,6 +110,7 @@ export class Agent {
     this.credentials = new CredentialIssuer(this, () => {
       return { subject: this.identityWallet.did }
     })
+    this.logger = serviceContainer.get<Logger>('logger.agent')
   }
 
   /**
@@ -162,6 +168,8 @@ export class Agent {
       this.didMethod.registrar,
     )
 
+    this.logger.info(`New identity created. DID: '${this._identityWallet.did}'.`)
+
     await this.sdk.storeIdentityData(
       this._identityWallet.identity,
       this._keyProvider,
@@ -187,6 +195,8 @@ export class Agent {
   public async loadIdentity(did?: string): Promise<IdentityWallet> {
     const encryptedWalletInfo = await this.storage.get.encryptedWallet(did)
     if (!encryptedWalletInfo) {
+      this.logger.error(`Identity not found. DID: '${did}'.`)
+
       throw new SDKError(ErrorCode.NoWallet)
     }
 
@@ -194,6 +204,7 @@ export class Agent {
     try {
       encryptionPass = await this.passwordStore.getPassword()
     } catch (e) {
+      this.logger.error(`Identity password definition failed. DID:'${did}'. Error: '${e}'.`)
       // This may fail if the application was uninstalled and reinstalled, as
       // the android keystore is cleared on uninstall, but the database may
       // still remain, due to having been auto backed up!
@@ -219,6 +230,10 @@ export class Agent {
     // the SDK default is changed in runtime
     this._didMethod = this.didMethod
 
+    this.logger.info(
+      `Identity loaded from storage successfully. DID: '${identityWallet.did}'.`,
+    )
+
     return (this._identityWallet = identityWallet)
   }
 
@@ -235,6 +250,10 @@ export class Agent {
     const pass = await this.passwordStore.getPassword()
 
     if (!this.didMethod.recoverFromSeed) {
+      this.logger.error(
+        `Identity loading failed. Recovery not implemented for method: '${this.didMethod.prefix}'.`,
+      )
+
       throw new Error(
         `Recovery not implemented for method ${this.didMethod.prefix}`,
       )
@@ -249,6 +268,10 @@ export class Agent {
     )
 
     if (!succesfullyResolved) {
+      this.logger.error(
+        `Identity loading failed. Identity not anchored. DID: '${identityWallet.did}'.`,
+      )
+
       throw new Error(
         `Identity for did ${identityWallet.did} not anchored, can't load`,
       )
@@ -266,6 +289,10 @@ export class Agent {
     // This sets the didMethod so that it doesn't return a different value if
     // the SDK default is changed in runtime
     this._didMethod = this.didMethod
+
+    this.logger.info(
+      `Identity loaded from BIP39 mnemonic phrase successfully. DID: '${identityWallet.did}'.`,
+    )
 
     return identityWallet
   }
@@ -287,6 +314,10 @@ export class Agent {
   ): Promise<IdentityWallet> {
     const pass = await this.passwordStore.getPassword()
     if (!this.didMethod.recoverFromSeed) {
+      this.logger.error(
+        `Identity creation failed. Recovery not implemented for method: '${this.didMethod.prefix}'.`,
+      )
+
       throw new Error(
         `Recovery not implemented for method ${this.didMethod.prefix}`,
       )
@@ -301,6 +332,10 @@ export class Agent {
     )
 
     if (!shouldOverwrite && succesfullyResolved) {
+      this.logger.error(
+        `Identity with specified did already exists. DID: '${identityWallet.did}'. shouldOverwrite: '${shouldOverwrite}'.`,
+      )
+
       throw new Error(
         `Identity for did ${identityWallet.did} already anchored, and shouldOverwrite? was set to ${shouldOverwrite}`,
       )
@@ -320,6 +355,10 @@ export class Agent {
     // This sets the didMethod so that it doesn't return a different value if
     // the SDK default is changed in runtime
     this._didMethod = this.didMethod
+
+    this.logger.info(
+      `Identity created from BIP39 mnemonic phrase successfully. DID: '${identityWallet.did}'.`,
+    )
 
     return identityWallet
   }
@@ -351,7 +390,15 @@ export class Agent {
         transportAPI,
       )
     } catch (err) {
-      if (err.message !== ErrorCode.NoSuchInteraction) throw err
+      if (err.message === ErrorCode.NoSuchInteraction) {
+        this.logger.info(
+          `Interaction not found. Token nonce: '${token.nonce}'.`,
+        )
+      } else {
+        this.logger.error(`JWT processing failed. '${err}'.`)
+
+        throw err
+      }
     }
 
     // extract ProofOfControlAuthority (PCA) and process it if available
@@ -366,6 +413,8 @@ export class Agent {
       // NOTE: interactionManager.start internally calls
       // processInteractionToken and storage.store
       interxn = await this.interactionManager.start(token, transportAPI)
+
+      this.logger.info(`New interaction created. Nonce: '${token.nonce}'.`)
     } else if (interxn.lastMessage.encode() !== jwt) {
       // NOTE FIXME TODO #multitenancy
       // we only process the message if it is not last message seen (see "else if" condition)
@@ -378,6 +427,8 @@ export class Agent {
       // JWTs
       await interxn.processInteractionToken(token)
       await this.storage.store.interactionToken(token)
+
+      this.logger.info(`Interaction updated. Nonce: '${token.nonce}'.`)
     }
 
     return interxn
@@ -405,6 +456,8 @@ export class Agent {
     } else if (inp && inp.nonce) {
       id = inp.nonce
     } else {
+      this.logger.info(`Interaction not found.`)
+
       throw new SDKError(ErrorCode.NoSuchInteraction)
     }
 
@@ -430,6 +483,11 @@ export class Agent {
       await this.passwordStore.getPassword(),
     )
     await this.interactionManager.start(token)
+
+    this.logger.info(
+      `Authentication request received. Nonce: '${token.nonce}'.`,
+    )
+
     return token
   }
 
@@ -452,6 +510,9 @@ export class Agent {
     )
 
     await this.interactionManager.start(token)
+
+    this.logger.info(`Resolution request received. Nonce: '${token.nonce}'.`)
+
     return token
   }
 
@@ -475,6 +536,9 @@ export class Agent {
     )
 
     await this.interactionManager.start(token)
+
+    this.logger.info(`Authorization request received. Nonce: '${token.nonce}'.`)
+
     return token
   }
 
@@ -497,6 +561,11 @@ export class Agent {
     )
 
     await this.interactionManager.start(token)
+
+    this.logger.info(
+      `Establish channel request received. Nonce: '${token.nonce}'.`,
+    )
+
     return token
   }
 
@@ -515,6 +584,9 @@ export class Agent {
       await this.passwordStore.getPassword(),
     )
     await this.interactionManager.start(token)
+
+    this.logger.info(`Credential request received. Nonce: '${token.nonce}'.`)
+
     return token
   }
 
@@ -559,6 +631,11 @@ export class Agent {
     )
 
     await this.interactionManager.start(token)
+
+    this.logger.info(
+      `Credential offer request received. Nonce: '${token.nonce}'.`,
+    )
+
     return token
   }
 
@@ -580,6 +657,10 @@ export class Agent {
       issuance,
       await this.passwordStore.getPassword(),
       JolocomLib.parse.interactionToken.fromJWT(selection),
+    )
+
+    this.logger.info(
+      `Credential issuance request received. Nonce: '${token.nonce}'.`,
     )
 
     return token
@@ -609,6 +690,10 @@ export class Agent {
 
     await this.interactionManager.start(token)
 
+    this.logger.info(
+      `RPC decryption request received. Nonce: '${token.nonce}'.`,
+    )
+
     return token
   }
 
@@ -636,6 +721,10 @@ export class Agent {
 
     await this.interactionManager.start(token)
 
+    this.logger.info(
+      `RPC encryption request received. Nonce: '${token.nonce}'.`,
+    )
+
     return token
   }
 
@@ -661,6 +750,8 @@ export class Agent {
 
     await this.interactionManager.start(token)
 
+    this.logger.info(`Signing request received. Nonce: '${token.nonce}'.`)
+
     return token
   }
 
@@ -675,6 +766,8 @@ export class Agent {
   public async signedCredential<T extends BaseMetadata>(
     credParams: ISignedCredCreationArgs<T>,
   ) {
+    this.logger.warn(`Signing credential request received. Deprecated.`)
+
     return this.credentials.create(credParams)
   }
 
@@ -692,15 +785,32 @@ export class Agent {
 
   public async delete(options?: DeleteAgentOptions) {
     await this.sdk.deleteAgent(this.idw.did, options)
+
+    this.logger.info(
+      `Deleted data associated with an identity. DID: '${this.idw.did}'.`,
+      [options],
+    )
   }
 
-
   public async export(opts?: ExportAgentOptions): Promise<IExportedAgent> {
-    return this.sdk.exportAgent(this, opts)
+    const agent = await this.sdk.exportAgent(this, opts)
+
+    this.logger.error(`Agent exported. Agent DID: ${agent.did}. Options: `, [
+      opts,
+    ])
+
+    return agent
   }
 
   public async import(exagent: IExportedAgent, opts?: ExportAgentOptions): Promise<void> {
-    if (this.idw.did !== exagent.did) throw new SDKError(ErrorCode.Unknown)
+    if (this.idw.did !== exagent.did) {
+      this.logger.error(
+        `Agent import failed. Provided invalid agent. Current DID: '${this.idw.did}'. Imported agent DID: ${exagent.did}`,
+      )
+
+      throw new SDKError(ErrorCode.Unknown)
+    }
+
     await this.sdk.importAgent(exagent, opts)
   }
 }
