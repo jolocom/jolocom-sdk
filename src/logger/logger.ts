@@ -6,7 +6,7 @@ export interface Logger {
    * @param message
    * @param args
    */
-  debug(message: string, args?: []): void
+  debug(message: string, args?: unknown[]): void
 
   /**
    * Adds a log record at the INFO level.
@@ -15,7 +15,7 @@ export interface Logger {
    * @param message
    * @param args
    */
-  info(message: string, args?: []): void
+  info(message: string, args?: unknown[]): void
 
   /**
    * Adds a log record at the WARNING level.
@@ -27,7 +27,7 @@ export interface Logger {
    * @param message
    * @param args
    */
-  warn(message: string, args?: []): void
+  warn(message: string, args?: unknown[]): void
 
   /**
    * Adds a log record at the ERROR level.
@@ -36,7 +36,7 @@ export interface Logger {
    * @param message
    * @param args
    */
-  error(message: string, args?: []): void
+  error(message: string, args?: unknown[]): void
 
   /**
    * Adds a log record at the FATAL level.
@@ -45,5 +45,5 @@ export interface Logger {
    * @param message
    * @param args
    */
-  fatal(message: string, args?: []): void
+  fatal(message: string, args?: unknown[]): void
 }
