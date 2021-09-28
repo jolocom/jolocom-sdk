@@ -1,12 +1,14 @@
 import { ServiceContainer } from '../serviceContainer'
-import { LoggerConfig } from '@jolocom/sdk'
+import { LoggerConfig } from '../types'
 import { LoggerChannel } from './loggerChannel'
-import { configuration } from './config'
+import { configure } from './config'
 import { DefaultLogger } from './defaultLogger'
 import { Logger } from './logger'
 
 export class LoggerRegistrar {
   static register(container: ServiceContainer, clientConfig?: LoggerConfig) {
+    configure(clientConfig)
+
     Object.values(LoggerChannel).forEach(channel => {
       const loggerChannel = LoggerRegistrar.createLoggerChannel(
         channel,
@@ -21,11 +23,10 @@ export class LoggerRegistrar {
     name: LoggerChannel,
     clientConfig?: LoggerConfig,
   ): Logger {
-    const channelConfig = configuration(clientConfig)
     const isEnabled =
       clientConfig?.isEnabled !== false &&
       clientConfig?.channelsConfig?.[name]?.isEnabled !== false
 
-    return new DefaultLogger(channelConfig, name, isEnabled)
+    return new DefaultLogger(name, isEnabled)
   }
 }

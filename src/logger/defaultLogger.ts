@@ -1,4 +1,4 @@
-import { Configuration, configure, getLogger, Logger as Log4js } from 'log4js'
+import { getLogger, Logger as Log4js } from 'log4js'
 import { Logger } from './logger'
 import { Level } from './level'
 
@@ -6,13 +6,7 @@ export class DefaultLogger implements Logger {
   private readonly logger: Log4js
   private readonly isEnabled: boolean
 
-  constructor(
-    configuration: Configuration,
-    channelName: string,
-    isEnabled = true,
-  ) {
-    configure(configuration)
-
+  constructor(channelName: string, isEnabled = true) {
     this.logger = getLogger(channelName)
     this.isEnabled = isEnabled
   }

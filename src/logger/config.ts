@@ -1,9 +1,9 @@
 import appRootDir from 'app-root-path'
-import { Configuration } from 'log4js'
 import { LoggerChannel } from './loggerChannel'
-import { LoggerConfig } from '@jolocom/sdk'
+import { LoggerConfig } from '../types'
 import { OutputType } from './outputType'
 import { Level } from './level'
+import { configure as log4jsConfigure } from 'log4js'
 
 const DEFAULT_MAX_LOG_SIZE = 5242880
 const appendersConfigMap = (filePath: string) => ({
@@ -37,7 +37,7 @@ const appendersConfigMap = (filePath: string) => ({
   },
 })
 
-export const configuration = (clientConfig?: LoggerConfig): Configuration => {
+export const configure = (clientConfig?: LoggerConfig): void => {
   const appenders = {}
   const categories = {}
   let defaultCategoryLevel = Level.INFO
@@ -56,11 +56,11 @@ export const configuration = (clientConfig?: LoggerConfig): Configuration => {
     }
   })
 
-  return {
+  log4jsConfigure({
     appenders,
     categories: {
       default: { appenders: [LoggerChannel.SDK], level: defaultCategoryLevel },
       ...categories,
     },
-  }
+  })
 }
