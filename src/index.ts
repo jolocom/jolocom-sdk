@@ -64,7 +64,7 @@ export class JolocomSDK {
   public resolver: IResolver
 
   constructor(conf: IJolocomSDKConfig) {
-    this.serviceContainer = new ServiceContainer()
+    this.serviceContainer = ServiceContainer.getInstance()
     this.storage = conf.storage
     const localDidMethod = new LocalDidMethod(
       conf.eventDB || this.storage.eventDB,

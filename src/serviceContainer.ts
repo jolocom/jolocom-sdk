@@ -1,8 +1,28 @@
 export class ServiceContainer {
+  private static instance: ServiceContainer
   private readonly services: Record<string, any> = {}
 
-  register(identifier: string, service: any, redefine = false) {
-    const normalizedIdentifier = ServiceContainer.normalizeIdentifier(identifier)
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  private constructor() {}
+
+  static getInstance(): ServiceContainer {
+    if (!ServiceContainer.instance) {
+      this.instance = new ServiceContainer()
+    }
+
+    return ServiceContainer.instance
+  }
+
+  register(
+    identifier: string,
+    service: unknown,
+    prefix?: string,
+    redefine = false,
+  ) {
+    const normalizedIdentifier = ServiceContainer.normalizeIdentifier(
+      identifier,
+      prefix,
+    )
 
     if (this.services.hasOwnProperty(normalizedIdentifier) && !redefine) {
       throw new Error(
@@ -27,7 +47,12 @@ export class ServiceContainer {
     return this.services[normalizedIdentifier] as T
   }
 
-  private static normalizeIdentifier(identifier: string): string {
-    return identifier.toLowerCase()
+  private static normalizeIdentifier(
+    identifier: string,
+    prefix?: string,
+  ): string {
+    return prefix
+      ? `${prefix}.${identifier.toLowerCase()}`
+      : identifier.toLowerCase()
   }
 }

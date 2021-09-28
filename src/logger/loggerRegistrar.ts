@@ -15,7 +15,7 @@ export class LoggerRegistrar {
         clientConfig,
       )
 
-      container.register(`logger.${channel}`, loggerChannel)
+      container.register(channel, loggerChannel, 'logger')
     })
   }
 
