@@ -5,19 +5,23 @@ import { LoggerConfig } from '@jolocom/sdk'
 import { OutputType } from './outputType'
 import { Level } from './level'
 
+const DEFAULT_MAX_LOG_SIZE = 5242880
 const appendersConfigMap = (filePath: string) => ({
   file: {
     [LoggerChannel.SDK]: {
       type: 'file',
       filename: filePath + '/sdk.log',
+      maxLogSize: DEFAULT_MAX_LOG_SIZE,
     },
     [LoggerChannel.AGENT]: {
       type: 'file',
       filename: filePath + '/sdk_agent.log',
+      maxLogSize: DEFAULT_MAX_LOG_SIZE,
     },
     [LoggerChannel.INTERACTION]: {
       type: 'file',
       filename: filePath + '/sdk_interaction.log',
+      maxLogSize: DEFAULT_MAX_LOG_SIZE,
     },
   },
   console: {
