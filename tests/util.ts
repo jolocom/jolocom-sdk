@@ -23,6 +23,7 @@ export async function createAgent(
     sdk,
     passwordStore,
     didMethod,
+    serviceContainer: sdk.serviceContainer,
   })
   return agent
 }
