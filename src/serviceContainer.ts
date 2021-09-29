@@ -1,17 +1,5 @@
 export class ServiceContainer {
-  private static instance: ServiceContainer
   private readonly services: Record<string, any> = {}
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  private constructor() {}
-
-  static getInstance(): ServiceContainer {
-    if (!ServiceContainer.instance) {
-      this.instance = new ServiceContainer()
-    }
-
-    return ServiceContainer.instance
-  }
 
   register(
     identifier: string,
