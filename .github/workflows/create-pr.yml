@@ -1,0 +1,23 @@
+name: 'Creating PR in "react-native-jolocom" repo'
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  pull-request:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Create pull request
+      uses: SBub/create-outside-pr@v1.0.0
+
+      env:
+        API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+      with:
+        destination_repo: 'jolocom/react-native-jolocom'
+        destination_base_branch: 'master'
+        user_name: 'SBub'
+        user_email: 'svetaibuben@gmail.com'
