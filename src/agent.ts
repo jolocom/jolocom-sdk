@@ -378,6 +378,11 @@ export class Agent {
       // JWTs
       await interxn.processInteractionToken(token)
       await this.storage.store.interactionToken(token)
+    } else if (interxn.lastMessage.encode() === jwt) {
+      // NOTE
+      // the @interactionResumed event is emitted here because @processInteractionToken is
+      // not called if the token was previously processed
+      this.interactionManager.emit('interactionResumed', interxn)
     }
 
     return interxn
