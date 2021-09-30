@@ -24,18 +24,23 @@ afterEach(async () => {
 describe('Events', () => {
   let userInterxnCreated = jest.fn(),
     userInterxnUpdated = jest.fn(),
+    userInterxnResumed = jest.fn(),
     serviceInterxnCreated = jest.fn(),
     serviceInterxnUpdated = jest.fn(),
+    serviceInterxnResumed = jest.fn(),
     unsubs: Unsubscriber[] = []
 
   beforeEach(() => {
     userInterxnCreated.mockReset()
     userInterxnUpdated.mockReset()
+    userInterxnResumed.mockReset()
     serviceInterxnCreated.mockReset()
     serviceInterxnUpdated.mockReset()
+    serviceInterxnResumed.mockReset()
     unsubs = [
       user.interactionManager.on('interactionCreated', userInterxnCreated),
       user.interactionManager.on('interactionUpdated', userInterxnUpdated),
+      user.interactionManager.on('interactionResumed', userInterxnResumed),
       service.interactionManager.on(
         'interactionCreated',
         serviceInterxnCreated,
@@ -44,14 +49,18 @@ describe('Events', () => {
         'interactionUpdated',
         serviceInterxnUpdated,
       ),
+      service.interactionManager.on(
+        'interactionResumed',
+        serviceInterxnResumed,
+      ),
     ]
   })
 
   afterEach(() => {
-    unsubs.forEach((unsub) => unsub())
+    unsubs.forEach(unsub => unsub())
   })
 
-  test('on creating or updating interactions', async () => {
+  test('on creating, updating and resuming interactions', async () => {
     const serviceAuthReq = await service.authRequestToken({
       callbackURL: 'nowhere',
       description: 'test',
@@ -61,6 +70,9 @@ describe('Events', () => {
     const userInterxn = await user.processJWT(serviceAuthReq.encode())
     expect(userInterxnCreated).toHaveBeenCalledWith(userInterxn)
     expect(userInterxnUpdated).not.toHaveBeenCalled()
+
+    await user.processJWT(serviceAuthReq.encode())
+    expect(userInterxnResumed).toHaveBeenCalledWith(userInterxn)
 
     const userResponse = (
       await userInterxn.createAuthenticationResponse()
@@ -76,6 +88,7 @@ describe('Events', () => {
     expect(serviceInterxnUpdated).toHaveBeenCalledTimes(1)
     expect(userInterxnCreated).toHaveBeenCalledTimes(1)
     expect(userInterxnUpdated).toHaveBeenCalledTimes(1)
+    expect(userInterxnResumed).toHaveBeenCalledTimes(1)
   })
 
   test('on loading interactions from storage', async () => {
@@ -109,6 +122,10 @@ describe('Events', () => {
       'interactionUpdated',
       serviceInterxnUpdated,
     )
+    serviceReloaded.interactionManager.on(
+      'interactionResumed',
+      serviceInterxnResumed,
+    )
     const interxnReloaded = await serviceReloaded.findInteraction(
       serviceInterxn.id,
     )
@@ -117,7 +134,9 @@ describe('Events', () => {
 
     expect(serviceInterxnCreated).toHaveBeenCalledTimes(1)
     expect(serviceInterxnUpdated).toHaveBeenCalledTimes(1)
+    expect(serviceInterxnResumed).toHaveBeenCalledTimes(0)
     expect(userInterxnCreated).toHaveBeenCalledTimes(1)
     expect(userInterxnUpdated).toHaveBeenCalledTimes(1)
+    expect(userInterxnResumed).toHaveBeenCalledTimes(0)
   })
 })
