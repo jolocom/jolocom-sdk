@@ -362,11 +362,13 @@ export class Agent {
         .registrar.encounter(token.payload.pca)
     }
 
+    const lastJwt = interxn?.lastMessage.encode()
+
     if (!interxn) {
       // NOTE: interactionManager.start internally calls
       // processInteractionToken and storage.store
       interxn = await this.interactionManager.start(token, transportAPI)
-    } else if (interxn.lastMessage.encode() !== jwt) {
+    } else if (lastJwt !== jwt) {
       // NOTE FIXME TODO #multitenancy
       // we only process the message if it is not last message seen (see "else if" condition)
       // this is to allow for some flexibility with how processJWT is called,
@@ -378,6 +380,11 @@ export class Agent {
       // JWTs
       await interxn.processInteractionToken(token)
       await this.storage.store.interactionToken(token)
+    } else if (lastJwt === jwt) {
+      // NOTE
+      // the @interactionResumed event is emitted here because @processInteractionToken is
+      // not called if the token was previously processed
+      this.interactionManager.emit('interactionResumed', interxn)
     }
 
     return interxn
@@ -694,12 +701,14 @@ export class Agent {
     await this.sdk.deleteAgent(this.idw.did, options)
   }
 
-
   public async export(opts?: ExportAgentOptions): Promise<IExportedAgent> {
     return this.sdk.exportAgent(this, opts)
   }
 
-  public async import(exagent: IExportedAgent, opts?: ExportAgentOptions): Promise<void> {
+  public async import(
+    exagent: IExportedAgent,
+    opts?: ExportAgentOptions,
+  ): Promise<void> {
     if (this.idw.did !== exagent.did) throw new SDKError(ErrorCode.Unknown)
     await this.sdk.importAgent(exagent, opts)
   }
