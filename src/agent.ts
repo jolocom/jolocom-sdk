@@ -193,7 +193,7 @@ export class Agent {
     let encryptionPass: string
     try {
       encryptionPass = await this.passwordStore.getPassword()
-    } catch (e) {
+    } catch (e: any) {
       // This may fail if the application was uninstalled and reinstalled, as
       // the android keystore is cleared on uninstall, but the database may
       // still remain, due to having been auto backed up!
@@ -350,7 +350,7 @@ export class Agent {
         token.nonce,
         transportAPI,
       )
-    } catch (err) {
+    } catch (err: any) {
       if (err.message !== ErrorCode.NoSuchInteraction) throw err
     }
 
@@ -435,7 +435,8 @@ export class Agent {
     const token = await this.idw.create.interactionTokens.request.auth(
       auth,
       await this.passwordStore.getPassword(),
-    )
+    ) as JSONWebToken<Authentication>
+
     await this.interactionManager.start(token)
     return token
   }
@@ -520,7 +521,7 @@ export class Agent {
     const token = await this.idw.create.interactionTokens.request.share(
       request,
       await this.passwordStore.getPassword(),
-    )
+    ) as JSONWebToken<CredentialRequest>
     await this.interactionManager.start(token)
     return token
   }
@@ -563,7 +564,7 @@ export class Agent {
         }),
       },
       await this.passwordStore.getPassword(),
-    )
+    ) as JSONWebToken<CredentialOfferRequest>
 
     await this.interactionManager.start(token)
     return token
@@ -587,7 +588,7 @@ export class Agent {
       issuance,
       await this.passwordStore.getPassword(),
       JolocomLib.parse.interactionToken.fromJWT(selection),
-    )
+    ) as JSONWebToken<CredentialsReceive>
 
     return token
   }

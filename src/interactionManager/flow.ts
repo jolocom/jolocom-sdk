@@ -25,6 +25,7 @@ export abstract class Flow<T> {
     return this.state
   }
 
+  //@ts-ignore
   abstract async handleInteractionToken(
     message: T,
     messageType: string,

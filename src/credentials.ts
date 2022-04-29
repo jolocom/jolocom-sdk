@@ -197,7 +197,7 @@ export class CredentialTypeKeeper
     await Promise.all(data.map(async credMeta => {
       try {
         await this.create(credMeta)
-      } catch (err) {
+      } catch (err: any) {
         console.error("credential metadata import failed", credMeta, err)
         // TODO better error breakdown
         err = err instanceof SDKError ? err : new SDKError(ErrorCode.Unknown, err)
@@ -268,7 +268,7 @@ export class CredentialKeeper
         const signer = await this.resolver.resolve(credJson.issuer)
         const cred = await JolocomLib.parseAndValidate.signedCredential(credJson, signer)
         await this.storage.store.verifiableCredential(cred)
-      } catch (err) {
+      } catch (err: any) {
         console.error("credential import failed", err)
         // TODO better error breakdown
         err = err instanceof SDKError ? err : new SDKError(ErrorCode.Unknown, err)

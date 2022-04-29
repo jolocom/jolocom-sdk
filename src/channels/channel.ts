@@ -44,6 +44,7 @@ export class Channel extends Transportable {
     this.initialInteraction = initialInteraction
 
     this.authPromise = new Promise<boolean>(resolve => {
+      //@ts-ignore
       this._resolveAuthPromise = resolve
     })
 

@@ -521,7 +521,7 @@ export class Interaction<
           : undefined,
         this.ctx.ctx.resolver,
       )
-    } catch (err) {
+    } catch (err: any) {
       throw new SDKError(ErrorCode.InvalidToken, err)
     }
 
@@ -727,7 +727,7 @@ export class Interaction<
           this.ctx.ctx.credentials.types.create(metadata)
         )
       )
-    } catch (err) {
+    } catch (err: any) {
       console.error('storeCredentialMetadata failed', err)
       throw new SDKError(ErrorCode.SaveCredentialMetadataFailed, err)
     }
