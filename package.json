@@ -46,7 +46,7 @@
     "fs-extra": "^8.1.0",
     "jest": "^26.4.2",
     "mockdate": "^2.0.2",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.7",
     "prettier": "^1.18.2",
     "regenerator-runtime": "^0.13.5",
     "sqlite3": "^4",
