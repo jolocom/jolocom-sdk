@@ -325,7 +325,7 @@ export class JolocomSDK {
       // NOTE: must 'await' here explicity for error handling to work correctly
       const agent = await this.loadAgent(passOrStore, did)
       return agent
-    } catch (err) {
+    } catch (err: any) {
       if (err.message !== ErrorCode.NoWallet || auto === false) {
         throw err
       }
