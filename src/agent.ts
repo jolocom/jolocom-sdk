@@ -431,9 +431,9 @@ export class Agent {
   public async authRequestToken(auth: {
     callbackURL: string
     description?: string
-  }): Promise<JSONWebToken<Authentication>> {
+  }, expires?: Date): Promise<JSONWebToken<Authentication>> {
     const token = await this.idw.create.interactionTokens.request.auth(
-      auth,
+      {...auth, expires },
       await this.passwordStore.getPassword(),
     ) as JSONWebToken<Authentication>
 
@@ -517,9 +517,10 @@ export class Agent {
    */
   public async credRequestToken(
     request: ICredentialRequestAttrs,
+    expires?: Date
   ): Promise<JSONWebToken<CredentialRequest>> {
     const token = await this.idw.create.interactionTokens.request.share(
-      request,
+      {...request, expires },
       await this.passwordStore.getPassword(),
     ) as JSONWebToken<CredentialRequest>
     await this.interactionManager.start(token)
@@ -537,10 +538,12 @@ export class Agent {
    */
   public async credOfferToken(
     offer: CredentialOfferRequestAttrs,
+    expires?: Date
   ): Promise<JSONWebToken<CredentialOfferRequest>> {
     const token = await this.idw.create.interactionTokens.request.offer(
       {
         callbackURL: offer.callbackURL,
+        expires,
         offeredCredentials: offer.offeredCredentials.map(oc => {
           oc.issuer = {
             id: this.idw.did,
@@ -583,9 +586,10 @@ export class Agent {
   public async credIssuanceToken(
     issuance: ICredentialsReceiveAttrs,
     selection: string,
+    expires?: Date
   ): Promise<JSONWebToken<CredentialsReceive>> {
     const token = await this.idw.create.interactionTokens.response.issue(
-      issuance,
+      {...issuance, expires },
       await this.passwordStore.getPassword(),
       JolocomLib.parse.interactionToken.fromJWT(selection),
     ) as JSONWebToken<CredentialsReceive>
