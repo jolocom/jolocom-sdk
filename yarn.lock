@@ -1890,10 +1890,10 @@
     "@jolocom/native-core-node-14-linux-x64" "^1.0.0"
     "@jolocom/native-core-node-14-win32-x64" "^1.0.0"
 
-"@jolocom/protocol-ts@^0.5.4":
-  version "0.5.4"
-  resolved "https://registry.yarnpkg.com/@jolocom/protocol-ts/-/protocol-ts-0.5.4.tgz#a59052d97b45ad157e877b1ed8ed2cd8235ad45e"
-  integrity sha512-t6gzeLZPgKQUksjAVgMint/htYIEy6LwVfqhm7kZx4+bkAxa0LHIynqEXFPA7bbx1+mrd2hxsvWmSswXiBtlkw==
+"@jolocom/protocol-ts@^0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@jolocom/protocol-ts/-/protocol-ts-0.6.0.tgz#f8955eb9e9961e54321da6ccd7f71c57b9061589"
+  integrity sha512-2UXEsiVun5ETEMXz/av0dhhN6pkvEQi0zJhpQVYE8zm312dufZv+1OGpSbckvPbA6USqs4y6O8sYPnThUBTChQ==
   dependencies:
     cred-types-jolocom-core "^0.0.11"
 
@@ -5158,17 +5158,17 @@ jest@^26.4.2:
     import-local "^3.0.2"
     jest-cli "^26.4.2"
 
-jolocom-lib@^5.4.0:
-  version "5.4.0"
-  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-5.4.0.tgz#9ca628ddcce7186a800a4250d2f2f85f0a6645cd"
-  integrity sha512-M6SNvpyvI3B1a2DqC5F6esSmpC3idkaB7k0dDRMLKrTFfqcu8tkvBJHtpEwxiu6K1V3a42q/z5gjVltEOXJ52g==
+jolocom-lib@5.5.0:
+  version "5.5.0"
+  resolved "https://registry.yarnpkg.com/jolocom-lib/-/jolocom-lib-5.5.0.tgz#244e4d92d8e8c449aaaa05fd1f862a49866c9de8"
+  integrity sha512-ordN03EtIo7Q/q0kTyj8rjuANexgGPMDBb+7qjvROjHEZCATbznB9lOqwb998njjLmJUXKTlzgPlChFkj2Q3ow==
   dependencies:
     "@hawkingnetwork/ed25519-hd-key-rn" "^1.0.1"
     "@jolocom/jolo-did-registrar" "1.0.2"
     "@jolocom/jolo-did-resolver" "^1.0.0"
     "@jolocom/local-resolver-registrar" "^1.0.1"
     "@jolocom/native-core" "^1.0.0"
-    "@jolocom/protocol-ts" "^0.5.4"
+    "@jolocom/protocol-ts" "^0.6.0"
     "@jolocom/vaulted-key-provider" "^0.7.4"
     "@types/sinon" "^9.0.5"
     bip39 "^3.0.2"
