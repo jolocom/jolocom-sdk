@@ -12,7 +12,11 @@ import { QueryOptions, IStorage, CredentialQuery } from './storage'
 import { JolocomLib } from 'jolocom-lib'
 import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
 import { Agent } from './agent'
-import { ObjectKeeper, CredentialMetadataSummary, IdentitySummary } from './types'
+import {
+  ObjectKeeper,
+  CredentialMetadataSummary,
+  IdentitySummary,
+} from './types'
 import { IResolver } from 'jolocom-lib/js/didMethods/types'
 import { validateJsonLd } from 'jolocom-lib/js/linkedData'
 import { SDKError, ErrorCode } from './errors'
@@ -25,8 +29,8 @@ export interface DisplayVal {
 }
 
 export interface CredentialDisplay {
-  type: string[],
-  issuerProfile?: IdentitySummary,
+  type: string[]
+  issuerProfile?: IdentitySummary
   name: string
   schema: string
   styles: CredentialDefinition['styles']
@@ -47,9 +51,10 @@ export class CredentialType {
 
   constructor(type: string[], metadata?: CredentialMetadataSummary) {
     this.type = type
-    this.definition = metadata?.credential || {} as CredentialDefinition
+    this.definition = metadata?.credential || ({} as CredentialDefinition)
     // NOTE: support for deprecated 'renderInfo'
-    this.renderAs = metadata?.renderInfo?.renderAs || CredentialRenderTypes.claim
+    this.renderAs =
+      metadata?.renderInfo?.renderAs || CredentialRenderTypes.claim
     // TODO add check against schema in definition
     this.issuerProfile = metadata?.issuer
   }
@@ -59,9 +64,9 @@ export class CredentialType {
       type: this.type[1],
       issuer: this.issuerProfile!,
       renderInfo: {
-        renderAs: this.renderAs
+        renderAs: this.renderAs,
       },
-      credential: this.definition
+      credential: this.definition,
     }
   }
 
@@ -71,11 +76,11 @@ export class CredentialType {
     }
 
     if (this.definition.display) {
-      Object.keys(this.definition.display).forEach((k) => {
+      Object.keys(this.definition.display).forEach(k => {
         const val = this.definition.display![k]
         if (Array.isArray(val)) {
           // it's the 'properties' array
-          display[k] = val.map((dm) => this._processDisplayMapping(dm, claim))
+          display[k] = val.map(dm => this._processDisplayMapping(dm, claim))
         } else {
           // one of 'title', 'subtitle', 'description'
           display[k] = this._processDisplayMapping(val, claim)
@@ -86,7 +91,7 @@ export class CredentialType {
     return {
       type: this.type,
       issuerProfile: this.issuerProfile,
-      name: this.definition.name || this.type.join(", "),
+      name: this.definition.name || this.type.join(', '),
       schema: this.definition.schema || '',
       display: display,
       styles: {
@@ -101,7 +106,7 @@ export class CredentialType {
   ) {
     let value
     const key = claim
-      ? dm.path?.find((p) => {
+      ? dm.path?.find(p => {
           // the paths are jsonpath
           value = jsonpath(p, claim)
           return value !== undefined
@@ -118,16 +123,11 @@ export class CredentialType {
 
 export class CredentialTypeKeeper
   implements
-    ObjectKeeper<
-      CredentialType,
-      CredentialMetadataSummary,
-      CredentialQuery
-    > {
-
+    ObjectKeeper<CredentialType, CredentialMetadataSummary, CredentialQuery> {
   constructor(
     protected credKeeper: CredentialKeeper,
     protected storage: IStorage,
-  ) { }
+  ) {}
 
   buildId(issuer: string, credentialType: string | string[]): string {
     if (typeof credentialType === 'string') {
@@ -153,7 +153,11 @@ export class CredentialTypeKeeper
 
   getByIssuerAndType(issuerDid: string, credType: string | string[]) {
     const fullCredType = this.getFullCredentialTypeList(credType)
-    return this.get(this.buildId(issuerDid, fullCredType), issuerDid, fullCredType)
+    return this.get(
+      this.buildId(issuerDid, fullCredType),
+      issuerDid,
+      fullCredType,
+    )
   }
 
   async get(id: string, issuerDid?: string, fullCredType?: string | string[]) {
@@ -165,7 +169,7 @@ export class CredentialTypeKeeper
     if (!meta.issuer?.publicProfile) {
       try {
         meta.issuer = await this.storage.get.publicProfile(issuerDid)
-      } catch(err) {
+      } catch (err) {
         console.error(`could not lookup issuer ${issuerDid}`, err)
         // pass
       }
@@ -186,24 +190,32 @@ export class CredentialTypeKeeper
     return this.getByIssuerAndType(cred.issuer, cred.type)
   }
 
-  async export(query?: CredentialQuery, options?: QueryOptions): Promise<CredentialMetadataSummary[]> {
+  async export(
+    query?: CredentialQuery,
+    options?: QueryOptions,
+  ): Promise<CredentialMetadataSummary[]> {
     const creds = await this.credKeeper.query(query, options)
     const credTypes = await Promise.all(creds.map(c => this.forCredential(c)))
     return credTypes.map(credType => credType.summary())
   }
 
-  async import(data: CredentialMetadataSummary[]): Promise<[CredentialMetadataSummary, SDKError][]> {
-    const rejected: [CredentialMetadataSummary, SDKError][]  = []
-    await Promise.all(data.map(async credMeta => {
-      try {
-        await this.create(credMeta)
-      } catch (err: any) {
-        console.error("credential metadata import failed", credMeta, err)
-        // TODO better error breakdown
-        err = err instanceof SDKError ? err : new SDKError(ErrorCode.Unknown, err)
-        rejected.push([credMeta, err])
-      }
-    }))
+  async import(
+    data: CredentialMetadataSummary[],
+  ): Promise<[CredentialMetadataSummary, SDKError][]> {
+    const rejected: [CredentialMetadataSummary, SDKError][] = []
+    await Promise.all(
+      data.map(async credMeta => {
+        try {
+          await this.create(credMeta)
+        } catch (err) {
+          console.error('credential metadata import failed', credMeta, err)
+          // TODO better error breakdown
+          err =
+            err instanceof SDKError ? err : new SDKError(ErrorCode.Unknown, err)
+          rejected.push([credMeta, err])
+        }
+      }),
+    )
     return rejected
   }
 }
@@ -216,7 +228,6 @@ export class CredentialKeeper
       CredentialQuery,
       ISignedCredentialAttrs
     > {
-
   readonly types: CredentialTypeKeeper
 
   private _applyFilter: () => CredentialQuery | undefined
@@ -244,7 +255,10 @@ export class CredentialKeeper
     return creds[0]
   }
 
-  async query(attrs?: CredentialQuery, options?: QueryOptions): Promise<SignedCredential[]> {
+  async query(
+    attrs?: CredentialQuery,
+    options?: QueryOptions,
+  ): Promise<SignedCredential[]> {
     const filterVals = this._applyFilter()
     return await this.storage.get.verifiableCredential({
       ...attrs,
@@ -252,7 +266,10 @@ export class CredentialKeeper
     })
   }
 
-  async export(query?: CredentialQuery, options?: QueryOptions): Promise<ISignedCredentialAttrs[]> {
+  async export(
+    query?: CredentialQuery,
+    options?: QueryOptions,
+  ): Promise<ISignedCredentialAttrs[]> {
     const creds = await this.query(query, options)
     //const credTypes = await Promise.all(creds.map(c => this.getCredentialType(c)))
     //const metas = credTypes.map(credType => credType.summary())
@@ -261,20 +278,28 @@ export class CredentialKeeper
     return creds.reverse().map(c => c.toJSON())
   }
 
-  async import(data: ISignedCredentialAttrs[]): Promise<[ISignedCredentialAttrs, SDKError][]> {
-    const rejected: [ISignedCredentialAttrs, SDKError][]  = []
-    await Promise.all(data.map(async credJson => {
-      try {
-        const signer = await this.resolver.resolve(credJson.issuer)
-        const cred = await JolocomLib.parseAndValidate.signedCredential(credJson, signer)
-        await this.storage.store.verifiableCredential(cred)
-      } catch (err: any) {
-        console.error("credential import failed", err)
-        // TODO better error breakdown
-        err = err instanceof SDKError ? err : new SDKError(ErrorCode.Unknown, err)
-        rejected.push([credJson, err])
-      }
-    }))
+  async import(
+    data: ISignedCredentialAttrs[],
+  ): Promise<[ISignedCredentialAttrs, SDKError][]> {
+    const rejected: [ISignedCredentialAttrs, SDKError][] = []
+    await Promise.all(
+      data.map(async credJson => {
+        try {
+          const signer = await this.resolver.resolve(credJson.issuer)
+          const cred = await JolocomLib.parseAndValidate.signedCredential(
+            credJson,
+            signer,
+          )
+          await this.storage.store.verifiableCredential(cred)
+        } catch (err) {
+          console.error('credential import failed', err)
+          // TODO better error breakdown
+          err =
+            err instanceof SDKError ? err : new SDKError(ErrorCode.Unknown, err)
+          rejected.push([credJson, err])
+        }
+      }),
+    )
     return rejected
   }
 
@@ -337,7 +362,9 @@ export class CredentialIssuer extends CredentialKeeper {
     // requires a foreign link to the subject... so only self-signed creds work
     // Otherwise it throws
     if (credential.issuer !== credential.subject) {
-      console.warn('Credential persistence. Only self-signed credentials can be stored.')
+      console.warn(
+        'Credential persistence. Only self-signed credentials can be stored.',
+      )
 
       return
     }
@@ -365,7 +392,9 @@ export class CredentialIssuer extends CredentialKeeper {
   private assertClaimValueDefined(claim: object) {
     for (const [key, value] of Object.entries(claim)) {
       if (value === null || value === undefined) {
-        throw new Error(`Credential issuance. Claim '${key}' value must be defined.`)
+        throw new Error(
+          `Credential issuance. Claim '${key}' value must be defined.`,
+        )
       }
     }
   }
