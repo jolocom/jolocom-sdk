@@ -6,6 +6,7 @@ import {
   ISignedCredCreationArgs,
   ISignedCredentialAttrs,
   CredentialRenderTypes,
+  ClaimMimeType,
 } from '@jolocom/protocol-ts'
 import { jsonpath } from './util'
 import { QueryOptions, IStorage, CredentialQuery } from './storage'
@@ -26,6 +27,8 @@ export interface DisplayVal {
   label?: string
   key?: string
   value?: string
+  preview?: boolean
+  mime_type: ClaimMimeType
 }
 
 export interface CredentialDisplay {
@@ -93,7 +96,7 @@ export class CredentialType {
       issuerProfile: this.issuerProfile,
       name: this.definition.name || this.type.join(', '),
       schema: this.definition.schema || '',
-      display: display,
+      display,
       styles: {
         ...this.definition.styles,
       },
@@ -103,7 +106,7 @@ export class CredentialType {
   private _processDisplayMapping(
     dm: CredentialManifestDisplayMapping,
     claim: any,
-  ) {
+  ): DisplayVal {
     let value
     const key = claim
       ? dm.path?.find(p => {
@@ -117,6 +120,8 @@ export class CredentialType {
       label: dm.label,
       key,
       value: value !== undefined ? value : dm.text,
+      preview: dm.preview,
+      mime_type: dm.mime_type,
     }
   }
 }
