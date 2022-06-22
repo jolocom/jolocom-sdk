@@ -25,6 +25,7 @@ export { FlowType } from './interactionManager/types'
 export interface IJolocomSDKConfig {
   storage: IStorage
   eventDB?: InternalDb
+  resolveCachedIdentities?: boolean
 }
 
 export interface IInitAgentOptions {
@@ -44,6 +45,7 @@ export class JolocomSDK {
   public transports = new TransportKeeper()
   public storage: IStorage
   public credentials: CredentialKeeper
+  public resolveCachedIdentities: boolean
 
   /**
    * The toplevel resolver which simply invokes {@link resolve}
@@ -58,6 +60,8 @@ export class JolocomSDK {
       conf.eventDB || this.storage.eventDB,
     )
     this.didMethods.register('jun', localDidMethod)
+
+    this.resolveCachedIdentities = conf.resolveCachedIdentities ?? true
 
     // FIXME the prefix bit is required just to match IResolver
     // but does anything need it at that level?
@@ -99,7 +103,7 @@ export class JolocomSDK {
   public async resolve(did: string): Promise<Identity> {
     const cached = await this.storage.get.identity(did)
 
-    if (!cached) {
+    if (!cached || !this.resolveCachedIdentities) {
       const resolved = await this.didMethods
         .getForDid(did)
         .resolver.resolve(did)
