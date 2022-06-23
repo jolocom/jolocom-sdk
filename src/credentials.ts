@@ -171,14 +171,13 @@ export class CredentialTypeKeeper
     issuerDid = issuerDid || meta.issuer?.did
     fullCredType = this.getFullCredentialTypeList(fullCredType || meta.type)
 
-    if (!meta.issuer?.publicProfile) {
-      try {
-        meta.issuer = await this.storage.get.publicProfile(issuerDid)
-      } catch (err) {
-        console.error(`could not lookup issuer ${issuerDid}`, err)
-        // pass
-      }
+    try {
+      meta.issuer = await this.storage.get.publicProfile(issuerDid)
+    } catch (err) {
+      console.error(`could not lookup issuer ${issuerDid}`, err)
+      // pass
     }
+
     return new CredentialType(fullCredType, meta)
   }
 
@@ -216,7 +215,9 @@ export class CredentialTypeKeeper
           console.error('credential metadata import failed', credMeta, err)
           // TODO better error breakdown
           err =
+            // @ts-ignore
             err instanceof SDKError ? err : new SDKError(ErrorCode.Unknown, err)
+          // @ts-ignore
           rejected.push([credMeta, err])
         }
       }),
@@ -300,7 +301,9 @@ export class CredentialKeeper
           console.error('credential import failed', err)
           // TODO better error breakdown
           err =
+            // @ts-ignore
             err instanceof SDKError ? err : new SDKError(ErrorCode.Unknown, err)
+          // @ts-ignore
           rejected.push([credJson, err])
         }
       }),
