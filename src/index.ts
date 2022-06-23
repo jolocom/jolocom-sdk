@@ -103,19 +103,19 @@ export class JolocomSDK {
   public async resolve(did: string): Promise<Identity> {
     const cached = await this.storage.get.identity(did)
 
-    if (!cached || !this.resolveCachedIdentities) {
-      const resolved = await this.didMethods
-        .getForDid(did)
-        .resolver.resolve(did)
-
-      await this.storage.store.identity(resolved).catch(err => {
-        console.error('Failed to store Identity after resolving', err)
-      })
-
-      return resolved
+    if (cached && this.resolveCachedIdentities) {
+      return cached
     }
 
-    return cached
+    const resolved = await this.didMethods
+      .getForDid(did)
+      .resolver.resolve(did)
+
+    await this.storage.store.identity(resolved).catch(err => {
+      console.error('Failed to store Identity after resolving', err)
+    })
+
+    return resolved
   }
 
   private _makePassStore(passOrStore?: string | IPasswordStore) {
