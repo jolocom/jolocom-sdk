@@ -1,14 +1,15 @@
+import { ClaimMimeType } from '@jolocom/protocol-ts'
 import { claimsMetadata } from 'jolocom-lib'
+import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
+import { CredentialOfferFlow } from 'src/interactionManager/credentialOfferFlow'
+import { CredentialOfferFlowState } from 'src/interactionManager/types'
 import { Agent } from '../src'
 import {
-  destroyAgent,
   createAgent,
+  destroyAgent,
   meetAgent,
   testConsoleThenReturnValue,
 } from './util'
-import { CredentialOfferFlowState } from 'src/interactionManager/types'
-import { CredentialOfferFlow } from 'src/interactionManager/credentialOfferFlow'
-import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential'
 
 const conn1Name = 'issuance1'
 const conn2Name = 'issuance2'
@@ -56,7 +57,12 @@ describe('Credential Issuance interaction', () => {
         return {
           label: subSchema.title,
           path: [`$.${key}`],
-          ...(subSchema.description !== undefined && { text: subSchema.description })
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          mime_type: ClaimMimeType.text_plain,
+          preview: false,
+          ...(subSchema.description !== undefined && {
+            text: subSchema.description,
+          }),
         }
       })
     }
@@ -70,7 +76,7 @@ describe('Credential Issuance interaction', () => {
             schema: credDesc.schema,
             name: credDesc.name,
             display: {
-              properties: jsonSchemaToDisplayMappings(credDesc.claimSchema)
+              properties: jsonSchemaToDisplayMappings(credDesc.claimSchema),
             },
           },
         },
@@ -108,7 +114,8 @@ describe('Credential Issuance interaction', () => {
             },
           }),
         expectedInvokeTimes: 1,
-        expectedMessage: 'Credential persistence. Only self-signed credentials can be stored.',
+        expectedMessage:
+          'Credential persistence. Only self-signed credentials can be stored.',
       })) as SignedCredential,
     ])
 
@@ -139,11 +146,9 @@ describe('Credential Issuance interaction', () => {
     const credTypes = ['name', 'emailAddress', 'mobilePhoneNumber']
     const aliceCredOffer = await alice.credOfferToken({
       callbackURL: 'nowhere',
-      offeredCredentials: credTypes.map(t => {
-        return {
-          type: claimsMetadata[t].type[1],
-        }
-      }),
+      offeredCredentials: credTypes.map(t => ({
+        type: claimsMetadata[t].type[1],
+      })),
     })
 
     const bobInteraction = await bob.processJWT(aliceCredOffer.encode())
@@ -188,7 +193,8 @@ describe('Credential Issuance interaction', () => {
 
     // Bob receives the issued credentials
     const bobRecieving = await bob.processJWT(aliceIssuance.encode())
-    const bobsFlowState = bobRecieving.getSummary().state as CredentialOfferFlowState
+    const bobsFlowState = bobRecieving.getSummary()
+      .state as CredentialOfferFlowState
 
     // The credential validity is [true, true, false] because the last credential,
     // as per the order in the offer, is the broken mobilePhoneNumber cred
@@ -217,9 +223,11 @@ describe('Credential Issuance interaction', () => {
 
     // Bob makes a response with the selection being in a different order than the
     // offer
-    const bobResponse = (await bobInteraction.createCredentialOfferResponseToken([
-      { type: claimsMetadata.emailAddress.type[1] }
-    ])).encode()
+    const bobResponse = (
+      await bobInteraction.createCredentialOfferResponseToken([
+        { type: claimsMetadata.emailAddress.type[1] },
+      ])
+    ).encode()
     await bob.processJWT(bobResponse)
 
     const aliceInteraction = await alice.processJWT(bobResponse)
@@ -247,9 +255,12 @@ describe('Credential Issuance interaction', () => {
       }),
     })
 
-    const aliceIssuance = await aliceInteraction.createCredentialReceiveToken(aliceIssuanceCreds)
+    const aliceIssuance = await aliceInteraction.createCredentialReceiveToken(
+      aliceIssuanceCreds,
+    )
     await aliceInteraction.processInteractionToken(aliceIssuance)
-    const alicesFlowState = aliceInteraction.flow.state as CredentialOfferFlowState
+    const alicesFlowState = aliceInteraction.flow
+      .state as CredentialOfferFlowState
 
     // Bob receives the issued credentials
     const bobRecieving = await bob.processJWT(aliceIssuance.encode())
@@ -259,7 +270,9 @@ describe('Credential Issuance interaction', () => {
     expect(bobsFlow.state.credentialsAllValid).toBeTruthy()
     expect(bobsFlow.state.issued).toHaveLength(1)
     expect(alicesFlowState.issued).toHaveLength(1)
-    expect(alicesFlowState.selectedTypes).toEqual([claimsMetadata.emailAddress.type[1]])
+    expect(alicesFlowState.selectedTypes).toEqual([
+      claimsMetadata.emailAddress.type[1],
+    ])
     expect(bobsFlow.getSelectionResult()).toEqual(alicesFlowState.selectedTypes)
   })
 
@@ -289,7 +302,10 @@ describe('Credential Issuance interaction', () => {
     },
   ]
 
-  const createInteractionForNullPropertyValueCheck = async (alice: Agent, bob: Agent) => {
+  const createInteractionForNullPropertyValueCheck = async (
+    alice: Agent,
+    bob: Agent,
+  ) => {
     const aliceCredOffer = await alice.credOfferToken({
       callbackURL: 'nowhere',
       offeredCredentials: [{ type: claimsMetadata['name'].type[1] }],
@@ -316,9 +332,12 @@ describe('Credential Issuance interaction', () => {
         Promise.resolve(alice.idw.didDocument.toJSON()),
       )
 
-      const interaction = await createInteractionForNullPropertyValueCheck(alice, bob)
-      const issuanceCredentials = async () => await interaction.issueSelectedCredentials(
-        {
+      const interaction = await createInteractionForNullPropertyValueCheck(
+        alice,
+        bob,
+      )
+      const issuanceCredentials = async () =>
+        await interaction.issueSelectedCredentials({
           ProofOfNameCredential: async () => ({
             metadata: claimsMetadata.name,
             subject: bob.idw.did,
@@ -338,9 +357,12 @@ describe('Credential Issuance interaction', () => {
       Promise.resolve(alice.idw.didDocument.toJSON()),
     )
 
-    const interaction = await createInteractionForNullPropertyValueCheck(alice, bob)
-    const issuanceCredentials = async () => await interaction.issueSelectedCredentials(
-      {
+    const interaction = await createInteractionForNullPropertyValueCheck(
+      alice,
+      bob,
+    )
+    const issuanceCredentials = async () =>
+      await interaction.issueSelectedCredentials({
         ProofOfNameCredential: async () => ({
           metadata: claimsMetadata.name,
           subject: bob.idw.did,
