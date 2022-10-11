@@ -14,8 +14,15 @@ import { Identity } from 'jolocom-lib/js/identity/identity'
 import { Agent } from './agent'
 import { TransportKeeper } from './transports'
 import { CredentialKeeper } from './credentials'
-import { DeleteAgentOptions, ExportAgentOptions, ExportedAgentData, IExportedAgent, EXPORT_SCHEMA_VERSION } from './types'
+import {
+  DeleteAgentOptions,
+  ExportAgentOptions,
+  ExportedAgentData,
+  IExportedAgent,
+  EXPORT_SCHEMA_VERSION,
+} from './types'
 import { getDeleteAgentOptions, getExportAgentOptions } from './util'
+import { JoloDidMethod } from 'jolocom-lib/js/didMethods/jolo'
 export { Agent } from './agent'
 
 export * from './types'
@@ -41,7 +48,12 @@ export interface JolocomPlugin {
 }
 
 export class JolocomSDK {
-  public didMethods = new DidMethodKeeper()
+  public didMethods = new DidMethodKeeper(
+    new JoloDidMethod(
+      'https://ceed9f781cdd476a900c873adb297e4c.rinkeby.rpc.rivet.cloud/',
+      '0xd4351c3f383d79ba378ed1875275b1e7b960f120',
+    ),
+  )
   public transports = new TransportKeeper()
   public storage: IStorage
   public credentials: CredentialKeeper
