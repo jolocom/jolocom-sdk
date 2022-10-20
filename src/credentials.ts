@@ -31,6 +31,10 @@ export interface DisplayVal {
   mime_type: ClaimMimeType
 }
 
+interface CredentialCreateAttrsWithExpiry<T extends BaseMetadata> extends ISignedCredCreationArgs<T> {
+  expires?: Date
+}
+
 export interface CredentialDisplay {
   type: string[]
   issuerProfile?: IdentitySummary
@@ -350,7 +354,7 @@ export class CredentialIssuer extends CredentialKeeper {
    * @throws Error on credential claim with 'null' or 'undefined' value
    * @category Credential Management
    */
-  async create<T extends BaseMetadata>(credParams: ISignedCredCreationArgs<T>) {
+  async create<T extends BaseMetadata>(credParams: CredentialCreateAttrsWithExpiry<T>) {
     const credential = await this.issue(credParams)
 
     await this.persist(credential)
@@ -388,7 +392,7 @@ export class CredentialIssuer extends CredentialKeeper {
    * @throws Error on credential claim with 'null' or 'undefined' value
    * @category Credential Management
    */
-  async issue<T extends BaseMetadata>(credParams: ISignedCredCreationArgs<T>) {
+  async issue<T extends BaseMetadata>(credParams: CredentialCreateAttrsWithExpiry<T>) {
     this.assertClaimValueDefined((credParams.claim || {}) as ClaimInterface)
 
     return await this.agent.idw.create.signedCredential(

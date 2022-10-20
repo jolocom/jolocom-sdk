@@ -391,7 +391,7 @@ export class Interaction<
   public async issueSelectedCredentials(offerMap?: {
     [k: string]: (
       inp?: any,
-    ) => Promise<{ claim: any; metadata?: any; subject?: string }>
+    ) => Promise<{ claim: any; metadata?: any; subject?: string, expires?: Date }>
   }): Promise<SignedCredential[]> {
     const flowState = this.flow.state as CredentialOfferFlowState
 
@@ -402,6 +402,8 @@ export class Interaction<
 
         const metadata = (credDesc && credDesc.metadata) || { context: [] }
         const subject = (credDesc && credDesc.subject) || this.counterparty?.did
+        const expires = credDesc && credDesc.expires
+
         if (!subject) throw new Error('no subject for credential')
 
         const claim = (credDesc && credDesc.claim) || {}
@@ -410,6 +412,7 @@ export class Interaction<
           metadata,
           claim,
           subject,
+          expires
         })
       }),
     )
