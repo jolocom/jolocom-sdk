@@ -92,6 +92,11 @@ export interface AuthenticationFlowState extends FlowState {
 export interface CredentialRequestFlowState extends FlowState {
   constraints: CredentialRequest[]
   providedCredentials: CredentialResponse[]
+  validityMap: Array<{
+    credentialId: string
+    expired: boolean
+    signatureInvalid: boolean
+  }>
 }
 
 export interface CredentialOfferFlowState extends FlowState {

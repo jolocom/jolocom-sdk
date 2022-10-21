@@ -5,6 +5,8 @@ import { Flow } from './flow'
 import { CredentialResponse } from 'jolocom-lib/js/interactionTokens/credentialResponse'
 import { CredentialRequestFlowState, FlowType } from './types'
 import { isCredentialRequest, isCredentialResponse } from './guards'
+import { validateDigestable } from 'jolocom-lib/js/utils/validation'
+import { ErrorCode, SDKError } from '../errors'
 
 export class CredentialRequestFlow extends Flow<
   CredentialRequest | CredentialResponse
@@ -12,6 +14,7 @@ export class CredentialRequestFlow extends Flow<
   public state: CredentialRequestFlowState = {
     constraints: [],
     providedCredentials: [],
+    validityMap: [],
   }
   public static type = FlowType.CredentialShare
   public static firstMessageType = InteractionType.CredentialRequest
@@ -51,6 +54,32 @@ export class CredentialRequestFlow extends Flow<
   private async handleCredentialResponse(token: CredentialResponse) {
     this.state.providedCredentials.push(token)
     const lastIndex = this.state.constraints.length - 1
+
+    this.state.validityMap = await Promise.all(
+      token.suppliedCredentials.map(async vc => {
+        // Failing to resolve the issuer throws an error, instead
+        // we'd like a boolean flag
+        let validityCheck = validateDigestable(vc).catch(_ => false);
+
+        return validityCheck.then(signatureValid => ({
+          credentialId: vc.id,
+          expired: vc.expires <= new Date(),
+          signatureInvalid: !signatureValid,
+        }))
+      }),
+    )
+
+    const any_invalid = this.state.validityMap.some(
+      ({ expired, signatureInvalid }) => expired || signatureInvalid,
+    )
+
+    if (any_invalid) {
+      throw new SDKError(
+        ErrorCode.CredentialResponseFailed,
+        new Error("Presented credentials are not valid")
+      )
+    }
+
     if (lastIndex >= 0) {
       return token.satisfiesRequest(this.state.constraints[lastIndex])
     } else return true
