@@ -59,7 +59,6 @@ export class CredentialRequestFlow extends Flow<
       token.suppliedCredentials.map(async vc => {
         // Failing to resolve the issuer throws an error, instead
         // we'd like a boolean flag
-        //thats a lot of ctx
         let validityCheck = validateDigestable(vc, this.ctx.ctx.ctx.resolver).catch(_ => false);
 
         return validityCheck.then(signatureValid => ({
